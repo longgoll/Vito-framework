@@ -1,4 +1,10 @@
 // Vito Logger Middleware Plugin (vito/packages/logger/logger.vit)
+import { Request, Response } from "../../src/vito.vit";
+
+function loggerMiddleware(req: Request, res: Response): boolean {
+    print("[Vito Logger] " + req.method + " " + req.path + (req.queryString.length > 0 ? "?" + req.queryString : ""));
+    return true; // Continue pipeline
+}
 
 function logRequest(method: string, path: string): void {
     print("[Vito Logger] " + method + " " + path);

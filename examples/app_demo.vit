@@ -1,9 +1,29 @@
 // Vito Framework Application Demo (vito/examples/app_demo.vit)
-import { runVitoApp } from "vito/src/vito.vit";
-import { logRequest } from "vito/packages/logger/logger.vit";
+import { VitoApp, Request, Response, createApp } from "../src/vito.vit";
+import { loggerMiddleware } from "../packages/logger/logger.vit";
+import { corsMiddleware } from "../packages/cors/cors.vit";
 
 function main(): number {
-    logRequest("GET", "/api/status");
-    runVitoApp(8888);
+    let app = createApp();
+
+    // 1. Register Global Middlewares
+    app.use(corsMiddleware);
+    app.use(loggerMiddleware);
+
+    // 2. Register Routes
+    app.get("/", (req: Request, res: Response) => {
+        res.html("<h1>Welcome to Vito Web Framework! 🚀</h1>");
+    });
+
+    app.get("/api/status", (req: Request, res: Response) => {
+        res.json("{\"status\":\"ok\",\"framework\":\"Vito v1.0.0\",\"engine\":\"VIT Native\"}");
+    });
+
+    app.post("/api/echo", (req: Request, res: Response) => {
+        res.json("{\"received_body\":\"" + req.body + "\"}");
+    });
+
+    // 3. Start Server
+    app.listen(8888);
     return 0;
 }

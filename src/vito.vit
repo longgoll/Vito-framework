@@ -1,25 +1,285 @@
-// Vito Web Framework Core (vito/src/vito.vit)
+// Vito Web Framework Engine (vito/src/vito.vit)
 import { listenTcp, TcpListener, TcpStream } from "std/net";
-import { Response } from "std/http";
+import { charAt } from "std/string";
 
-function runVitoApp(port: number): void {
-    print("=========================================");
-    print(" 🚀 Vito Web Framework v1.0.0 (VIT Native)");
-    print(" Running on: http://127.0.0.1:8888");
-    print("=========================================");
+// 1. Request Context
+struct Request {
+    method: string,
+    path: string,
+    queryString: string,
+    body: string,
+    raw: string
+}
 
-    let listener = listenTcp("127.0.0.1", port);
-    while (true) {
-        let stream = listener.accept();
-        let rawData = stream.read(4096);
-        if (rawData.length > 0) {
-            let res: Response;
-            res.status = 200;
-            res.body = "";
-            res.stream = stream;
-            res.json("{\"status\":\"ok\",\"framework\":\"Vito v1.0.0\",\"engine\":\"VIT Native\"}");
-        } else {
-            stream.close();
+// 2. Response Context & HTTP Status Code Handling
+struct Response {
+    status: number,
+    statusText: string,
+    headersStr: string,
+    stream: TcpStream,
+    isClosed: boolean,
+
+    function setHeader(name: string, value: string): void {
+        this.headersStr = this.headersStr + name + ": " + value + "\r\n";
+    },
+
+    function setStatus(code: number): Response {
+        this.status = code;
+        if (code == 200) { this.statusText = "OK"; }
+        else if (code == 201) { this.statusText = "Created"; }
+        else if (code == 204) { this.statusText = "No Content"; }
+        else if (code == 400) { this.statusText = "Bad Request"; }
+        else if (code == 401) { this.statusText = "Unauthorized"; }
+        else if (code == 403) { this.statusText = "Forbidden"; }
+        else if (code == 404) { this.statusText = "Not Found"; }
+        else if (code == 500) { this.statusText = "Internal Server Error"; }
+        else { this.statusText = "OK"; }
+        return this;
+    },
+
+    function send(text: string): void {
+        if (this.isClosed) { return; }
+        if (this.status == 0) { this.setStatus(200); }
+        let headerStr = "HTTP/1.1 " + this.status + " " + this.statusText + "\r\n" +
+                        "Content-Type: text/plain; charset=utf-8\r\n" +
+                        "Content-Length: " + text.length + "\r\n" +
+                        this.headersStr +
+                        "Connection: close\r\n\r\n";
+        this.stream.write(headerStr + text);
+        this.stream.close();
+        this.isClosed = true;
+    },
+
+    function html(htmlStr: string): void {
+        if (this.isClosed) { return; }
+        if (this.status == 0) { this.setStatus(200); }
+        let headerStr = "HTTP/1.1 " + this.status + " " + this.statusText + "\r\n" +
+                        "Content-Type: text/html; charset=utf-8\r\n" +
+                        "Content-Length: " + htmlStr.length + "\r\n" +
+                        this.headersStr +
+                        "Connection: close\r\n\r\n";
+        this.stream.write(headerStr + htmlStr);
+        this.stream.close();
+        this.isClosed = true;
+    },
+
+    function json(jsonStr: string): void {
+        if (this.isClosed) { return; }
+        if (this.status == 0) { this.setStatus(200); }
+        let headerStr = "HTTP/1.1 " + this.status + " " + this.statusText + "\r\n" +
+                        "Content-Type: application/json; charset=utf-8\r\n" +
+                        "Content-Length: " + jsonStr.length + "\r\n" +
+                        this.headersStr +
+                        "Connection: close\r\n\r\n";
+        this.stream.write(headerStr + jsonStr);
+        this.stream.close();
+        this.isClosed = true;
+    }
+}
+
+// 3. HTTP Request Parser
+function parseHttpMethod(raw: string): string {
+    let method = "";
+    let len = raw.length;
+    let i = 0;
+    while (i < len) {
+        let ch = charAt(raw, i);
+        if (ch == " ") { break; }
+        method = method + ch;
+        i = i + 1;
+    }
+    if (method == "") { return "GET"; }
+    return method;
+}
+
+function parseHttpPath(raw: string): string {
+    let len = raw.length;
+    let i = 0;
+    while (i < len && charAt(raw, i) != " ") { i = i + 1; }
+    while (i < len && charAt(raw, i) == " ") { i = i + 1; }
+    let path = "";
+    while (i < len) {
+        let ch = charAt(raw, i);
+        if (ch == " " || ch == "?" || ch == "\r" || ch == "\n") { break; }
+        path = path + ch;
+        i = i + 1;
+    }
+    if (path == "") { return "/"; }
+    return path;
+}
+
+function parseQueryString(raw: string): string {
+    let len = raw.length;
+    let i = 0;
+    while (i < len && charAt(raw, i) != " ") { i = i + 1; }
+    while (i < len && charAt(raw, i) == " ") { i = i + 1; }
+    while (i < len && charAt(raw, i) != " " && charAt(raw, i) != "?") { i = i + 1; }
+    if (i < len && charAt(raw, i) == "?") {
+        i = i + 1;
+        let query = "";
+        while (i < len) {
+            let ch = charAt(raw, i);
+            if (ch == " " || ch == "\r" || ch == "\n") { break; }
+            query = query + ch;
+            i = i + 1;
+        }
+        return query;
+    }
+    return "";
+}
+
+function parseHttpBody(raw: string): string {
+    let len = raw.length;
+    let i = 0;
+    while (i + 3 < len) {
+        if (charAt(raw, i) == "\r" && charAt(raw, i + 1) == "\n" && charAt(raw, i + 2) == "\r" && charAt(raw, i + 3) == "\n") {
+            i = i + 4;
+            let body = "";
+            while (i < len) {
+                body = body + charAt(raw, i);
+                i = i + 1;
+            }
+            return body;
+        }
+        i = i + 1;
+    }
+    return "";
+}
+
+function parseHttpRequest(raw: string): Request {
+    let req: Request;
+    req.raw = raw;
+    req.method = parseHttpMethod(raw);
+    req.path = parseHttpPath(raw);
+    req.queryString = parseQueryString(raw);
+    req.body = parseHttpBody(raw);
+    return req;
+}
+
+// 4. Router & Middleware Pipeline Architecture
+struct RouteEntry {
+    method: string,
+    path: string,
+    handler: (req: Request, res: Response) => void
+}
+
+struct MiddlewareEntry {
+    handler: (req: Request, res: Response) => boolean
+}
+
+struct VitoApp {
+    routes: RouteEntry[],
+    routeCount: number,
+    middlewares: MiddlewareEntry[],
+    middlewareCount: number,
+
+    function init(): void {
+        this.routeCount = 0;
+        this.middlewareCount = 0;
+    },
+
+    function use(mwHandler: (req: Request, res: Response) => boolean): void {
+        let mw: MiddlewareEntry;
+        mw.handler = mwHandler;
+        this.middlewares[this.middlewareCount] = mw;
+        this.middlewareCount = this.middlewareCount + 1;
+    },
+
+    function get(path: string, handler: (req: Request, res: Response) => void): void {
+        this.addRoute("GET", path, handler);
+    },
+
+    function post(path: string, handler: (req: Request, res: Response) => void): void {
+        this.addRoute("POST", path, handler);
+    },
+
+    function put(path: string, handler: (req: Request, res: Response) => void): void {
+        this.addRoute("PUT", path, handler);
+    },
+
+    function delete(path: string, handler: (req: Request, res: Response) => void): void {
+        this.addRoute("DELETE", path, handler);
+    },
+
+    function addRoute(method: string, path: string, handler: (req: Request, res: Response) => void): void {
+        let r: RouteEntry;
+        r.method = method;
+        r.path = path;
+        r.handler = handler;
+        this.routes[this.routeCount] = r;
+        this.routeCount = this.routeCount + 1;
+    },
+
+    function handleRequest(req: Request, res: Response): void {
+        // A. Run Middleware Pipeline
+        let m = 0;
+        while (m < this.middlewareCount) {
+            let mw = this.middlewares[m];
+            let next = mw.handler(req, res);
+            if (!next || res.isClosed) {
+                return;
+            }
+            m = m + 1;
+        }
+
+        // B. Dispatch to Router
+        let i = 0;
+        let matched = false;
+        while (i < this.routeCount) {
+            let r = this.routes[i];
+            if (r.method == req.method && r.path == req.path) {
+                matched = true;
+                r.handler(req, res);
+                break;
+            }
+            i = i + 1;
+        }
+
+        // C. Fallback Error Handling: 404 Not Found
+        if (!matched && !res.isClosed) {
+            res.setStatus(404).json("{\"error\":\"Route Not Found\",\"path\":\"" + req.path + "\",\"method\":\"" + req.method + "\"}");
+        }
+    },
+
+    function listen(port: number): void {
+        print("=========================================");
+        print(" 🚀 Vito Web Framework v1.0.0 (VIT Native)");
+        print(" Running on: http://127.0.0.1:" + port);
+        print(" Registered Routes: " + this.routeCount);
+        print(" Active Middlewares: " + this.middlewareCount);
+        print("=========================================");
+
+        let listener = listenTcp("127.0.0.1", port);
+        while (true) {
+            let stream = listener.accept();
+            let rawData = stream.read(4096);
+            if (rawData.length > 0) {
+                let req = parseHttpRequest(rawData);
+                let res: Response;
+                res.status = 200;
+                res.statusText = "OK";
+                res.headersStr = "";
+                res.stream = stream;
+                res.isClosed = false;
+
+                this.handleRequest(req, res);
+            } else {
+                stream.close();
+            }
         }
     }
+}
+
+function createApp(): VitoApp {
+    let app: VitoApp;
+    app.init();
+    return app;
+}
+
+function runVitoApp(port: number): void {
+    let app = createApp();
+    app.get("/", (req: Request, res: Response) => {
+        res.json("{\"status\":\"ok\",\"framework\":\"Vito v1.0.0\",\"engine\":\"VIT Native\"}");
+    });
+    app.listen(port);
 }
