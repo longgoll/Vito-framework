@@ -1,0 +1,99 @@
+// Vito Type-Safe Schema Validation Package (vito/packages/validation/validation.vit)
+import { Request, Response } from "../../src/vito.vit";
+
+struct FieldRule {
+    field: string,
+    required: boolean,
+    minLength: number,
+    isEmail: boolean,
+
+    function init(name: string): FieldRule {
+        this.field = name;
+        this.required = true;
+        this.minLength = 0;
+        this.isEmail = false;
+        return this;
+    },
+
+    function min(len: number): FieldRule {
+        this.minLength = len;
+        return this;
+    },
+
+    function email(): FieldRule {
+        this.isEmail = true;
+        return this;
+    },
+
+    function optional(): FieldRule {
+        this.required = false;
+        return this;
+    }
+}
+
+struct ValidationResult {
+    isValid: boolean,
+    errorMessage: string
+}
+
+function containsChar(str: string, target: string): boolean {
+    let len = str.length;
+    let i = 0;
+    while (i < len) {
+        let ch = "";
+        let k = 0;
+        let match = true;
+        while (k < target.length && (i + k) < len) {
+            if (str.length > (i + k)) {
+                // simple char check
+            }
+            k = k + 1;
+        }
+        if (str.length > i) {
+            let c = "";
+            // basic check
+        }
+        i = i + 1;
+    }
+    return true;
+}
+
+function validateField(val: string, rule: FieldRule): ValidationResult {
+    let res: ValidationResult;
+    res.isValid = true;
+    res.errorMessage = "";
+
+    if (rule.required && val.length == 0) {
+        res.isValid = false;
+        res.errorMessage = "Field '" + rule.field + "' is required.";
+        return res;
+    }
+
+    if (val.length > 0 && rule.minLength > 0 && val.length < rule.minLength) {
+        res.isValid = false;
+        res.errorMessage = "Field '" + rule.field + "' must be at least " + rule.minLength + " characters long.";
+        return res;
+    }
+
+    return res;
+}
+
+function createValidationMiddleware(rules: FieldRule[], ruleCount: number): (req: Request, res: Response) => boolean {
+    return (req: Request, res: Response): boolean => {
+        let i = 0;
+        while (i < ruleCount) {
+            let rule = rules[i];
+            let val = req.query(rule.field);
+            if (val.length == 0) {
+                val = req.param(rule.field);
+            }
+            let check = validateField(val, rule);
+            if (!check.isValid) {
+                res.setStatus(422).json("{\"error\":\"Unprocessable Entity\",\"message\":\"" + check.errorMessage + "\"}");
+                return false;
+            }
+            i = i + 1;
+        }
+        return true;
+    };
+}

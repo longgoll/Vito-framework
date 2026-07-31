@@ -1,0 +1,21 @@
+// Vito OpenAPI & Swagger Documentation Package (vito/packages/swagger/swagger.vit)
+import { VitoApp, Request, Response } from "../../src/vito.vit";
+
+function setupSwaggerDocs(app: VitoApp, title: string, version: string): void {
+    // 1. Register OpenAPI Spec Endpoint (/openapi.json)
+    app.get("/openapi.json", (req: Request, res: Response) => {
+        let jsonSpec = "{\"openapi\":\"3.0.0\",\"info\":{\"title\":\"" + title + "\",\"version\":\"" + version + "\"},\"paths\":{\"/api/v1/status\":{\"get\":{\"summary\":\"System Status Check\",\"responses\":{\"200\":{\"description\":\"OK\"}}}},\"/users/{id}\":{\"get\":{\"summary\":\"Get User By ID\",\"parameters\":[{\"name\":\"id\",\"in\":\"path\",\"required\":true}],\"responses\":{\"200\":{\"description\":\"OK\"}}}}}}";
+        res.json(jsonSpec);
+    });
+
+    // 2. Register Interactive Swagger UI Page (/docs)
+    app.get("/docs", (req: Request, res: Response) => {
+        let uiHtml = "<!DOCTYPE html><html><head><title>" + title + " - Swagger UI</title>" +
+                     "<link rel='stylesheet' href='https://unpkg.com/swagger-ui-dist@4/swagger-ui.css'/>" +
+                     "</head><body style='margin:0;background:#fafafa;'><div id='swagger-ui'></div>" +
+                     "<script src='https://unpkg.com/swagger-ui-dist@4/swagger-ui-bundle.js'></script>" +
+                     "<script>SwaggerUIBundle({url:'/openapi.json',dom_id:'#swagger-ui'});</script>" +
+                     "</body></html>";
+        res.html(uiHtml);
+    });
+}

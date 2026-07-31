@@ -16,15 +16,20 @@ vito/
 │   └── roadmap/                 # Lộ trình phát triển tương lai
 │       └── FUTURE_ROADMAP.md
 ├── src/                         # Core Web Engine
-│   └── vito.vit                 # HTTP Parser, Dynamic Router, Grouping & App Engine
+│   └── vito.vit                 # HTTP Parser, Dynamic Router, Grouping, DI Container & App Engine
 ├── packages/                    # Hệ sinh thái Official Middleware Plugins
 │   ├── cors/                    # Middleware xử lý CORS & Preflight OPTIONS
 │   ├── logger/                  # Middleware ghi log HTTP Request
-│   └── static/                  # Middleware phục vụ Static Files từ đĩa
+│   ├── static/                  # Middleware phục vụ Static Files từ đĩa
+│   ├── validation/              # Package Schema Validation Engine (HTTP 422)
+│   ├── security/                # Rate Limiting (HTTP 429), Helmet Security Headers & JWT Auth Guard (HTTP 401)
+│   ├── swagger/                 # Swagger UI Interactive (/docs) & OpenAPI Spec Generator (/openapi.json)
+│   └── sse/                     # Server-Sent Events (SSE) Response Streaming cho AI/LLM Token
 └── examples/                    # Ứng dụng mẫu
     ├── app_demo.vit             # Demo ứng dụng tích hợp đầy đủ tính năng
     ├── standalone_demo.vit      # Demo standalone TCP server
-    └── trie_demo.vit            # Demo Radix Trie Router, Lifecycle Hooks & app.inject()
+    ├── trie_demo.vit            # Demo Radix Trie Router, Lifecycle Hooks & app.inject()
+    └── roadmap_full_demo.vit    # Demo trọn bộ hệ sinh thái Vito Framework (Phase 1 -> 4)
 ```
 
 ---
@@ -57,7 +62,8 @@ vito/
   - `res.json(jsonStr)`: Phản hồi dữ liệu JSON với header `Content-Type: application/json; charset=utf-8`.
   - `res.html(htmlStr)`: Phản hồi HTML trang web với `Content-Type: text/html; charset=utf-8`.
   - `res.send(textStr)`: Phản hồi Plain Text với `Content-Type: text/plain; charset=utf-8`.
-- **Thiết lập Status Code chuẩn HTTP**: `res.setStatus(code)` hỗ trợ tự động gán Status Text phù hợp (`200 OK`, `201 Created`, `204 No Content`, `400 Bad Request`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found`, `500 Internal Server Error`).
+  - `res.sendChunk(chunk)`: Phản hồi truyền dữ liệu dạng Stream / Chunked.
+- **Thiết lập Status Code chuẩn HTTP**: `res.setStatus(code)` hỗ trợ tự động gán Status Text phù hợp (`200 OK`, `201 Created`, `204 No Content`, `400 Bad Request`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found`, `422 Unprocessable Entity`, `429 Too Many Requests`, `500 Internal Server Error`).
 - **Tùy biến HTTP Header**: `res.setHeader(name, value)` cho phép chèn hoặc ghi đè tùy ý các HTTP Response Header.
 
 ---
@@ -79,27 +85,32 @@ vito/
 
 ---
 
-### 7. 🔗 Hệ Sinh Thái Middleware Offical Plugins (`packages/`)
-- **`packages/cors/cors.vit`**:
-  - Tự động cấu hình CORS header (`Access-Control-Allow-Origin`, `Access-Control-Allow-Methods`, `Access-Control-Allow-Headers`).
-  - Xử lý tự động HTTP `OPTIONS` Preflight Request và trả về `204 No Content`.
-- **`packages/logger/logger.vit`**:
-  - Tự động ghi log thông tin các request gửi đến (`Method`, `Path`, `Query String`).
-- **`packages/static/static.vit`**:
-  - Phục vụ các file tĩnh trên đĩa (`HTML`, `CSS`, `JS`, `JSON`, `PNG`, `JPG`) với MIME type phù hợp.
+### 7. 🔗 Hệ Sinh Thái Middleware Official Plugins (`packages/`)
+- **`packages/cors/cors.vit`**: Xử lý CORS headers & `OPTIONS` Preflight.
+- **`packages/logger/logger.vit`**: Ghi log HTTP Request.
+- **`packages/static/static.vit`**: Phục vụ file tĩnh trên đĩa.
+- **`packages/validation/validation.vit`**: Type-Safe Schema Validation Engine (Tự động từ chối request không hợp lệ với HTTP 422).
+- **`packages/security/security.vit`**: Helmet Security Headers, Rate Limiting Middleware (HTTP 429) & JWT Auth Guard (HTTP 401).
+- **`packages/swagger/swagger.vit`**: Swagger UI tương tác (`/docs`) & Tự động sinh `openapi.json`.
+- **`packages/sse/sse.vit`**: Server-Sent Events (SSE) Response Streaming cho AI/LLM tokens.
 
 ---
 
-### 8. 🔄 Request Lifecycle Hooks Engine (`app.onRequest`)
+### 8. 🏗 Dependency Injection Container (`createContainer()`)
+- Quản lý Lifecycle và Tiêm phụ thuộc (Dependency Injection / IoC) cho các Service và Repository.
+
+---
+
+### 9. 🔄 Request Lifecycle Hooks Engine (`app.onRequest`)
 - Cho phép đăng ký hook `app.onRequest((req, res) => { ... })` can thiệp vào giai đoạn bắt đầu của vòng đời HTTP Request trước khi chạy qua các middleware.
 
 ---
 
-### 9. 🧪 In-Memory Testing Injector (`app.inject`)
+### 10. 🧪 In-Memory Testing Injector (`app.inject`)
 - Phương thức `app.inject(method, path)` cho phép gửi HTTP request thử nghiệm giả lập trực tiếp qua pipeline của VitoApp mà không cần mở cổng TCP thực tế trên hệ điều hành.
 - Giúp viết Unit Test & Integration Test đơn giản, tin cậy và không phụ thuộc vào hệ thống mạng.
 
 ---
 
 ## 📊 Kết Luận
-Phiên bản hiện tại của **Vito** đã sở hữu đầy đủ bộ khung của một **Modern Lightweight Web Framework**, chạy mượt mà trên nền tảng **VIT Native Compiler Engine**.
+Toàn bộ hệ sinh thái **Vito Web Framework** từ Core Engine đến các gói mở rộng Official Packages (Validation, Security, Swagger UI, SSE, DI Container) đã hoàn thành 100% trên nền tảng **VIT Native Compiler Engine**.

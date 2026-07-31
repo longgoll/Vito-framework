@@ -299,7 +299,53 @@ struct Response {
             this.stream.close();
         }
         this.isClosed = true;
+    },
+
+    function sendChunk(chunk: string): void {
+        if (this.isClosed) { return; }
+        if (this.status == 0) { this.setStatus(200); }
+        if (this.isMock) {
+            this.mockBody = this.mockBody + chunk;
+        } else {
+            this.stream.write(chunk);
+        }
     }
+}
+
+// 4.5. Dependency Injection Container (IoC)
+struct Container {
+    keys: string[],
+    values: string[],
+    count: number,
+
+    function init(): void {
+        this.count = 0;
+        this.keys = ["", "", "", "", "", "", "", ""];
+        this.values = ["", "", "", "", "", "", "", ""];
+    },
+
+    function register(key: string, val: string): void {
+        this.keys[this.count] = key;
+        this.values[this.count] = val;
+        this.count = this.count + 1;
+    },
+
+    function get(key: string): string {
+        let i = 0;
+        while (i < this.count) {
+            if (this.keys[i] == key) {
+                return this.values[i];
+            }
+            i = i + 1;
+        }
+        return "";
+    }
+}
+
+function createContainer(): Container {
+    let c: Container;
+    c.init();
+    return c;
 }
 
 // 5. HTTP Request Parser

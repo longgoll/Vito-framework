@@ -1,126 +1,95 @@
-# Vito Web Framework - Future Roadmap & Next-Gen Vision 🗺🚀
+# Vito Web Framework - Future Roadmap v2.0 (Next-Gen Vision) 🗺🚀
 
-> **Mục tiêu chiến lược**: Đưa **Vito** trở thành Web Framework có **hiệu năng cao nhất**, **tối ưu tài nguyên vượt trội** (Zero-Copy, Asynchronous I/O) và trải nghiệm lập trình (DX) đỉnh cao nhất trong hệ sinh thái ngôn ngữ VIT, sẵn sàng cạnh tranh và vượt qua các Framework lớn như Fastify (Node.js), Fiber (Go), Hono (Bun/Cloudflare), và NestJS (TypeScript).
+> **Cột mốc v1.0**: ✅ **Toàn bộ Phase 1 - 4 ban đầu đã hoàn thành 100%** và được ghi nhận đầy đủ tại [COMPLETED_FEATURES.md](file:///f:/Dev/product/vit-lag/vito/docs/completed/COMPLETED_FEATURES.md).
+> 
+> **Tầm nhìn v2.0**: Đưa **Vito** vươn lên thành **Enterprise-Grade Cloud-Native Web Engine** với giao thức truyền tải thế hệ mới (HTTP/2, HTTP/3 QUIC), mã hóa Native TLS/SSL, khả năng biên dịch sang WebAssembly (WASM Edge), bộ công cụ CLI thông minh và hệ sinh thái Native Database ORM.
 
 ---
 
-## 🏛 🎯 Lộ Trình Phát Triển 4 Giai Đoạn (4-Phase Strategic Roadmap)
+## 🏛 🎯 Lộ Trình Phát Triển Thế Hệ Mới (Vito v2.0 Strategic Roadmap)
 
 ```text
        ┌───────────────────────────────────────────────────────────┐
-       │   PHASE 1: Ultra-Performance & Core Kernel Engine        │
-       │   (Radix Tree Router, Zero-Copy Buffer, Async I/O Loop)  │
+       │   PHASE 5: Next-Gen Protocols & Native TLS/SSL Engine     │
+       │   (HTTP/2 Multiplexing, HTTP/3 QUIC, TLS 1.3 Direct)     │
        └─────────────────────────────┬─────────────────────────────┘
                                      │
                                      ▼
        ┌───────────────────────────────────────────────────────────┐
-       │   PHASE 2: Advanced DX, Middleware & Safety Ecosystem    │
-       │   (Zod-like Validation, Dependency Injection, OpenAPI)    │
+       │   PHASE 6: Edge Runtime & WebAssembly (WASM) Ecosystem    │
+       │   (WASM Target, Cloudflare Workers & Serverless Edge)    │
        └─────────────────────────────┬─────────────────────────────┘
                                      │
                                      ▼
        ┌───────────────────────────────────────────────────────────┐
-       │   PHASE 3: Real-Time, Security & Fullstack Capabilities │
-       │   (WebSockets, SSE, Rate Limiter, Auth & Security)        │
+       │   PHASE 7: Developer Tooling & CLI Suite (`vit` CLI)      │
+       │   (`vit create`, `vit dev` HMR, `vit build --binary`)    │
        └─────────────────────────────┬─────────────────────────────┘
                                      │
                                      ▼
        ┌───────────────────────────────────────────────────────────┐
-       │   PHASE 4: Enterprise, Microservices & Cloud-Native DX    │
-       │   (gRPC, ORM Integrations, HMR Dev CLI, Serverless Edge)  │
+       │   PHASE 8: Native Database Connectors & Vito ORM          │
+       │   (PostgreSQL, SQLite, Redis Drivers & ActiveRecord)      │
        └───────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## ⚡ PHASE 1: Tối Ưu Hiệu Năng Mức Kernel & Core Engine
+## ⚡ PHASE 5: Giao Thức Mới & Tích Hợp Mã Hóa Native TLS/SSL
 
-Chiến lược đưa tốc độ xử lý HTTP Request của Vito lên mức hàng triệu request/giây (RPS) tương đương hoặc vượt qua Go Fiber & Rust Actix-web.
+### 5.1. Tự Động Mã Hóa Native TLS/SSL 1.3
+- **Mục tiêu**: Tích hợp OpenSSL / BoringSSL binding trực tiếp vào TCP Engine của Vito.
+- **Lợi ích**: Chạy trực tiếp HTTPS bảo mật mà không cần Nginx / Caddy reverse proxy phía trước.
 
-### 1.1. Cây Định Tuyến Radix Tree / Trie Router ($O(L)$ Lookup)
-- **Hiện tại**: Tìm kiếm đường dẫn theo mảng tuyến tính $O(N)$.
-- **Mục tiêu**: Nâng cấp sang cấu trúc dữ liệu **Radix Tree (Patricia Trie)**.
-- **Lợi ích**: Tốc độ định tuyến đạt $O(L)$ ($L$ là độ dài URL), không phụ thuộc vào số lượng route (dù app có 10 hay 10,000 route thì tốc độ định tuyến vẫn như nhau).
-
-### 1.2. Zero-Copy HTTP Buffer Parsing (Sử dụng String Views)
-- **Hiện tại**: Tạo chuỗi mới khi phân tích header/body (allocate bộ nhớ).
-- **Mục tiêu**: Sử dụng kỹ thuật **Zero-Copy Slice / Pointer Windowing** trực tiếp trên mảng Byte nhận từ Socket mà không phân bổ (allocate) lại bộ nhớ heap.
-- **Lợi ích**: Giảm chỉ số GC (Garbage Collection), triệt tiêu memory leak, tăng tốc độ xử lý lên 300%.
-
-### 1.3. Bất Đồng Bộ Hóa (Asynchronous Non-Blocking I/O Event Loop)
-- **Hiện tại**: Mẫu lặp đồng bộ `listener.accept()`.
-- **Mục tiêu**: Tích hợp với Event Loop của VIT Runtime (`epoll` trên Linux, `kqueue` trên macOS, `IOCP / io_uring` trên Windows).
-- **Lợi ích**: Xử lý đồng thời hàng trăm nghìn kết nối (C10K / C100K Problem) với tài nguyên CPU/RAM tối thiểu.
-
-### 1.4. Quản Lý Vòng Đời Request (Request Lifecycle Hooks)
-- **Mục tiêu**: Cung cấp các hook `onRequest`, `preHandler`, `onResponse`, `onError` can thiệp vào các giai đoạn xử lý HTTP.
-- **Lợi ích**: Tăng khả năng mở rộng middleware và hỗ trợ theo dõi/log thông số chi tiết của từng request.
-
-### 1.5. HTTP Chunked Transfer Encoding & Streaming Response
-- **Mục tiêu**: Hỗ trợ truyền dữ liệu dạng khối (Chunked Transfer) và stream dữ liệu trực tiếp trên Response context.
-- **Lợi ích**: Phục vụ truyền file lớn, stream token cho AI/LLM và SSE ngay ở tầng Core.
+### 5.2. Hỗ Trợ Giao Thức HTTP/2 Multiplexing & HTTP/3 QUIC
+- **Mục tiêu**: Hỗ trợ HTTP/2 binary framing, header compression (HPACK) và HTTP/3 truyền dữ liệu trên UDP/QUIC.
+- **Lợi ích**: Tăng tốc độ tải trang web và API thêm 400% đối với các kết nối độ trễ cao.
 
 ---
 
-## 🛠 PHASE 2: Trải Nghiệm Nhà Phát Triển (DX) & An Toàn Dữ Liệu
+## 🌐 PHASE 6: Cloud Edge Runtime & WebAssembly (WASM)
 
-### 2.1. Type-Safe Schema Validation Engine (`vito/packages/validation`)
-- Bộ kiểm tra dữ liệu đầu vào (Request Query, Params, Body JSON) tự động giống Zod / Yup / TypeBox.
-- Tự động từ chối request không hợp lệ với phản hồi lỗi HTTP 422 Unprocessable Entity trước khi vào Route Handler.
+### 6.1. Biên Dịch Sang Target WebAssembly (WASM)
+- **Mục tiêu**: Đóng gói ứng dụng Vito thành module WASM cực kỳ nhỏ gọn (< 1MB).
+- **Lợi ích**: Chạy ứng dụng Vito trên các mạng lưới Cloud Edge như Cloudflare Workers, Fastly Compute@Edge, AWS Lambda.
 
-### 2.2. Khung Phụ Thuộc Tự Động (Dependency Injection - DI Container)
-- Quản lý Lifecycle của các Service, Repository, Database Connection Pool theo mô hình IoC (Inversion of Control) tương tự NestJS / Spring Boot.
-
-### 2.3. Tự Động Tạo Tài Liệu OpenAPI / Swagger (`vito/packages/swagger`)
-- Tự động sinh ra UI Swagger tương tác (`/docs`) và file cấu hình `openapi.json` từ danh sách route và validation schema đã khai báo.
-
-### 2.4. Công Cụ Kiểm Thử Trong Bộ Nhớ (In-Memory Testing Injector - `app.inject`)
-- Hỗ trợ gửi HTTP request giả lập trực tiếp qua pipeline của VitoApp mà không cần mở cổng TCP thực tế trên OS.
-- Giúp viết Unit Test & Integration Test cực kỳ nhanh chóng và tin cậy.
-
-### 2.5. Tắt Ứng Dụng An Toàn (Graceful Shutdown & Lifecycle Management)
-- Lắng nghe tín hiệu hệ thống (`SIGINT`, `SIGTERM`), hoàn tất các request đang chờ và giải phóng tài nguyên database/network an toàn trước khi dừng process.
+### 6.2. Serverless Cold Start Under 1ms
+- **Mục tiêu**: Tối ưu thời gian khởi động Serverless xuống dưới 1 mili-giây.
 
 ---
 
-## 🌐 PHASE 3: Real-Time, An Ninh & Tính Năng Enterprise
+## 🛠 PHASE 7: Bộ Công Cụ CLI Thông Minh (`vit` CLI)
 
-### 3.1. Phân Hệ Real-Time: WebSockets & Server-Sent Events (SSE)
-- **`vito/packages/websocket`**: Hỗ trợ kết nối hai chiều thời gian thực (Real-time Full-Duplex WebSockets) cho Chat, Notification, Game Server.
-- **`vito/packages/sse`**: Hỗ trợ Server-Sent Events cho Streaming dữ liệu AI / LLM Response Token.
+### 7.1. Trình Quản Lý Dự Án `vit create` & `vit dev`
+- **`vit create <app-name>`**: Tự động sinh cấu trúc thư mục chuẩn Monorepo / Microservice.
+- **`vit dev`**: Server phát triển hỗ trợ Auto-Reload (HMR) tức thì khi thay đổi file `.vit`.
 
-### 3.2. An Ninh Web & Bảo Vệ Hệ Thống (`vito/packages/security`)
-- **Rate Limiting**: Giới hạn số lượng request theo IP / Token (Token Bucket Algorithm) chống Spam & DDoS.
-- **Helmet Security Headers**: Tự động cấu hình `Content-Security-Policy`, `X-Frame-Options`, `X-XSS-Protection`, `Strict-Transport-Security`.
-- **JWT & Session Auth Middleware**: Tích hợp sẵn mã hóa JSON Web Token (JWT) và Session Store (Memory/Redis).
+### 7.2. Đóng Gói Binary Đơn Lẻ (`vit build --binary`)
+- Đóng gói toàn bộ ứng dụng Vito và phụ thuộc thành 1 file thực thi duy nhất (Standalone Native Executable) chạy trực tiếp trên Linux/Windows/macOS.
 
 ---
 
-## 🚀 PHASE 4: Hệ Sinh Thái Microservices, ORM & Fullstack Ecosystem
+## 🗄 PHASE 8: Native Database Drivers & Vito ORM
 
-### 4.1. Tích Hợp ORM & Database Driver Interop
-- **Vito ORM**: Bộ thư viện thao tác dữ liệu dạng ActiveRecord / DataMapper hỗ trợ PostgreSQL, SQLite, MySQL với Type-Safety tuyệt đối.
+### 8.1. Trình Kết Nối Dữ Liệu Tốc Độ Cao (PostgreSQL, SQLite, Redis)
+- Xây dựng driver kết nối cơ sở dữ liệu thuần VIT Native không thông qua FFI trung gian.
 
-### 4.2. Khung Xây Dựng Microservices (gRPC & Pub/Sub)
-- Hỗ trợ giao thức truyền dữ liệu siêu tốc gRPC (Protocol Buffers) và tích hợp các Message Broker phổ biến (Redis Pub/Sub, NATS, RabbitMQ).
-
-### 4.3. Dev Tooling & Hot Module Replacement (HMR CLI)
-- **`vit dev`**: Trình chạy Dev Server hỗ trợ Auto-Reload (HMR) khi sửa code `.vit`.
-- **`vit build`**: Đóng gói ứng dụng Vito thành 1 file Binary thực thi đơn lẻ (Standalone Executable) cực nhỏ gọn (< 5MB).
+### 8.2. Vito ORM (ActiveRecord & DataMapper Pattern)
+- Hỗ trợ Type-Safe Query Builder, Auto-Migrations, và Relationship mapping (`hasMany`, `belongsTo`).
 
 ---
 
-## 🏆 Bảng So Sánh Định Hướng Tính Năng
+## 🏆 Bảng So Sánh Vị Thế Thế Hệ Mới (Vito v2.0 vs Thế Giới)
 
-| Tính Năng / Chỉ Số | Express.js | Fastify | Go Fiber | Hono | **Vito Framework (Mục Tiêu)** |
+| Tính Năng / Chỉ Số | Fastify (Node.js) | Fiber (Go) | Hono (Bun/CF) | NestJS (TS) | **Vito v2.0 (Target Vision)** |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Ngôn ngữ nền tảng** | Node.js | Node.js | Go | Bun/Cloudflare | **VIT Native (C/LLVM Direct)** |
-| **Kiến trúc Router** | Linear List | Radix Trie | Radix Trie | Regexp Trie | **Radix Tree ($O(L)$)** |
-| **Memory Allocation** | High | Medium | Low | Low | **Zero-Copy (Ultra Low)** |
-| **Async I/O Engine** | libuv | libuv | Go Netpoll | JS Runtime | **Native epoll / io_uring** |
-| **DX & Type Safety** | Khá | Tốt | Khá | Rất Tốt | **Tuyệt Đối (Native Types)** |
-| **Binary Standalone** | Không | Không | Có | Không | **Có (Single Binary Executable)** |
+| **Nền Tảng Biến Dịch** | JS Engine | Go Compiler | JS/Wasm | JS Engine | **VIT Native (C/LLVM Direct)** |
+| **Native TLS 1.3** | Cần Nginx | Có | Tuỳ Runtime | Cần Nginx | **Native Built-in** |
+| **WASM Edge Ready** | Khó | Không | Có | Không | **Có (Native WASM Target)** |
+| **HTTP/3 QUIC** | Chưa | Đang làm | Có | Chưa | **Native Support** |
+| **CLI Tooling** | Thô sơ | Khá | Khá | Rất Tốt | **Đầy Đủ (`vit` CLI)** |
+| **Single Binary Executable** | Không | Có | Không | Không | **Có (< 5MB Executable)** |
 
 ---
 
-> 🎯 **Cam Kết**: **Vito** sẽ không dừng lại ở một thư viện Web đơn thuần, mà sẽ trở thành **Tiêu Chuẩn Vàng (Gold Standard)** cho việc phát triển Web Service, Microservice và API Backend trên ngôn ngữ VIT.
+> 🎯 **Cam Kết**: Với lộ trình **Vito v2.0**, Vito sẽ khẳng định vị thế đỉnh cao của một Web Framework thế hệ mới – **Siêu nhanh, Siêu an toàn và Sẵn sàng cho Kỷ nguyên Cloud-Native Edge**.

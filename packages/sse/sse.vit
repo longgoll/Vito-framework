@@ -1,0 +1,11 @@
+// Vito Server-Sent Events (SSE) Package (vito/packages/sse/sse.vit)
+import { Response } from "../../src/vito.vit";
+
+function sendSseEvent(res: Response, eventName: string, dataPayload: string): void {
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    
+    let frame = "event: " + eventName + "\r\ndata: " + dataPayload + "\r\n\r\n";
+    res.send(frame);
+}
