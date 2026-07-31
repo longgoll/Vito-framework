@@ -1,4 +1,4 @@
-// Vito Framework Application Demo (vito/examples/app_demo.vit)
+// Vito Framework Advanced Application Demo (vito/examples/app_demo.vit)
 import { VitoApp, Request, Response, createApp } from "../src/vito.vit";
 import { loggerMiddleware } from "../packages/logger/logger.vit";
 import { corsMiddleware } from "../packages/cors/cors.vit";
@@ -10,20 +10,43 @@ function main(): number {
     app.use(corsMiddleware);
     app.use(loggerMiddleware);
 
-    // 2. Register Routes
+    // 2. Custom Error Handler Middleware (404 Not Found)
+    app.setNotFoundHandler((req: Request, res: Response) => {
+        res.setStatus(404).html("<h1>404 Page Not Found 😢</h1><p>The requested URL " + req.path + " was not found on this Vito server.</p>");
+    });
+
+    // 3. Main Routes
     app.get("/", (req: Request, res: Response) => {
-        res.html("<h1>Welcome to Vito Web Framework! 🚀</h1>");
+        res.html("<h1>Welcome to Vito Web Framework Advanced Demo! 🚀</h1>");
     });
 
-    app.get("/api/status", (req: Request, res: Response) => {
-        res.json("{\"status\":\"ok\",\"framework\":\"Vito v1.0.0\",\"engine\":\"VIT Native\"}");
+    // Dynamic Route Parameter Demo (/users/:id)
+    app.get("/users/:id", (req: Request, res: Response) => {
+        let userId = req.param("id");
+        res.json("{\"action\":\"get_user\",\"user_id\":\"" + userId + "\"}");
     });
 
-    app.post("/api/echo", (req: Request, res: Response) => {
-        res.json("{\"received_body\":\"" + req.body + "\"}");
+    // Query Parameters Demo (/search?q=vit)
+    app.get("/search", (req: Request, res: Response) => {
+        let queryVal = req.query("q");
+        res.json("{\"action\":\"search\",\"query\":\"" + queryVal + "\"}");
     });
 
-    // 3. Start Server
+    // 4. Route Grouping Demo (/api/v1)
+    app.group("/api/v1", (v1) => {
+        v1.get("/status", (req: Request, res: Response) => {
+            let authHeader = req.header("Authorization");
+            res.json("{\"version\":\"v1\",\"status\":\"active\",\"auth\":\"" + authHeader + "\"}");
+        });
+
+        v1.get("/products/:category/:id", (req: Request, res: Response) => {
+            let cat = req.param("category");
+            let pId = req.param("id");
+            res.json("{\"version\":\"v1\",\"category\":\"" + cat + "\",\"product_id\":\"" + pId + "\"}");
+        });
+    });
+
+    // 5. Start Web Server
     app.listen(8888);
     return 0;
 }
