@@ -1,0 +1,11 @@
+# Executables & Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+*.wasm
+
+# Build & System
+.vit/
+build/
+output.txt

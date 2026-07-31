@@ -1,0 +1,5 @@
+// Vito Logger Middleware Plugin (vito/packages/logger/logger.vit)
+
+function logRequest(method: string, path: string): void {
+    print("[Vito Logger] " + method + " " + path);
+}

@@ -1,0 +1,9 @@
+// Vito Framework Application Demo (vito/examples/app_demo.vit)
+import { runVitoApp } from "vito/src/vito.vit";
+import { logRequest } from "vito/packages/logger/logger.vit";
+
+function main(): number {
+    logRequest("GET", "/api/status");
+    runVitoApp(8888);
+    return 0;
+}

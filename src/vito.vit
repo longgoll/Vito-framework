@@ -1,0 +1,25 @@
+// Vito Web Framework Core (vito/src/vito.vit)
+import { listenTcp, TcpListener, TcpStream } from "std/net";
+import { Response } from "std/http";
+
+function runVitoApp(port: number): void {
+    print("=========================================");
+    print(" 🚀 Vito Web Framework v1.0.0 (VIT Native)");
+    print(" Running on: http://127.0.0.1:8888");
+    print("=========================================");
+
+    let listener = listenTcp("127.0.0.1", port);
+    while (true) {
+        let stream = listener.accept();
+        let rawData = stream.read(4096);
+        if (rawData.length > 0) {
+            let res: Response;
+            res.status = 200;
+            res.body = "";
+            res.stream = stream;
+            res.json("{\"status\":\"ok\",\"framework\":\"Vito v1.0.0\",\"engine\":\"VIT Native\"}");
+        } else {
+            stream.close();
+        }
+    }
+}

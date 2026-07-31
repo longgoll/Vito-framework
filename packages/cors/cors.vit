@@ -1,0 +1,5 @@
+// Vito CORS Middleware Plugin (vito/packages/cors/cors.vit)
+
+function formatCorsHeader(): string {
+    return "Access-Control-Allow-Origin: *\r\nAccess-Control-Allow-Methods: GET, POST, OPTIONS\r\n";
+}

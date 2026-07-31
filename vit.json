@@ -1,0 +1,7 @@
+{
+  "name": "vito",
+  "version": "1.0.0",
+  "description": "Vito Web Framework for VIT Language",
+  "main": "src/vito.vit",
+  "dependencies": {}
+}

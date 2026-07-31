@@ -1,0 +1,36 @@
+import { listenTcp, TcpListener, TcpStream } from "std/net";
+import { Request, Response } from "std/http";
+
+function logRequest(method: string, path: string): void {
+    print("[Vito Logger] " + method + " " + path);
+}
+
+function main(): number {
+    print("=========================================");
+    print(" 🚀 Vito Web Framework Standalone Server");
+    print(" Running on: http://127.0.0.1:8888");
+    print("=========================================");
+
+    logRequest("GET", "/api/status");
+
+    let listener = listenTcp("127.0.0.1", 8888);
+    print("Server bound to port 8888, waiting for connections...");
+
+    while (true) {
+        let stream = listener.accept();
+        print("Incoming connection accepted!");
+        let rawData = stream.read(4096);
+        print("Received: " + rawData);
+
+        if (rawData.length > 0) {
+            let res: Response;
+            res.status = 200;
+            res.body = "";
+            res.stream = stream;
+            res.json("{\"status\":\"ok\",\"framework\":\"Vito v1.0.0\",\"engine\":\"VIT Native\"}");
+        } else {
+            stream.close();
+        }
+    }
+    return 0;
+}
