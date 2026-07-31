@@ -1,0 +1,18 @@
+// Vito CORS Middleware Plugin (vito/packages/cors/cors.vit)
+import { Request, Response } from "../../src/vito.vit";
+
+function corsMiddleware(req: Request, res: Response): boolean {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+    if (req.method == "OPTIONS") {
+        res.setStatus(204).send("");
+        return false; // Stop further pipeline execution for Preflight requests
+    }
+    return true; // Continue next middleware/route
+}
+
+function formatCorsHeader(): string {
+    return "Access-Control-Allow-Origin: *\r\nAccess-Control-Allow-Methods: GET, POST, OPTIONS\r\n";
+}

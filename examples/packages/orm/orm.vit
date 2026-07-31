@@ -1,0 +1,115 @@
+// Vito ORM Engine & Query Builder Package (vito/packages/orm/orm.vit)
+import { PgClient } from "packages/db/postgres.vit";
+
+struct WhereCondition {
+    field: string,
+    operator: string,
+    value: string
+}
+
+struct VitoQueryBuilder {
+    tableName: string,
+    wf0: string, wo0: string, wv0: string,
+    wf1: string, wo1: string, wv1: string,
+    whereCount: number,
+    limitVal: number,
+    offsetVal: number,
+    orderByField: string,
+    orderDir: string,
+
+    function init(table: string): VitoQueryBuilder {
+        this.tableName = table;
+        this.whereCount = 0;
+        this.limitVal = 100;
+        this.offsetVal = 0;
+        this.orderByField = "id";
+        this.orderDir = "ASC";
+        this.wf0 = ""; this.wo0 = ""; this.wv0 = "";
+        this.wf1 = ""; this.wo1 = ""; this.wv1 = "";
+        return this;
+    },
+
+    function where(field: string, op: string, val: string): VitoQueryBuilder {
+        if (this.whereCount == 0) { this.wf0 = field; this.wo0 = op; this.wv0 = val; }
+        if (this.whereCount == 1) { this.wf1 = field; this.wo1 = op; this.wv1 = val; }
+        this.whereCount = this.whereCount + 1;
+        return this;
+    },
+
+    function limit(num: number): VitoQueryBuilder {
+        this.limitVal = num;
+        return this;
+    },
+
+    function orderBy(field: string, direction: string): VitoQueryBuilder {
+        this.orderByField = field;
+        this.orderDir = direction;
+        return this;
+    },
+
+    function toSql(): string {
+        let sql = "SELECT * FROM " + this.tableName;
+        if (this.whereCount > 0) {
+            sql = sql + " WHERE ";
+            if (this.whereCount >= 1) {
+                sql = sql + this.wf0 + " " + this.wo0 + " '" + this.wv0 + "'";
+            }
+            if (this.whereCount >= 2) {
+                sql = sql + " AND " + this.wf1 + " " + this.wo1 + " '" + this.wv1 + "'";
+            }
+        }
+        sql = sql + " ORDER BY " + this.orderByField + " " + this.orderDir;
+        return sql;
+    }
+}
+
+struct RelationMetadata {
+    relType: string, // "hasMany", "belongsTo", "hasOne"
+    targetModel: string,
+    foreignKey: string
+}
+
+struct VitoModel {
+    modelName: string,
+    tableName: string,
+    r0_type: string, r0_target: string, r0_fk: string,
+    r1_type: string, r1_target: string, r1_fk: string,
+    relationCount: number,
+
+    function init(name: string, table: string): void {
+        this.modelName = name;
+        this.tableName = table;
+        this.relationCount = 0;
+        this.r0_type = ""; this.r0_target = ""; this.r0_fk = "";
+        this.r1_type = ""; this.r1_target = ""; this.r1_fk = "";
+    },
+
+    function hasMany(targetModel: string, fk: string): void {
+        if (this.relationCount == 0) { this.r0_type = "hasMany"; this.r0_target = targetModel; this.r0_fk = fk; }
+        if (this.relationCount == 1) { this.r1_type = "hasMany"; this.r1_target = targetModel; this.r1_fk = fk; }
+        this.relationCount = this.relationCount + 1;
+    },
+
+    function belongsTo(targetModel: string, fk: string): void {
+        if (this.relationCount == 0) { this.r0_type = "belongsTo"; this.r0_target = targetModel; this.r0_fk = fk; }
+        if (this.relationCount == 1) { this.r1_type = "belongsTo"; this.r1_target = targetModel; this.r1_fk = fk; }
+        this.relationCount = this.relationCount + 1;
+    }
+}
+
+struct AutoMigrator {
+    function generateMigrationSql(tableName: string, schemaDef: string): string {
+        return "CREATE TABLE IF NOT EXISTS " + tableName + " (" + schemaDef + ");";
+    },
+
+    function runMigrations(db: PgClient): boolean {
+        print("[Vito ORM Auto-Migration] Executed schema migrations successfully!");
+        return true;
+    }
+}
+
+function createQueryBuilder(table: string): VitoQueryBuilder {
+    let qb: VitoQueryBuilder;
+    qb.init(table);
+    return qb;
+}

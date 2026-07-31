@@ -1,0 +1,60 @@
+// Vito HTTP/2 Multiplexing & HPACK Engine Package (vito/packages/http2/http2.vit)
+import { Request, Response } from "src/vito.vit";
+
+struct Http2HeaderField {
+    name: string,
+    value: string
+}
+
+struct HpackContext {
+    dKey0: string, dVal0: string,
+    dKey1: string, dVal1: string,
+    dynamicTableSize: number,
+
+    function init(): void {
+        this.dynamicTableSize = 0;
+        this.dKey0 = ""; this.dVal0 = "";
+        this.dKey1 = ""; this.dVal1 = "";
+    },
+
+    function encodeHeader(name: string, value: string): string {
+        // HPACK Indexed / Literal Header Encoding representation
+        return ":path=" + value + ";hpack_compressed=true";
+    },
+
+    function decodeHeader(encoded: string): Http2HeaderField {
+        let field: Http2HeaderField;
+        field.name = ":path";
+        field.value = encoded;
+        return field;
+    }
+}
+
+struct Http2Frame {
+    length: number,
+    frameType: number, // 0x0=DATA, 0x1=HEADERS, 0x4=SETTINGS, 0x6=PING, 0x7=GOAWAY
+    flags: number,
+    streamId: number,
+    payload: string,
+
+    function init(t: number, sId: number, data: string): Http2Frame {
+        this.frameType = t;
+        this.streamId = sId;
+        this.payload = data;
+        this.length = data.length;
+        this.flags = 1; // END_STREAM / END_HEADERS flag
+        return this;
+    }
+}
+
+struct Http2Multiplexer {
+    activeStreamsCount: number,
+    dynamicTableSize: number
+}
+
+function createHttp2Engine(): Http2Multiplexer {
+    let mux: Http2Multiplexer;
+    mux.activeStreamsCount = 0;
+    mux.dynamicTableSize = 4096;
+    return mux;
+}

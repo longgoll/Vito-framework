@@ -1,0 +1,29 @@
+// Vito Static File Middleware Plugin (vito/packages/static/static.vit)
+import { Request, Response } from "../../src/vito.vit";
+import { readFile } from "std/fs";
+
+function getMimeType(filePath: string): string {
+    if (filePath.length > 5 && filePath.indexOf(".html") > 0) { return "text/html; charset=utf-8"; }
+    if (filePath.length > 4 && filePath.indexOf(".css") > 0) { return "text/css; charset=utf-8"; }
+    if (filePath.length > 3 && filePath.indexOf(".js") > 0) { return "application/javascript; charset=utf-8"; }
+    if (filePath.length > 5 && filePath.indexOf(".json") > 0) { return "application/json; charset=utf-8"; }
+    if (filePath.length > 4 && filePath.indexOf(".png") > 0) { return "image/png"; }
+    if (filePath.length > 4 && filePath.indexOf(".jpg") > 0) { return "image/jpeg"; }
+    return "text/plain; charset=utf-8";
+}
+
+function createStaticMiddleware(publicDir: string): (req: Request, res: Response) => boolean {
+    return (req: Request, res: Response): boolean => {
+        if (req.method == "GET" && req.path.length > 1) {
+            let targetFile = publicDir + req.path;
+            let fileContent = readFile(targetFile);
+            if (fileContent.length > 0) {
+                let mime = getMimeType(targetFile);
+                res.setHeader("Content-Type", mime);
+                res.setStatus(200).send(fileContent);
+                return false; // Served static file, stop pipeline
+            }
+        }
+        return true; // Continue pipeline
+    };
+}

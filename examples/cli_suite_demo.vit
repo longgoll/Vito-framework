@@ -1,0 +1,49 @@
+// Vito CLI Tooling & Single Binary Executable Demo (vito/examples/cli_suite_demo.vit)
+
+struct VitCliConfig {
+    appName: string,
+    version: string,
+    template: string,
+    outputBinary: string
+}
+
+function vitCreateProject(appName: string, template: string): boolean {
+    print("=========================================================");
+    print(" 🛠 `vit create " + appName + "` Scaffolding Generator");
+    print("=========================================================");
+    print("  [+] Creating directory structure for: " + appName);
+    print("  [+] Initializing vit.json project configuration");
+    print("  [+] Generated src/main.vit (Vito Web Engine)");
+    print("  [+] Scaffolding Monorepo packages/ & tests/");
+    print("  [+] Project " + appName + " created successfully!");
+    return true;
+}
+
+function vitDevServer(port: number): void {
+    print("=========================================================");
+    print(" ⚡ `vit dev` HMR Auto-Reload Server");
+    print("=========================================================");
+    print("  [Watcher] Monitoring directory: src/, packages/");
+    print("  [HMR] Server active on http://127.0.0.1:" + port);
+    print("  [HMR] Ready for instant code updates without restart!");
+}
+
+function vitBuildSingleBinary(sourceFile: string, outputBinary: string): boolean {
+    print("=========================================================");
+    print(" 📦 `vit build --binary` Standalone Executable Bundler");
+    print("=========================================================");
+    print("  [1/3] Compiling " + sourceFile + " with LLVM Native Backend...");
+    print("  [2/3] Bundling Vito Web Engine & dependency tree...");
+    print("  [3/3] Emitting single native executable: " + outputBinary);
+    print("  [SUCCESS] Binary size: 4.2 MB (Zero external runtime dependency)");
+    return true;
+}
+
+function main(): number {
+    vitCreateProject("my-vito-enterprise-app", "rest-api");
+    print("");
+    vitDevServer(3000);
+    print("");
+    vitBuildSingleBinary("src/main.vit", "my-vito-enterprise-app.exe");
+    return 0;
+}

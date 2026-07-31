@@ -1,0 +1,74 @@
+// Vito Web Security & Protection Ecosystem Package (vito/packages/security/security.vit)
+import { Request, Response } from "../../src/vito.vit";
+
+// 1. Helmet Security Headers Middleware
+function helmetMiddleware(req: Request, res: Response): boolean {
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("X-XSS-Protection", "1; mode=block");
+    res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+    res.setHeader("Content-Security-Policy", "default-src 'self'");
+    return true;
+}
+
+// 2. Rate Limiting Middleware (Token Bucket / Request Count)
+struct RateLimiter {
+    maxRequests: number,
+    requestCount: number,
+
+    function init(maxReq: number): RateLimiter {
+        this.maxRequests = maxReq;
+        this.requestCount = 0;
+        return this;
+    },
+
+    function checkAndIncrement(): boolean {
+        if (this.requestCount >= this.maxRequests) {
+            return false;
+        }
+        this.requestCount = this.requestCount + 1;
+        return true;
+    }
+}
+
+function createRateLimiterMiddleware(maxRequests: number): (req: Request, res: Response) => boolean {
+    let limiter: RateLimiter;
+    limiter.init(maxRequests);
+
+    return (req: Request, res: Response): boolean => {
+        if (!limiter.checkAndIncrement()) {
+            res.setHeader("Retry-After", "60");
+            res.setStatus(429).json("{\"error\":\"Too Many Requests\",\"message\":\"Rate limit exceeded. Please try again later.\"}");
+            return false;
+        }
+        return true;
+    };
+}
+
+// 3. JWT Auth Guard Middleware
+function jwtAuthMiddleware(req: Request, res: Response): boolean {
+    let authHeader = req.header("Authorization");
+    if (authHeader.length == 0) {
+        authHeader = req.header("authorization");
+    }
+
+    if (authHeader.length == 0) {
+        res.setStatus(401).json("{\"error\":\"Unauthorized\",\"message\":\"Missing Authorization header\"}");
+        return false;
+    }
+
+    // Check "Bearer " prefix
+    let hasBearer = false;
+    if (authHeader.length > 7) {
+        if (charAt(authHeader, 0) == "B" && charAt(authHeader, 1) == "e" && charAt(authHeader, 2) == "a" && charAt(authHeader, 3) == "r" && charAt(authHeader, 4) == "e" && charAt(authHeader, 5) == "r" && charAt(authHeader, 6) == " ") {
+            hasBearer = true;
+        }
+    }
+
+    if (!hasBearer) {
+        res.setStatus(401).json("{\"error\":\"Unauthorized\",\"message\":\"Invalid token format. Expected Bearer <token>\"}");
+        return false;
+    }
+
+    return true;
+}

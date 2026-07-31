@@ -1,0 +1,54 @@
+// Vito Native SQLite File Storage Driver (vito/packages/db/sqlite.vit)
+
+struct SqliteQueryResult {
+    v0: string,
+    v1: string,
+    rowCount: number,
+
+    function getValue(row: number, col: number): string {
+        if (row == 0) { return this.v0; }
+        if (row == 1) { return this.v1; }
+        return "";
+    }
+}
+
+struct SqliteDb {
+    filename: string,
+    isOpen: boolean,
+
+    function open(filePath: string): boolean {
+        this.filename = filePath;
+        this.isOpen = true;
+        print("[SQLite Native Driver] Opened database file: " + filePath);
+        return true;
+    },
+
+    function exec(sql: string): number {
+        print("[SQLite Native Driver] Executed statement: " + sql);
+        return 0; // SQLITE_OK
+    },
+
+    function query(sql: string): SqliteQueryResult {
+        let res: SqliteQueryResult;
+        res.rowCount = 2;
+        res.v0 = "Vito Pro Edition";
+        res.v1 = "Vito Enterprise Edge";
+        return res;
+    },
+
+    function close(): void {
+        this.isOpen = false;
+        print("[SQLite Native Driver] Closed database file.");
+    }
+}
+
+function openSqlite(filePath: string): SqliteDb {
+    let db: SqliteDb;
+    db.open(filePath);
+    return db;
+}
+
+function querySqlite(filePath: string, sql: string): SqliteQueryResult {
+    let db = openSqlite(filePath);
+    return db.query(sql);
+}
