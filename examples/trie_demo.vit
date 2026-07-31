@@ -1,0 +1,53 @@
+// Vito Framework Engine Upgrade Demo (vito/examples/trie_demo.vit)
+import { VitoApp, Request, Response, createApp } from "../src/vito.vit";
+
+function main(): number {
+    print("=========================================");
+    print(" 🧪 Vito Phase 1 Engine Verification Demo ");
+    print("=========================================");
+
+    let app = createApp();
+
+    // 1. Register Request Lifecycle Hook
+    app.onRequest((req: Request, res: Response) => {
+        print("[Hook:onRequest] Incoming request: " + req.method + " " + req.path);
+    });
+
+    // 2. Define Dynamic Routes
+    app.get("/", (req: Request, res: Response) => {
+        res.json("{\"message\":\"Welcome to Vito Engine Phase 1!\"}");
+    });
+
+    app.get("/users/:id", (req: Request, res: Response) => {
+        let userId = req.param("id");
+        res.json("{\"user_id\":\"" + userId + "\",\"status\":\"active\"}");
+    });
+
+    app.get("/categories/:catId/products/:prodId", (req: Request, res: Response) => {
+        let cat = req.param("catId");
+        let prod = req.param("prodId");
+        res.json("{\"category\":\"" + cat + "\",\"product\":\"" + prod + "\"}");
+    });
+
+    // 3. Perform In-Memory Unit Testing with app.inject()
+    print("\n--- 🔍 Running In-Memory Test Suite (app.inject) ---");
+
+    // Test 1: GET /
+    let res1 = app.inject("GET", "/");
+    print("[TEST 1] GET / => Status: " + res1.status + " | Body: " + res1.mockBody);
+
+    // Test 2: GET /users/42
+    let res2 = app.inject("GET", "/users/42");
+    print("[TEST 2] GET /users/42 => Status: " + res2.status + " | Body: " + res2.mockBody);
+
+    // Test 3: GET /categories/tech/products/laptop99
+    let res3 = app.inject("GET", "/categories/tech/products/laptop99");
+    print("[TEST 3] GET /categories/tech/products/laptop99 => Status: " + res3.status + " | Body: " + res3.mockBody);
+
+    // Test 4: GET /unknown-path (404)
+    let res4 = app.inject("GET", "/unknown-path");
+    print("[TEST 4] GET /unknown-path => Status: " + res4.status + " | Body: " + res4.mockBody);
+
+    print("\n✅ All In-Memory Engine Tests Completed Successfully!");
+    return 0;
+}

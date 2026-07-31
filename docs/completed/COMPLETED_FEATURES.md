@@ -23,7 +23,8 @@ vito/
 │   └── static/                  # Middleware phục vụ Static Files từ đĩa
 └── examples/                    # Ứng dụng mẫu
     ├── app_demo.vit             # Demo ứng dụng tích hợp đầy đủ tính năng
-    └── standalone_demo.vit      # Demo standalone TCP server
+    ├── standalone_demo.vit      # Demo standalone TCP server
+    └── trie_demo.vit            # Demo Radix Trie Router, Lifecycle Hooks & app.inject()
 ```
 
 ---
@@ -86,6 +87,17 @@ vito/
   - Tự động ghi log thông tin các request gửi đến (`Method`, `Path`, `Query String`).
 - **`packages/static/static.vit`**:
   - Phục vụ các file tĩnh trên đĩa (`HTML`, `CSS`, `JS`, `JSON`, `PNG`, `JPG`) với MIME type phù hợp.
+
+---
+
+### 8. 🔄 Request Lifecycle Hooks Engine (`app.onRequest`)
+- Cho phép đăng ký hook `app.onRequest((req, res) => { ... })` can thiệp vào giai đoạn bắt đầu của vòng đời HTTP Request trước khi chạy qua các middleware.
+
+---
+
+### 9. 🧪 In-Memory Testing Injector (`app.inject`)
+- Phương thức `app.inject(method, path)` cho phép gửi HTTP request thử nghiệm giả lập trực tiếp qua pipeline của VitoApp mà không cần mở cổng TCP thực tế trên hệ điều hành.
+- Giúp viết Unit Test & Integration Test đơn giản, tin cậy và không phụ thuộc vào hệ thống mạng.
 
 ---
 

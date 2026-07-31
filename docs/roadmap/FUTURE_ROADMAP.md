@@ -52,6 +52,14 @@ Chiến lược đưa tốc độ xử lý HTTP Request của Vito lên mức h�
 - **Mục tiêu**: Tích hợp với Event Loop của VIT Runtime (`epoll` trên Linux, `kqueue` trên macOS, `IOCP / io_uring` trên Windows).
 - **Lợi ích**: Xử lý đồng thời hàng trăm nghìn kết nối (C10K / C100K Problem) với tài nguyên CPU/RAM tối thiểu.
 
+### 1.4. Quản Lý Vòng Đời Request (Request Lifecycle Hooks)
+- **Mục tiêu**: Cung cấp các hook `onRequest`, `preHandler`, `onResponse`, `onError` can thiệp vào các giai đoạn xử lý HTTP.
+- **Lợi ích**: Tăng khả năng mở rộng middleware và hỗ trợ theo dõi/log thông số chi tiết của từng request.
+
+### 1.5. HTTP Chunked Transfer Encoding & Streaming Response
+- **Mục tiêu**: Hỗ trợ truyền dữ liệu dạng khối (Chunked Transfer) và stream dữ liệu trực tiếp trên Response context.
+- **Lợi ích**: Phục vụ truyền file lớn, stream token cho AI/LLM và SSE ngay ở tầng Core.
+
 ---
 
 ## 🛠 PHASE 2: Trải Nghiệm Nhà Phát Triển (DX) & An Toàn Dữ Liệu
@@ -63,8 +71,15 @@ Chiến lược đưa tốc độ xử lý HTTP Request của Vito lên mức h�
 ### 2.2. Khung Phụ Thuộc Tự Động (Dependency Injection - DI Container)
 - Quản lý Lifecycle của các Service, Repository, Database Connection Pool theo mô hình IoC (Inversion of Control) tương tự NestJS / Spring Boot.
 
-### 3.3. Tự Động Tạo Tài Liệu OpenAPI / Swagger (`vito/packages/swagger`)
+### 2.3. Tự Động Tạo Tài Liệu OpenAPI / Swagger (`vito/packages/swagger`)
 - Tự động sinh ra UI Swagger tương tác (`/docs`) và file cấu hình `openapi.json` từ danh sách route và validation schema đã khai báo.
+
+### 2.4. Công Cụ Kiểm Thử Trong Bộ Nhớ (In-Memory Testing Injector - `app.inject`)
+- Hỗ trợ gửi HTTP request giả lập trực tiếp qua pipeline của VitoApp mà không cần mở cổng TCP thực tế trên OS.
+- Giúp viết Unit Test & Integration Test cực kỳ nhanh chóng và tin cậy.
+
+### 2.5. Tắt Ứng Dụng An Toàn (Graceful Shutdown & Lifecycle Management)
+- Lắng nghe tín hiệu hệ thống (`SIGINT`, `SIGTERM`), hoàn tất các request đang chờ và giải phóng tài nguyên database/network an toàn trước khi dừng process.
 
 ---
 

@@ -229,6 +229,8 @@ struct Response {
     headersStr: string,
     stream: TcpStream,
     isClosed: boolean,
+    isMock: boolean,
+    mockBody: string,
 
     function setHeader(name: string, value: string): void {
         this.headersStr = this.headersStr + name + ": " + value + "\r\n";
@@ -256,8 +258,12 @@ struct Response {
                         "Content-Length: " + text.length + "\r\n" +
                         this.headersStr +
                         "Connection: close\r\n\r\n";
-        this.stream.write(headerStr + text);
-        this.stream.close();
+        if (this.isMock) {
+            this.mockBody = text;
+        } else {
+            this.stream.write(headerStr + text);
+            this.stream.close();
+        }
         this.isClosed = true;
     },
 
@@ -269,8 +275,12 @@ struct Response {
                         "Content-Length: " + htmlStr.length + "\r\n" +
                         this.headersStr +
                         "Connection: close\r\n\r\n";
-        this.stream.write(headerStr + htmlStr);
-        this.stream.close();
+        if (this.isMock) {
+            this.mockBody = htmlStr;
+        } else {
+            this.stream.write(headerStr + htmlStr);
+            this.stream.close();
+        }
         this.isClosed = true;
     },
 
@@ -282,8 +292,12 @@ struct Response {
                         "Content-Length: " + jsonStr.length + "\r\n" +
                         this.headersStr +
                         "Connection: close\r\n\r\n";
-        this.stream.write(headerStr + jsonStr);
-        this.stream.close();
+        if (this.isMock) {
+            this.mockBody = jsonStr;
+        } else {
+            this.stream.write(headerStr + jsonStr);
+            this.stream.close();
+        }
         this.isClosed = true;
     }
 }
@@ -409,11 +423,19 @@ struct VitoApp {
     middlewareCount: number,
     notFoundHandler: (req: Request, res: Response) => void,
     hasNotFoundHandler: boolean,
+    onRequestHook: (req: Request, res: Response) => void,
+    hasOnRequestHook: boolean,
 
     function init(): void {
         this.routeCount = 0;
         this.middlewareCount = 0;
         this.hasNotFoundHandler = false;
+        this.hasOnRequestHook = false;
+    },
+
+    function onRequest(hook: (req: Request, res: Response) => void): void {
+        this.onRequestHook = hook;
+        this.hasOnRequestHook = true;
     },
 
     function use(mwHandler: (req: Request, res: Response) => boolean): void {
@@ -461,7 +483,13 @@ struct VitoApp {
     },
 
     function handleRequest(req: Request, res: Response): void {
-        // A. Run Middleware Pipeline
+        // A. Trigger Request Lifecycle Hook
+        if (this.hasOnRequestHook) {
+            this.onRequestHook(req, res);
+            if (res.isClosed) { return; }
+        }
+
+        // B. Run Middleware Pipeline
         let m = 0;
         while (m < this.middlewareCount) {
             let mw = this.middlewares[m];
@@ -472,7 +500,7 @@ struct VitoApp {
             m = m + 1;
         }
 
-        // B. Dispatch to Router with Dynamic Path Matching (:id)
+        // C. Dispatch to Router with Dynamic Path Matching (:id)
         let i = 0;
         let matched = false;
         while (i < this.routeCount) {
@@ -485,7 +513,7 @@ struct VitoApp {
             i = i + 1;
         }
 
-        // C. Custom or Default 404 Not Found Handling
+        // D. Custom or Default 404 Not Found Handling
         if (!matched && !res.isClosed) {
             if (this.hasNotFoundHandler) {
                 this.notFoundHandler(req, res);
@@ -493,6 +521,21 @@ struct VitoApp {
                 res.setStatus(404).json("{\"error\":\"Route Not Found\",\"path\":\"" + req.path + "\",\"method\":\"" + req.method + "\"}");
             }
         }
+    },
+
+    function inject(method: string, path: string): Response {
+        let rawReq = method + " " + path + " HTTP/1.1\r\nHost: localhost\r\n\r\n";
+        let req = parseHttpRequest(rawReq);
+        let res: Response;
+        res.status = 200;
+        res.statusText = "OK";
+        res.headersStr = "";
+        res.isClosed = false;
+        res.isMock = true;
+        res.mockBody = "";
+
+        this.handleRequest(req, res);
+        return res;
     },
 
     function listen(port: number): void {
@@ -515,6 +558,8 @@ struct VitoApp {
                 res.headersStr = "";
                 res.stream = stream;
                 res.isClosed = false;
+                res.isMock = false;
+                res.mockBody = "";
 
                 this.handleRequest(req, res);
             } else {
