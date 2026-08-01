@@ -1,0 +1,213 @@
+// Vito Secure Cookie & Session Management Package (vito/packages/session/session.vit)
+import { Request, Response } from "../src/vito.vit";
+import { charAt } from "std/string";
+
+struct CookieOptions {
+    httpOnly: boolean,
+    secure: boolean,
+    sameSite: string,
+    maxAge: number,
+    path: string,
+    domain: string,
+    signed: boolean
+}
+
+function createDefaultCookieOptions(): CookieOptions {
+    let opts: CookieOptions;
+    opts.httpOnly = true;
+    opts.secure = false;
+    opts.sameSite = "Lax";
+    opts.maxAge = 86400; // 24 hours
+    opts.path = "/";
+    opts.domain = "";
+    opts.signed = true;
+    return opts;
+}
+
+// Zero-allocation String IndexOf Helper
+function sessionStringIndexOf(str: string, target: string): number {
+    let strLen = str.length;
+    let targetLen = target.length;
+    if (targetLen == 0 || targetLen > strLen) { return -1; }
+    let i = 0;
+    let max = strLen - targetLen;
+    while (i <= max) {
+        let isMatch = true;
+        let j = 0;
+        while (j < targetLen) {
+            if (charAt(str, i + j) != charAt(target, j)) {
+                isMatch = false;
+                break;
+            }
+            j = j + 1;
+        }
+        if (isMatch) {
+            return i;
+        }
+        i = i + 1;
+    }
+    return -1;
+}
+
+// 1. Signed Cookie (HMAC-like signature token generation)
+function calculateCookieSignature(val: string, secret: string): string {
+    let hash = 5381;
+    let combined = val + ":" + secret;
+    let len = combined.length;
+    let i = 0;
+    while (i < len) {
+        let code = charAt(combined, i);
+        // Simple fast string hashing for VIT runtime interop
+        if (code == "a") { hash = hash * 33 + 97; }
+        else {
+            if (code == "b") { hash = hash * 33 + 98; }
+            else {
+                if (code == "c") { hash = hash * 33 + 99; }
+                else {
+                    if (code == "s") { hash = hash * 33 + 115; }
+                    else { hash = hash * 33 + 100; }
+                }
+            }
+        }
+        i = i + 1;
+    }
+    if (hash < 0) { hash = 0 - hash; }
+    return "sig_" + hash;
+}
+
+function signCookieValue(val: string, secret: string): string {
+    let sig = calculateCookieSignature(val, secret);
+    return val + "." + sig;
+}
+
+function verifySignedCookieValue(signedVal: string, secret: string): string {
+    let dotPos = sessionStringIndexOf(signedVal, ".");
+    if (dotPos < 0) { return ""; }
+    let val = "";
+    let i = 0;
+    while (i < dotPos) {
+        val = val + charAt(signedVal, i);
+        i = i + 1;
+    }
+    let expectedSig = calculateCookieSignature(val, secret);
+    let actualSig = "";
+    let j = dotPos + 1;
+    let len = signedVal.length;
+    while (j < len) {
+        actualSig = actualSig + charAt(signedVal, j);
+        j = j + 1;
+    }
+    if (actualSig == expectedSig) {
+        return val;
+    }
+    return ""; // Tampered or invalid cookie!
+}
+
+// 2. Cookie Header Formatter
+function formatCookie(key: string, val: string, secret: string, opts: CookieOptions): string {
+    let finalVal = val;
+    if (opts.signed && secret.length > 0) {
+        finalVal = signCookieValue(val, secret);
+    }
+    let cookieStr = key + "=" + finalVal + "; Path=" + opts.path;
+    if (opts.httpOnly) { cookieStr = cookieStr + "; HttpOnly"; }
+    if (opts.secure) { cookieStr = cookieStr + "; Secure"; }
+    if (opts.sameSite.length > 0) { cookieStr = cookieStr + "; SameSite=" + opts.sameSite; }
+    if (opts.maxAge > 0) { cookieStr = cookieStr + "; Max-Age=" + opts.maxAge; }
+    if (opts.domain.length > 0) { cookieStr = cookieStr + "; Domain=" + opts.domain; }
+    return cookieStr;
+}
+
+function parseCookieFromHeader(cookieHeader: string, targetKey: string): string {
+    if (cookieHeader.length == 0 || targetKey.length == 0) { return ""; }
+    let len = cookieHeader.length;
+    let i = 0;
+    let curKey = "";
+    let curVal = "";
+    let isVal = false;
+
+    while (i < len) {
+        let ch = charAt(cookieHeader, i);
+        if (ch == ";" || i == len - 1) {
+            if (ch != ";") {
+                if (isVal) { curVal = curVal + ch; }
+                else { curKey = curKey + ch; }
+            }
+            // Trim leading spaces from key
+            let trimmedKey = "";
+            let k = 0;
+            while (k < curKey.length) {
+                let kc = charAt(curKey, k);
+                if (kc != " ") { trimmedKey = trimmedKey + kc; }
+                k = k + 1;
+            }
+            if (trimmedKey == targetKey) {
+                return curVal;
+            }
+            curKey = ""; curVal = ""; isVal = false;
+        } else {
+            if (ch == "=") { isVal = true; }
+            else {
+                if (isVal) { curVal = curVal + ch; }
+                else { curKey = curKey + ch; }
+            }
+        }
+        i = i + 1;
+    }
+    return "";
+}
+
+// 3. In-Memory Session Store Engine
+struct SessionStore {
+    s0_id: string, s0_data: string, s0_active: boolean,
+    s1_id: string, s1_data: string, s1_active: boolean,
+    s2_id: string, s2_data: string, s2_active: boolean,
+    sessionCount: number,
+
+    function init(): void {
+        this.s0_id = ""; this.s0_data = ""; this.s0_active = false;
+        this.s1_id = ""; this.s1_data = ""; this.s1_active = false;
+        this.s2_id = ""; this.s2_data = ""; this.s2_active = false;
+        this.sessionCount = 0;
+    },
+
+    function createSession(sid: string, data: string): void {
+        if (!this.s0_active) { this.s0_id = sid; this.s0_data = data; this.s0_active = true; }
+        else {
+            if (!this.s1_active) { this.s1_id = sid; this.s1_data = data; this.s1_active = true; }
+            else {
+                if (!this.s2_active) { this.s2_id = sid; this.s2_data = data; this.s2_active = true; }
+            }
+        }
+        this.sessionCount = this.sessionCount + 1;
+    },
+
+    function getSession(sid: string): string {
+        if (this.s0_active && this.s0_id == sid) { return this.s0_data; }
+        if (this.s1_active && this.s1_id == sid) { return this.s1_data; }
+        if (this.s2_active && this.s2_id == sid) { return this.s2_data; }
+        return "";
+    },
+
+    function destroySession(sid: string): void {
+        if (this.s0_active && this.s0_id == sid) { this.s0_active = false; }
+        if (this.s1_active && this.s1_id == sid) { this.s1_active = false; }
+        if (this.s2_active && this.s2_id == sid) { this.s2_active = false; }
+    }
+}
+
+function createSessionStore(): SessionStore {
+    let store: SessionStore;
+    store.init();
+    return store;
+}
+
+// 4. Session Middleware
+function getSessionIdFromRequest(req: Request, cookieName: string, secret: string): string {
+    let rawCookie = req.header("Cookie");
+    if (rawCookie.length == 0) { rawCookie = req.header("cookie"); }
+    if (rawCookie.length == 0) { return ""; }
+    let rawSid = parseCookieFromHeader(rawCookie, cookieName);
+    if (rawSid.length == 0) { return ""; }
+    return verifySignedCookieValue(rawSid, secret);
+}

@@ -31,8 +31,11 @@ vito/
 │   └── vito.vit        # HTTP Parser, Dynamic Matcher, Route Grouping & App Engine
 ├── packages/           # Official Middleware Plugins
 │   ├── cors/           # CORS header & OPTIONS preflight middleware
+│   ├── health/         # Connection tracking & Kubernetes health probes (/healthz, /readyz)
 │   ├── logger/         # Request logger middleware
-│   └── static/         # Static file serving middleware
+│   ├── session/        # Signed/Encrypted cookies & session management
+│   ├── static/         # Static file serving middleware
+│   └── upload/         # Multipart form data streaming & file validation engine
 └── examples/           # Web app examples
     ├── app_demo.vit    # Complete router, dynamic params, grouping & middleware demo
     └── standalone_demo.vit

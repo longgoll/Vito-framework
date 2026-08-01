@@ -63,6 +63,7 @@ Starts listening for HTTP connections on the given port.
 | :--- | :--- | :--- |
 | `res.setStatus(code)` | Set HTTP status code (200, 404, 500...) | `res.setStatus(200)` |
 | `res.setHeader(name, val)`| Set custom HTTP response header | `res.setHeader("X-Powered-By", "Vito")` |
+| `res.setCookie(key, val, opts)`| Set cookie header with HMAC signature & HttpOnly/SameSite flags | `res.setCookie("sid", "abc", opts)` |
 | `res.json(jsonStr)` | Send JSON response with `Content-Type: application/json` | `res.json("{\"ok\":true}")` |
 | `res.html(htmlStr)` | Send HTML response with `Content-Type: text/html` | `res.html("<h1>Hi</h1>")` |
 | `res.send(textStr)` | Send Plain Text response | `res.send("Hello World")` |

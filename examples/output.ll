@@ -25,6 +25,11 @@ target triple = "x86_64-pc-windows-msvc"
 %struct.MiddlewareEntry = type { i8* }
 %struct.VitoGroup = type { double, i8* }
 %struct.VitoApp = type { i8*, i8*, i1, i8*, i8*, i8*, i1, i8*, i8*, i8*, i1, i8*, i8*, i8*, i1, i8*, i8*, i8*, i1, i8*, i8*, i8*, i1, i8*, i8*, i8*, i1, i8*, i8*, i8*, i1, i8*, i1, i8*, i1, i8*, i1, i8*, double, double, i8*, i1, i8*, i1, i1, double, double, i1, i1, i1, i1, double, i1, i1, i1, i1 }
+%struct.UploadedFile = type { i8*, i8*, i8*, double, i8*, i1, i8* }
+%struct.FileValidationEngine = type { double, i8*, i8* }
+%struct.CookieOptions = type { i1, i1, i8*, double, i8*, i8*, i1 }
+%struct.SessionStore = type { i8*, i8*, i1, i8*, i8*, i1, i8*, i8*, i1, double }
+%struct.HealthEngine = type { double, double, i1 }
 @.str.0 = private unnamed_addr constant [1 x i8] c"\00", align 1
 @.str.1 = private unnamed_addr constant [1 x i8] c"\00", align 1
 @.str.2 = private unnamed_addr constant [1 x i8] c"\00", align 1
@@ -52,50 +57,50 @@ target triple = "x86_64-pc-windows-msvc"
 @.str.24 = private unnamed_addr constant [1 x i8] c"\00", align 1
 @.str.25 = private unnamed_addr constant [3 x i8] c": \00", align 1
 @.str.26 = private unnamed_addr constant [3 x i8] c"\0D\0A\00", align 1
-@.str.27 = private unnamed_addr constant [3 x i8] c"OK\00", align 1
-@.str.28 = private unnamed_addr constant [8 x i8] c"Created\00", align 1
-@.str.29 = private unnamed_addr constant [11 x i8] c"No Content\00", align 1
-@.str.30 = private unnamed_addr constant [12 x i8] c"Bad Request\00", align 1
-@.str.31 = private unnamed_addr constant [13 x i8] c"Unauthorized\00", align 1
-@.str.32 = private unnamed_addr constant [10 x i8] c"Forbidden\00", align 1
-@.str.33 = private unnamed_addr constant [10 x i8] c"Not Found\00", align 1
-@.str.34 = private unnamed_addr constant [22 x i8] c"Internal Server Error\00", align 1
-@.str.35 = private unnamed_addr constant [10 x i8] c"HTTP/1.1 \00", align 1
-@.str.36 = private unnamed_addr constant [2 x i8] c" \00", align 1
-@.str.37 = private unnamed_addr constant [3 x i8] c"\0D\0A\00", align 1
-@.str.38 = private unnamed_addr constant [42 x i8] c"Content-Type: text/plain; charset=utf-8\0D\0A\00", align 1
-@.str.39 = private unnamed_addr constant [17 x i8] c"Content-Length: \00", align 1
-@.str.40 = private unnamed_addr constant [3 x i8] c"\0D\0A\00", align 1
-@.str.41 = private unnamed_addr constant [22 x i8] c"Connection: close\0D\0A\0D\0A\00", align 1
-@.str.42 = private unnamed_addr constant [10 x i8] c"HTTP/1.1 \00", align 1
-@.str.43 = private unnamed_addr constant [2 x i8] c" \00", align 1
+@.str.27 = private unnamed_addr constant [2 x i8] c"=\00", align 1
+@.str.28 = private unnamed_addr constant [3 x i8] c"; \00", align 1
+@.str.29 = private unnamed_addr constant [33 x i8] c"; Path=/; HttpOnly; SameSite=Lax\00", align 1
+@.str.30 = private unnamed_addr constant [11 x i8] c"Set-Cookie\00", align 1
+@.str.31 = private unnamed_addr constant [3 x i8] c"OK\00", align 1
+@.str.32 = private unnamed_addr constant [8 x i8] c"Created\00", align 1
+@.str.33 = private unnamed_addr constant [11 x i8] c"No Content\00", align 1
+@.str.34 = private unnamed_addr constant [12 x i8] c"Bad Request\00", align 1
+@.str.35 = private unnamed_addr constant [13 x i8] c"Unauthorized\00", align 1
+@.str.36 = private unnamed_addr constant [10 x i8] c"Forbidden\00", align 1
+@.str.37 = private unnamed_addr constant [10 x i8] c"Not Found\00", align 1
+@.str.38 = private unnamed_addr constant [22 x i8] c"Internal Server Error\00", align 1
+@.str.39 = private unnamed_addr constant [10 x i8] c"HTTP/1.1 \00", align 1
+@.str.40 = private unnamed_addr constant [2 x i8] c" \00", align 1
+@.str.41 = private unnamed_addr constant [3 x i8] c"\0D\0A\00", align 1
+@.str.42 = private unnamed_addr constant [42 x i8] c"Content-Type: text/plain; charset=utf-8\0D\0A\00", align 1
+@.str.43 = private unnamed_addr constant [17 x i8] c"Content-Length: \00", align 1
 @.str.44 = private unnamed_addr constant [3 x i8] c"\0D\0A\00", align 1
-@.str.45 = private unnamed_addr constant [41 x i8] c"Content-Type: text/html; charset=utf-8\0D\0A\00", align 1
-@.str.46 = private unnamed_addr constant [17 x i8] c"Content-Length: \00", align 1
-@.str.47 = private unnamed_addr constant [3 x i8] c"\0D\0A\00", align 1
-@.str.48 = private unnamed_addr constant [22 x i8] c"Connection: close\0D\0A\0D\0A\00", align 1
-@.str.49 = private unnamed_addr constant [10 x i8] c"HTTP/1.1 \00", align 1
-@.str.50 = private unnamed_addr constant [2 x i8] c" \00", align 1
+@.str.45 = private unnamed_addr constant [22 x i8] c"Connection: close\0D\0A\0D\0A\00", align 1
+@.str.46 = private unnamed_addr constant [10 x i8] c"HTTP/1.1 \00", align 1
+@.str.47 = private unnamed_addr constant [2 x i8] c" \00", align 1
+@.str.48 = private unnamed_addr constant [3 x i8] c"\0D\0A\00", align 1
+@.str.49 = private unnamed_addr constant [41 x i8] c"Content-Type: text/html; charset=utf-8\0D\0A\00", align 1
+@.str.50 = private unnamed_addr constant [17 x i8] c"Content-Length: \00", align 1
 @.str.51 = private unnamed_addr constant [3 x i8] c"\0D\0A\00", align 1
-@.str.52 = private unnamed_addr constant [48 x i8] c"Content-Type: application/json; charset=utf-8\0D\0A\00", align 1
-@.str.53 = private unnamed_addr constant [17 x i8] c"Content-Length: \00", align 1
-@.str.54 = private unnamed_addr constant [3 x i8] c"\0D\0A\00", align 1
-@.str.55 = private unnamed_addr constant [22 x i8] c"Connection: close\0D\0A\0D\0A\00", align 1
-@.str.56 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.57 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.58 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.59 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.52 = private unnamed_addr constant [22 x i8] c"Connection: close\0D\0A\0D\0A\00", align 1
+@.str.53 = private unnamed_addr constant [10 x i8] c"HTTP/1.1 \00", align 1
+@.str.54 = private unnamed_addr constant [2 x i8] c" \00", align 1
+@.str.55 = private unnamed_addr constant [3 x i8] c"\0D\0A\00", align 1
+@.str.56 = private unnamed_addr constant [48 x i8] c"Content-Type: application/json; charset=utf-8\0D\0A\00", align 1
+@.str.57 = private unnamed_addr constant [17 x i8] c"Content-Length: \00", align 1
+@.str.58 = private unnamed_addr constant [3 x i8] c"\0D\0A\00", align 1
+@.str.59 = private unnamed_addr constant [22 x i8] c"Connection: close\0D\0A\0D\0A\00", align 1
 @.str.60 = private unnamed_addr constant [1 x i8] c"\00", align 1
 @.str.61 = private unnamed_addr constant [1 x i8] c"\00", align 1
 @.str.62 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.63 = private unnamed_addr constant [4 x i8] c"GET\00", align 1
-@.str.64 = private unnamed_addr constant [5 x i8] c"POST\00", align 1
-@.str.65 = private unnamed_addr constant [4 x i8] c"PUT\00", align 1
-@.str.66 = private unnamed_addr constant [7 x i8] c"DELETE\00", align 1
-@.str.67 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.68 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.69 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.70 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.63 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.64 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.65 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.66 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.67 = private unnamed_addr constant [4 x i8] c"GET\00", align 1
+@.str.68 = private unnamed_addr constant [5 x i8] c"POST\00", align 1
+@.str.69 = private unnamed_addr constant [4 x i8] c"PUT\00", align 1
+@.str.70 = private unnamed_addr constant [7 x i8] c"DELETE\00", align 1
 @.str.71 = private unnamed_addr constant [1 x i8] c"\00", align 1
 @.str.72 = private unnamed_addr constant [1 x i8] c"\00", align 1
 @.str.73 = private unnamed_addr constant [1 x i8] c"\00", align 1
@@ -108,77 +113,201 @@ target triple = "x86_64-pc-windows-msvc"
 @.str.80 = private unnamed_addr constant [1 x i8] c"\00", align 1
 @.str.81 = private unnamed_addr constant [1 x i8] c"\00", align 1
 @.str.82 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.83 = private unnamed_addr constant [4 x i8] c"GET\00", align 1
-@.str.84 = private unnamed_addr constant [5 x i8] c"POST\00", align 1
-@.str.85 = private unnamed_addr constant [4 x i8] c"PUT\00", align 1
-@.str.86 = private unnamed_addr constant [7 x i8] c"DELETE\00", align 1
-@.str.87 = private unnamed_addr constant [36 x i8] c"{\22error\22:\22Route Not Found\22,\22path\22:\22\00", align 1
-@.str.88 = private unnamed_addr constant [13 x i8] c"\22,\22method\22:\22\00", align 1
-@.str.89 = private unnamed_addr constant [3 x i8] c"\22}\00", align 1
-@.str.90 = private unnamed_addr constant [2 x i8] c" \00", align 1
-@.str.91 = private unnamed_addr constant [31 x i8] c" HTTP/1.1\0D\0AHost: localhost\0D\0A\0D\0A\00", align 1
-@.str.92 = private unnamed_addr constant [3 x i8] c"OK\00", align 1
-@.str.93 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.94 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.95 = private unnamed_addr constant [42 x i8] c"=========================================\00", align 1
-@.str.96 = private unnamed_addr constant [47 x i8] c" 🚀 Vito Web Framework v1.0.0 (Phase 9 Perf)\00", align 1
-@.str.97 = private unnamed_addr constant [31 x i8] c" Running on: http://127.0.0.1:\00", align 1
-@.str.98 = private unnamed_addr constant [25 x i8] c" Memory Arena Capacity: \00", align 1
-@.str.99 = private unnamed_addr constant [7 x i8] c" slots\00", align 1
-@.str.100 = private unnamed_addr constant [21 x i8] c" Registered Routes: \00", align 1
-@.str.101 = private unnamed_addr constant [22 x i8] c" Active Middlewares: \00", align 1
-@.str.102 = private unnamed_addr constant [42 x i8] c"=========================================\00", align 1
-@.str.103 = private unnamed_addr constant [10 x i8] c"127.0.0.1\00", align 1
-@.str.104 = private unnamed_addr constant [3 x i8] c"OK\00", align 1
-@.str.105 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.106 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.107 = private unnamed_addr constant [42 x i8] c"=========================================\00", align 1
-@.str.108 = private unnamed_addr constant [45 x i8] c" 🧪 Vito Phase 1 Engine Verification Demo \00", align 1
-@.str.109 = private unnamed_addr constant [42 x i8] c"=========================================\00", align 1
-@.str.110 = private unnamed_addr constant [36 x i8] c"[Hook:onRequest] Incoming request: \00", align 1
-@.str.111 = private unnamed_addr constant [2 x i8] c" \00", align 1
-define i8* @__lambda_0(%struct.Request* %req, %struct.Response* %res) {
+@.str.83 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.84 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.85 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.86 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.87 = private unnamed_addr constant [4 x i8] c"GET\00", align 1
+@.str.88 = private unnamed_addr constant [5 x i8] c"POST\00", align 1
+@.str.89 = private unnamed_addr constant [4 x i8] c"PUT\00", align 1
+@.str.90 = private unnamed_addr constant [7 x i8] c"DELETE\00", align 1
+@.str.91 = private unnamed_addr constant [36 x i8] c"{\22error\22:\22Route Not Found\22,\22path\22:\22\00", align 1
+@.str.92 = private unnamed_addr constant [13 x i8] c"\22,\22method\22:\22\00", align 1
+@.str.93 = private unnamed_addr constant [3 x i8] c"\22}\00", align 1
+@.str.94 = private unnamed_addr constant [2 x i8] c" \00", align 1
+@.str.95 = private unnamed_addr constant [31 x i8] c" HTTP/1.1\0D\0AHost: localhost\0D\0A\0D\0A\00", align 1
+@.str.96 = private unnamed_addr constant [3 x i8] c"OK\00", align 1
+@.str.97 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.98 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.99 = private unnamed_addr constant [42 x i8] c"=========================================\00", align 1
+@.str.100 = private unnamed_addr constant [47 x i8] c" 🚀 Vito Web Framework v1.0.0 (Phase 9 Perf)\00", align 1
+@.str.101 = private unnamed_addr constant [31 x i8] c" Running on: http://127.0.0.1:\00", align 1
+@.str.102 = private unnamed_addr constant [25 x i8] c" Memory Arena Capacity: \00", align 1
+@.str.103 = private unnamed_addr constant [7 x i8] c" slots\00", align 1
+@.str.104 = private unnamed_addr constant [21 x i8] c" Registered Routes: \00", align 1
+@.str.105 = private unnamed_addr constant [22 x i8] c" Active Middlewares: \00", align 1
+@.str.106 = private unnamed_addr constant [42 x i8] c"=========================================\00", align 1
+@.str.107 = private unnamed_addr constant [10 x i8] c"127.0.0.1\00", align 1
+@.str.108 = private unnamed_addr constant [3 x i8] c"OK\00", align 1
+@.str.109 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.110 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.111 = private unnamed_addr constant [26 x i8] c"File size exceeds limit (\00", align 1
+@.str.112 = private unnamed_addr constant [4 x i8] c" > \00", align 1
+@.str.113 = private unnamed_addr constant [2 x i8] c")\00", align 1
+@.str.114 = private unnamed_addr constant [24 x i8] c"MIME type not allowed: \00", align 1
+@.str.115 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.116 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.117 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.118 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.119 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.120 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.121 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.122 = private unnamed_addr constant [4 x i8] c"GET\00", align 1
+@.str.123 = private unnamed_addr constant [9 x i8] c"/healthz\00", align 1
+@.str.124 = private unnamed_addr constant [37 x i8] c"{\22status\22:\22UP\22,\22active_connections\22:\00", align 1
+@.str.125 = private unnamed_addr constant [22 x i8] c",\22total_connections\22:\00", align 1
+@.str.126 = private unnamed_addr constant [2 x i8] c"}\00", align 1
+@.str.127 = private unnamed_addr constant [4 x i8] c"GET\00", align 1
+@.str.128 = private unnamed_addr constant [8 x i8] c"/readyz\00", align 1
+@.str.129 = private unnamed_addr constant [59 x i8] c"{\22status\22:\22NOT_READY\22,\22message\22:\22Server is shutting down\22}\00", align 1
+@.str.130 = private unnamed_addr constant [59 x i8] c"{\22status\22:\22READY\22,\22message\22:\22Server is accepting traffic\22}\00", align 1
+@.str.131 = private unnamed_addr constant [83 x i8] c"{\22error\22:\22Service Unavailable\22,\22message\22:\22Server is undergoing graceful shutdown\22}\00", align 1
+@.str.132 = private unnamed_addr constant [66 x i8] c"=================================================================\00", align 1
+@.str.133 = private unnamed_addr constant [62 x i8] c" 🧰 Vito Phase 10: Essential Backend Toolkit & Stream Demo \00", align 1
+@.str.134 = private unnamed_addr constant [66 x i8] c"=================================================================\00", align 1
+@.str.135 = private unnamed_addr constant [67 x i8] c"\0A--- 📤 TEST 1: Streaming Multipart Upload & File Validation ---\00", align 1
+@.str.136 = private unnamed_addr constant [68 x i8] c"multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW\00", align 1
+@.str.137 = private unnamed_addr constant [33 x i8] c"[Multipart] Extracted Boundary: \00", align 1
+@.str.138 = private unnamed_addr constant [42 x i8] c"------WebKitFormBoundary7MA4YWxkTrZu0gW\0D\0A\00", align 1
+@.str.139 = private unnamed_addr constant [72 x i8] c"Content-Disposition: form-data; name=\22avatar\22; filename=\22profile.png\22\0D\0A\00", align 1
+@.str.140 = private unnamed_addr constant [28 x i8] c"Content-Type: image/png\0D\0A\0D\0A\00", align 1
+@.str.141 = private unnamed_addr constant [41 x i8] c"PNG_BINARY_IMAGE_DATA_VITO_STREAM_8888\0D\0A\00", align 1
+@.str.142 = private unnamed_addr constant [42 x i8] c"------WebKitFormBoundary7MA4YWxkTrZu0gW--\00", align 1
+@.str.143 = private unnamed_addr constant [27 x i8] c"[Upload Parser] Filename: \00", align 1
+@.str.144 = private unnamed_addr constant [11 x i8] c" | Field: \00", align 1
+@.str.145 = private unnamed_addr constant [10 x i8] c" | MIME: \00", align 1
+@.str.146 = private unnamed_addr constant [10 x i8] c" | Size: \00", align 1
+@.str.147 = private unnamed_addr constant [7 x i8] c" bytes\00", align 1
+@.str.148 = private unnamed_addr constant [10 x i8] c".png,.jpg\00", align 1
+@.str.149 = private unnamed_addr constant [21 x i8] c"image/png,image/jpeg\00", align 1
+@.str.150 = private unnamed_addr constant [6 x i8] c"false\00", align 1
+@.str.151 = private unnamed_addr constant [5 x i8] c"true\00", align 1
+@.str.152 = private unnamed_addr constant [36 x i8] c"[Validation Engine] Is Valid File: \00", align 1
+@.str.153 = private unnamed_addr constant [21 x i8] c"uploaded_profile.png\00", align 1
+@.str.154 = private unnamed_addr constant [6 x i8] c"false\00", align 1
+@.str.155 = private unnamed_addr constant [5 x i8] c"true\00", align 1
+@.str.156 = private unnamed_addr constant [36 x i8] c"[Disk Storage] Saved File To Disk: \00", align 1
+@.str.157 = private unnamed_addr constant [65 x i8] c"\0A--- 🍪 TEST 2: Secure Signed Cookies & Session Management ---\00", align 1
+@.str.158 = private unnamed_addr constant [32 x i8] c"vito_super_secret_hmac_key_9999\00", align 1
+@.str.159 = private unnamed_addr constant [9 x i8] c"vito_sid\00", align 1
+@.str.160 = private unnamed_addr constant [15 x i8] c"sess_abc123xyz\00", align 1
+@.str.161 = private unnamed_addr constant [41 x i8] c"[Cookie Formatter] Set-Cookie Header:\0A  \00", align 1
+@.str.162 = private unnamed_addr constant [15 x i8] c"sess_abc123xyz\00", align 1
+@.str.163 = private unnamed_addr constant [37 x i8] c"[HMAC Signing] Signed Cookie Value: \00", align 1
+@.str.164 = private unnamed_addr constant [37 x i8] c"[HMAC Verification] Verified Value: \00", align 1
+@.str.165 = private unnamed_addr constant [8 x i8] c"_hacked\00", align 1
+@.str.166 = private unnamed_addr constant [4 x i8] c"YES\00", align 1
+@.str.167 = private unnamed_addr constant [3 x i8] c"NO\00", align 1
+@.str.168 = private unnamed_addr constant [53 x i8] c"[Security Check] Tamper Detected On Altered Cookie: \00", align 1
+@.str.169 = private unnamed_addr constant [15 x i8] c"sess_abc123xyz\00", align 1
+@.str.170 = private unnamed_addr constant [29 x i8] c"{\22userId\22:42,\22role\22:\22admin\22}\00", align 1
+@.str.171 = private unnamed_addr constant [15 x i8] c"sess_abc123xyz\00", align 1
+@.str.172 = private unnamed_addr constant [31 x i8] c"[Session Store] Session Data: \00", align 1
+@.str.173 = private unnamed_addr constant [61 x i8] c"\0A--- 🛑 TEST 3: Connection Tracker & Graceful Shutdown ---\00", align 1
+@.str.174 = private unnamed_addr constant [10 x i8] c"/api/data\00", align 1
+@.str.175 = private unnamed_addr constant [37 x i8] c"{\22message\22:\22Hello Vito Production!\22}\00", align 1
+define void @__lambda_0(%struct.Request* %req, %struct.Response* %res) {
 entry:
   %req.addr = alloca %struct.Request*, align 8
   store %struct.Request* %req, %struct.Request** %req.addr, align 8
   %res.addr = alloca %struct.Response*, align 8
   store %struct.Response* %res, %struct.Response** %res.addr, align 8
-  %t0 = getelementptr inbounds [36 x i8], [36 x i8]* @.str.110, i64 0, i64 0
-  %t1 = load %struct.Request*, %struct.Request** %req.addr, align 8
-  %t2 = getelementptr inbounds %struct.Request, %struct.Request* %t1, i32 0, i32 0
-  %t3 = load i8*, i8** %t2, align 8
-  %t5 = call i64 @strlen(i8* %t0)
-  %t6 = call i64 @strlen(i8* %t3)
-  %t7 = add i64 %t5, %t6
-  %t8 = add i64 %t7, 1
-  %t9 = call i8* @malloc(i64 %t8)
-  %t10 = call i8* @strcpy(i8* %t9, i8* %t0)
-  %t11 = call i8* @strcat(i8* %t9, i8* %t3)
-  %t12 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.111, i64 0, i64 0
-  %t14 = call i64 @strlen(i8* %t9)
-  %t15 = call i64 @strlen(i8* %t12)
-  %t16 = add i64 %t14, %t15
-  %t17 = add i64 %t16, 1
-  %t18 = call i8* @malloc(i64 %t17)
-  %t19 = call i8* @strcpy(i8* %t18, i8* %t9)
-  %t20 = call i8* @strcat(i8* %t18, i8* %t12)
-  %t21 = load %struct.Request*, %struct.Request** %req.addr, align 8
-  %t22 = getelementptr inbounds %struct.Request, %struct.Request* %t21, i32 0, i32 1
-  %t23 = load i8*, i8** %t22, align 8
-  %t25 = call i64 @strlen(i8* %t18)
-  %t26 = call i64 @strlen(i8* %t23)
-  %t27 = add i64 %t25, %t26
-  %t28 = add i64 %t27, 1
-  %t29 = call i8* @malloc(i64 %t28)
-  %t30 = call i8* @strcpy(i8* %t29, i8* %t18)
-  %t31 = call i8* @strcat(i8* %t29, i8* %t23)
-  %t32 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
-  %t33 = call i32 (i8*, ...) @printf(i8* %t32, i8* %t29)
-  ret i8* null
+  %t0 = load %struct.Response*, %struct.Response** %res.addr, align 8
+  %t1 = getelementptr inbounds [37 x i8], [37 x i8]* @.str.175, i64 0, i64 0
+  call void @_Response_json(%struct.Response* %t0, i8* %t1)
+  ret void
 }
 
-@.str.112 = private unnamed_addr constant [2 x i8] c"/\00", align 1
-@.str.113 = private unnamed_addr constant [46 x i8] c"{\22message\22:\22Welcome to Vito Engine Phase 1!\22}\00", align 1
+@.str.176 = private unnamed_addr constant [42 x i8] c"[Connection Tracker] Active Connections: \00", align 1
+@.str.177 = private unnamed_addr constant [11 x i8] c" | Total: \00", align 1
+@.str.178 = private unnamed_addr constant [4 x i8] c"GET\00", align 1
+@.str.179 = private unnamed_addr constant [9 x i8] c"/healthz\00", align 1
+@.str.180 = private unnamed_addr constant [26 x i8] c"GET /healthz HTTP/1.1\0D\0A\0D\0A\00", align 1
+@.str.181 = private unnamed_addr constant [26 x i8] c"[Probe /healthz] Status: \00", align 1
+@.str.182 = private unnamed_addr constant [10 x i8] c" | Body: \00", align 1
+@.str.183 = private unnamed_addr constant [4 x i8] c"GET\00", align 1
+@.str.184 = private unnamed_addr constant [8 x i8] c"/readyz\00", align 1
+@.str.185 = private unnamed_addr constant [25 x i8] c"GET /readyz HTTP/1.1\0D\0A\0D\0A\00", align 1
+@.str.186 = private unnamed_addr constant [34 x i8] c"[Probe /readyz (Normal)] Status: \00", align 1
+@.str.187 = private unnamed_addr constant [10 x i8] c" | Body: \00", align 1
+@.str.188 = private unnamed_addr constant [58 x i8] c"[Shutdown Interceptor] Triggering OS Graceful Shutdown...\00", align 1
+@.str.189 = private unnamed_addr constant [4 x i8] c"GET\00", align 1
+@.str.190 = private unnamed_addr constant [8 x i8] c"/readyz\00", align 1
+@.str.191 = private unnamed_addr constant [25 x i8] c"GET /readyz HTTP/1.1\0D\0A\0D\0A\00", align 1
+@.str.192 = private unnamed_addr constant [36 x i8] c"[Probe /readyz (Shutdown)] Status: \00", align 1
+@.str.193 = private unnamed_addr constant [10 x i8] c" | Body: \00", align 1
+@.str.194 = private unnamed_addr constant [4 x i8] c"GET\00", align 1
+@.str.195 = private unnamed_addr constant [10 x i8] c"/api/data\00", align 1
+@.str.196 = private unnamed_addr constant [27 x i8] c"GET /api/data HTTP/1.1\0D\0A\0D\0A\00", align 1
+@.str.197 = private unnamed_addr constant [36 x i8] c"[Route Traffic (Shutdown)] Status: \00", align 1
+@.str.198 = private unnamed_addr constant [10 x i8] c" | Body: \00", align 1
+@.str.199 = private unnamed_addr constant [56 x i8] c"[Connection Tracker] Post-Shutdown Active Connections: \00", align 1
+@.str.200 = private unnamed_addr constant [67 x i8] c"\0A=================================================================\00", align 1
+@.str.201 = private unnamed_addr constant [59 x i8] c" ✅ Phase 10 Essential Backend Toolkit Tests 100% Passed!\00", align 1
+@.str.202 = private unnamed_addr constant [66 x i8] c"=================================================================\00", align 1
+@.str.203 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.204 = private unnamed_addr constant [2 x i8] c"/\00", align 1
+@.str.205 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.206 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.207 = private unnamed_addr constant [2 x i8] c"/\00", align 1
+@.str.208 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.209 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.210 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.211 = private unnamed_addr constant [2 x i8] c"&\00", align 1
+@.str.212 = private unnamed_addr constant [2 x i8] c"&\00", align 1
+@.str.213 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.214 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.215 = private unnamed_addr constant [2 x i8] c"=\00", align 1
+@.str.216 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.217 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.218 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.219 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.220 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.221 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.222 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.223 = private unnamed_addr constant [2 x i8] c":\00", align 1
+@.str.224 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.225 = private unnamed_addr constant [2 x i8] c"*\00", align 1
+@.str.226 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.227 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.228 = private unnamed_addr constant [9 x i8] c"wildcard\00", align 1
+@.str.229 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.230 = private unnamed_addr constant [2 x i8] c" \00", align 1
+@.str.231 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.232 = private unnamed_addr constant [4 x i8] c"GET\00", align 1
+@.str.233 = private unnamed_addr constant [2 x i8] c" \00", align 1
+@.str.234 = private unnamed_addr constant [2 x i8] c" \00", align 1
+@.str.235 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.236 = private unnamed_addr constant [2 x i8] c" \00", align 1
+@.str.237 = private unnamed_addr constant [2 x i8] c"?\00", align 1
+@.str.238 = private unnamed_addr constant [2 x i8] c"\0D\00", align 1
+@.str.239 = private unnamed_addr constant [2 x i8] c"\0A\00", align 1
+@.str.240 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.241 = private unnamed_addr constant [2 x i8] c"/\00", align 1
+@.str.242 = private unnamed_addr constant [2 x i8] c" \00", align 1
+@.str.243 = private unnamed_addr constant [2 x i8] c" \00", align 1
+@.str.244 = private unnamed_addr constant [2 x i8] c" \00", align 1
+@.str.245 = private unnamed_addr constant [2 x i8] c"?\00", align 1
+@.str.246 = private unnamed_addr constant [2 x i8] c"?\00", align 1
+@.str.247 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.248 = private unnamed_addr constant [2 x i8] c" \00", align 1
+@.str.249 = private unnamed_addr constant [2 x i8] c"\0D\00", align 1
+@.str.250 = private unnamed_addr constant [2 x i8] c"\0A\00", align 1
+@.str.251 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.252 = private unnamed_addr constant [2 x i8] c"\0D\00", align 1
+@.str.253 = private unnamed_addr constant [2 x i8] c"\0A\00", align 1
+@.str.254 = private unnamed_addr constant [2 x i8] c"\0D\00", align 1
+@.str.255 = private unnamed_addr constant [2 x i8] c"\0A\00", align 1
+@.str.256 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.257 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.258 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.259 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.260 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.261 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.262 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.263 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.264 = private unnamed_addr constant [2 x i8] c"/\00", align 1
+@.str.265 = private unnamed_addr constant [77 x i8] c"{\22status\22:\22ok\22,\22framework\22:\22Vito v1.0.0\22,\22engine\22:\22VIT Native Phase 9 Perf\22}\00", align 1
 define void @__lambda_1(%struct.Request* %req, %struct.Response* %res) {
 entry:
   %req.addr = alloca %struct.Request*, align 8
@@ -186,212 +315,96 @@ entry:
   %res.addr = alloca %struct.Response*, align 8
   store %struct.Response* %res, %struct.Response** %res.addr, align 8
   %t0 = load %struct.Response*, %struct.Response** %res.addr, align 8
-  %t1 = getelementptr inbounds [46 x i8], [46 x i8]* @.str.113, i64 0, i64 0
+  %t1 = getelementptr inbounds [77 x i8], [77 x i8]* @.str.265, i64 0, i64 0
   call void @_Response_json(%struct.Response* %t0, i8* %t1)
   ret void
 }
 
-@.str.114 = private unnamed_addr constant [11 x i8] c"/users/:id\00", align 1
-@.str.115 = private unnamed_addr constant [3 x i8] c"id\00", align 1
-@.str.116 = private unnamed_addr constant [13 x i8] c"{\22user_id\22:\22\00", align 1
-@.str.117 = private unnamed_addr constant [21 x i8] c"\22,\22status\22:\22active\22}\00", align 1
-define void @__lambda_2(%struct.Request* %req, %struct.Response* %res) {
-entry:
-  %req.addr = alloca %struct.Request*, align 8
-  store %struct.Request* %req, %struct.Request** %req.addr, align 8
-  %res.addr = alloca %struct.Response*, align 8
-  store %struct.Response* %res, %struct.Response** %res.addr, align 8
-  %t0 = load %struct.Request*, %struct.Request** %req.addr, align 8
-  %t1 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.115, i64 0, i64 0
-  %t2 = call i8* @_Request_param(%struct.Request* %t0, i8* %t1)
-  %userId.addr = alloca i8*, align 8
-  store i8* %t2, i8** %userId.addr, align 8
-  %t3 = load %struct.Response*, %struct.Response** %res.addr, align 8
-  %t4 = getelementptr inbounds [13 x i8], [13 x i8]* @.str.116, i64 0, i64 0
-  %t5 = load i8*, i8** %userId.addr, align 8
-  %t7 = call i64 @strlen(i8* %t4)
-  %t8 = call i64 @strlen(i8* %t5)
-  %t9 = add i64 %t7, %t8
-  %t10 = add i64 %t9, 1
-  %t11 = call i8* @malloc(i64 %t10)
-  %t12 = call i8* @strcpy(i8* %t11, i8* %t4)
-  %t13 = call i8* @strcat(i8* %t11, i8* %t5)
-  %t14 = getelementptr inbounds [21 x i8], [21 x i8]* @.str.117, i64 0, i64 0
-  %t16 = call i64 @strlen(i8* %t11)
-  %t17 = call i64 @strlen(i8* %t14)
-  %t18 = add i64 %t16, %t17
-  %t19 = add i64 %t18, 1
-  %t20 = call i8* @malloc(i64 %t19)
-  %t21 = call i8* @strcpy(i8* %t20, i8* %t11)
-  %t22 = call i8* @strcat(i8* %t20, i8* %t14)
-  call void @_Response_json(%struct.Response* %t3, i8* %t20)
-  ret void
-}
-
-@.str.118 = private unnamed_addr constant [36 x i8] c"/categories/:catId/products/:prodId\00", align 1
-@.str.119 = private unnamed_addr constant [6 x i8] c"catId\00", align 1
-@.str.120 = private unnamed_addr constant [7 x i8] c"prodId\00", align 1
-@.str.121 = private unnamed_addr constant [14 x i8] c"{\22category\22:\22\00", align 1
-@.str.122 = private unnamed_addr constant [14 x i8] c"\22,\22product\22:\22\00", align 1
-@.str.123 = private unnamed_addr constant [3 x i8] c"\22}\00", align 1
-define void @__lambda_3(%struct.Request* %req, %struct.Response* %res) {
-entry:
-  %req.addr = alloca %struct.Request*, align 8
-  store %struct.Request* %req, %struct.Request** %req.addr, align 8
-  %res.addr = alloca %struct.Response*, align 8
-  store %struct.Response* %res, %struct.Response** %res.addr, align 8
-  %t0 = load %struct.Request*, %struct.Request** %req.addr, align 8
-  %t1 = getelementptr inbounds [6 x i8], [6 x i8]* @.str.119, i64 0, i64 0
-  %t2 = call i8* @_Request_param(%struct.Request* %t0, i8* %t1)
-  %cat.addr = alloca i8*, align 8
-  store i8* %t2, i8** %cat.addr, align 8
-  %t3 = load %struct.Request*, %struct.Request** %req.addr, align 8
-  %t4 = getelementptr inbounds [7 x i8], [7 x i8]* @.str.120, i64 0, i64 0
-  %t5 = call i8* @_Request_param(%struct.Request* %t3, i8* %t4)
-  %prod.addr = alloca i8*, align 8
-  store i8* %t5, i8** %prod.addr, align 8
-  %t6 = load %struct.Response*, %struct.Response** %res.addr, align 8
-  %t7 = getelementptr inbounds [14 x i8], [14 x i8]* @.str.121, i64 0, i64 0
-  %t8 = load i8*, i8** %cat.addr, align 8
-  %t10 = call i64 @strlen(i8* %t7)
-  %t11 = call i64 @strlen(i8* %t8)
-  %t12 = add i64 %t10, %t11
-  %t13 = add i64 %t12, 1
-  %t14 = call i8* @malloc(i64 %t13)
-  %t15 = call i8* @strcpy(i8* %t14, i8* %t7)
-  %t16 = call i8* @strcat(i8* %t14, i8* %t8)
-  %t17 = getelementptr inbounds [14 x i8], [14 x i8]* @.str.122, i64 0, i64 0
-  %t19 = call i64 @strlen(i8* %t14)
-  %t20 = call i64 @strlen(i8* %t17)
-  %t21 = add i64 %t19, %t20
-  %t22 = add i64 %t21, 1
-  %t23 = call i8* @malloc(i64 %t22)
-  %t24 = call i8* @strcpy(i8* %t23, i8* %t14)
-  %t25 = call i8* @strcat(i8* %t23, i8* %t17)
-  %t26 = load i8*, i8** %prod.addr, align 8
-  %t28 = call i64 @strlen(i8* %t23)
-  %t29 = call i64 @strlen(i8* %t26)
-  %t30 = add i64 %t28, %t29
-  %t31 = add i64 %t30, 1
-  %t32 = call i8* @malloc(i64 %t31)
-  %t33 = call i8* @strcpy(i8* %t32, i8* %t23)
-  %t34 = call i8* @strcat(i8* %t32, i8* %t26)
-  %t35 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.123, i64 0, i64 0
-  %t37 = call i64 @strlen(i8* %t32)
-  %t38 = call i64 @strlen(i8* %t35)
-  %t39 = add i64 %t37, %t38
-  %t40 = add i64 %t39, 1
-  %t41 = call i8* @malloc(i64 %t40)
-  %t42 = call i8* @strcpy(i8* %t41, i8* %t32)
-  %t43 = call i8* @strcat(i8* %t41, i8* %t35)
-  call void @_Response_json(%struct.Response* %t6, i8* %t41)
-  ret void
-}
-
-@.str.124 = private unnamed_addr constant [56 x i8] c"\0A--- 🔍 Running In-Memory Test Suite (app.inject) ---\00", align 1
-@.str.125 = private unnamed_addr constant [4 x i8] c"GET\00", align 1
-@.str.126 = private unnamed_addr constant [2 x i8] c"/\00", align 1
-@.str.127 = private unnamed_addr constant [27 x i8] c"[TEST 1] GET / => Status: \00", align 1
-@.str.128 = private unnamed_addr constant [10 x i8] c" | Body: \00", align 1
-@.str.129 = private unnamed_addr constant [4 x i8] c"GET\00", align 1
-@.str.130 = private unnamed_addr constant [10 x i8] c"/users/42\00", align 1
-@.str.131 = private unnamed_addr constant [35 x i8] c"[TEST 2] GET /users/42 => Status: \00", align 1
-@.str.132 = private unnamed_addr constant [10 x i8] c" | Body: \00", align 1
-@.str.133 = private unnamed_addr constant [4 x i8] c"GET\00", align 1
-@.str.134 = private unnamed_addr constant [35 x i8] c"/categories/tech/products/laptop99\00", align 1
-@.str.135 = private unnamed_addr constant [60 x i8] c"[TEST 3] GET /categories/tech/products/laptop99 => Status: \00", align 1
-@.str.136 = private unnamed_addr constant [10 x i8] c" | Body: \00", align 1
-@.str.137 = private unnamed_addr constant [4 x i8] c"GET\00", align 1
-@.str.138 = private unnamed_addr constant [14 x i8] c"/unknown-path\00", align 1
-@.str.139 = private unnamed_addr constant [39 x i8] c"[TEST 4] GET /unknown-path => Status: \00", align 1
-@.str.140 = private unnamed_addr constant [10 x i8] c" | Body: \00", align 1
-@.str.141 = private unnamed_addr constant [56 x i8] c"\0A✅ All In-Memory Engine Tests Completed Successfully!\00", align 1
-@.str.142 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.143 = private unnamed_addr constant [2 x i8] c"/\00", align 1
-@.str.144 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.145 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.146 = private unnamed_addr constant [2 x i8] c"/\00", align 1
-@.str.147 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.148 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.149 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.150 = private unnamed_addr constant [2 x i8] c"&\00", align 1
-@.str.151 = private unnamed_addr constant [2 x i8] c"&\00", align 1
-@.str.152 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.153 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.154 = private unnamed_addr constant [2 x i8] c"=\00", align 1
-@.str.155 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.156 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.157 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.158 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.159 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.160 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.161 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.162 = private unnamed_addr constant [2 x i8] c":\00", align 1
-@.str.163 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.164 = private unnamed_addr constant [2 x i8] c"*\00", align 1
-@.str.165 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.166 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.167 = private unnamed_addr constant [9 x i8] c"wildcard\00", align 1
-@.str.168 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.169 = private unnamed_addr constant [2 x i8] c" \00", align 1
-@.str.170 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.171 = private unnamed_addr constant [4 x i8] c"GET\00", align 1
-@.str.172 = private unnamed_addr constant [2 x i8] c" \00", align 1
-@.str.173 = private unnamed_addr constant [2 x i8] c" \00", align 1
-@.str.174 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.175 = private unnamed_addr constant [2 x i8] c" \00", align 1
-@.str.176 = private unnamed_addr constant [2 x i8] c"?\00", align 1
-@.str.177 = private unnamed_addr constant [2 x i8] c"\0D\00", align 1
-@.str.178 = private unnamed_addr constant [2 x i8] c"\0A\00", align 1
-@.str.179 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.180 = private unnamed_addr constant [2 x i8] c"/\00", align 1
-@.str.181 = private unnamed_addr constant [2 x i8] c" \00", align 1
-@.str.182 = private unnamed_addr constant [2 x i8] c" \00", align 1
-@.str.183 = private unnamed_addr constant [2 x i8] c" \00", align 1
-@.str.184 = private unnamed_addr constant [2 x i8] c"?\00", align 1
-@.str.185 = private unnamed_addr constant [2 x i8] c"?\00", align 1
-@.str.186 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.187 = private unnamed_addr constant [2 x i8] c" \00", align 1
-@.str.188 = private unnamed_addr constant [2 x i8] c"\0D\00", align 1
-@.str.189 = private unnamed_addr constant [2 x i8] c"\0A\00", align 1
-@.str.190 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.191 = private unnamed_addr constant [2 x i8] c"\0D\00", align 1
-@.str.192 = private unnamed_addr constant [2 x i8] c"\0A\00", align 1
-@.str.193 = private unnamed_addr constant [2 x i8] c"\0D\00", align 1
-@.str.194 = private unnamed_addr constant [2 x i8] c"\0A\00", align 1
-@.str.195 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.196 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.197 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.198 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.199 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.200 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.201 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.202 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.203 = private unnamed_addr constant [2 x i8] c"/\00", align 1
-@.str.204 = private unnamed_addr constant [77 x i8] c"{\22status\22:\22ok\22,\22framework\22:\22Vito v1.0.0\22,\22engine\22:\22VIT Native Phase 9 Perf\22}\00", align 1
-define void @__lambda_4(%struct.Request* %req, %struct.Response* %res) {
-entry:
-  %req.addr = alloca %struct.Request*, align 8
-  store %struct.Request* %req, %struct.Request** %req.addr, align 8
-  %res.addr = alloca %struct.Response*, align 8
-  store %struct.Response* %res, %struct.Response** %res.addr, align 8
-  %t0 = load %struct.Response*, %struct.Response** %res.addr, align 8
-  %t1 = getelementptr inbounds [77 x i8], [77 x i8]* @.str.204, i64 0, i64 0
-  call void @_Response_json(%struct.Response* %t0, i8* %t1)
-  ret void
-}
-
-@.str.205 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.206 = private unnamed_addr constant [2 x i8] c"\0A\00", align 1
-@.str.207 = private unnamed_addr constant [2 x i8] c":\00", align 1
-@.str.208 = private unnamed_addr constant [2 x i8] c" \00", align 1
-@.str.209 = private unnamed_addr constant [2 x i8] c"\0D\00", align 1
-@.str.210 = private unnamed_addr constant [2 x i8] c"\0A\00", align 1
-@.str.211 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.212 = private unnamed_addr constant [2 x i8] c"\0A\00", align 1
-@.str.213 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.214 = private unnamed_addr constant [2 x i8] c"/\00", align 1
-@.str.215 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.266 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.267 = private unnamed_addr constant [2 x i8] c"\0A\00", align 1
+@.str.268 = private unnamed_addr constant [2 x i8] c":\00", align 1
+@.str.269 = private unnamed_addr constant [2 x i8] c" \00", align 1
+@.str.270 = private unnamed_addr constant [2 x i8] c"\0D\00", align 1
+@.str.271 = private unnamed_addr constant [2 x i8] c"\0A\00", align 1
+@.str.272 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.273 = private unnamed_addr constant [2 x i8] c"\0A\00", align 1
+@.str.274 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.275 = private unnamed_addr constant [2 x i8] c"/\00", align 1
+@.str.276 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.277 = private unnamed_addr constant [10 x i8] c"boundary=\00", align 1
+@.str.278 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.279 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.280 = private unnamed_addr constant [2 x i8] c";\00", align 1
+@.str.281 = private unnamed_addr constant [2 x i8] c"\0D\00", align 1
+@.str.282 = private unnamed_addr constant [2 x i8] c"\0A\00", align 1
+@.str.283 = private unnamed_addr constant [2 x i8] c" \00", align 1
+@.str.284 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.285 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.286 = private unnamed_addr constant [25 x i8] c"application/octet-stream\00", align 1
+@.str.287 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.288 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.289 = private unnamed_addr constant [33 x i8] c"Missing boundary or body payload\00", align 1
+@.str.290 = private unnamed_addr constant [11 x i8] c"filename=\22\00", align 1
+@.str.291 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.292 = private unnamed_addr constant [2 x i8] c"\22\00", align 1
+@.str.293 = private unnamed_addr constant [18 x i8] c"uploaded_file.bin\00", align 1
+@.str.294 = private unnamed_addr constant [7 x i8] c"name=\22\00", align 1
+@.str.295 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.296 = private unnamed_addr constant [2 x i8] c"\22\00", align 1
+@.str.297 = private unnamed_addr constant [5 x i8] c"file\00", align 1
+@.str.298 = private unnamed_addr constant [15 x i8] c"Content-Type: \00", align 1
+@.str.299 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.300 = private unnamed_addr constant [2 x i8] c"\0D\00", align 1
+@.str.301 = private unnamed_addr constant [2 x i8] c"\0A\00", align 1
+@.str.302 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.303 = private unnamed_addr constant [5 x i8] c"\0D\0A\0D\0A\00", align 1
+@.str.304 = private unnamed_addr constant [3 x i8] c"--\00", align 1
+@.str.305 = private unnamed_addr constant [2 x i8] c"\0D\00", align 1
+@.str.306 = private unnamed_addr constant [2 x i8] c"\0A\00", align 1
+@.str.307 = private unnamed_addr constant [33 x i8] c"Invalid multipart payload format\00", align 1
+@.str.308 = private unnamed_addr constant [2 x i8] c"r\00", align 1
+@.str.309 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.310 = private unnamed_addr constant [31 x i8] c"File content read successfully\00", align 1
+@.str.311 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.312 = private unnamed_addr constant [2 x i8] c"w\00", align 1
+@.str.313 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.314 = private unnamed_addr constant [4 x i8] c"Lax\00", align 1
+@.str.315 = private unnamed_addr constant [2 x i8] c"/\00", align 1
+@.str.316 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.317 = private unnamed_addr constant [2 x i8] c":\00", align 1
+@.str.318 = private unnamed_addr constant [2 x i8] c"a\00", align 1
+@.str.319 = private unnamed_addr constant [2 x i8] c"b\00", align 1
+@.str.320 = private unnamed_addr constant [2 x i8] c"c\00", align 1
+@.str.321 = private unnamed_addr constant [2 x i8] c"s\00", align 1
+@.str.322 = private unnamed_addr constant [5 x i8] c"sig_\00", align 1
+@.str.323 = private unnamed_addr constant [2 x i8] c".\00", align 1
+@.str.324 = private unnamed_addr constant [2 x i8] c".\00", align 1
+@.str.325 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.326 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.327 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.328 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.329 = private unnamed_addr constant [2 x i8] c"=\00", align 1
+@.str.330 = private unnamed_addr constant [8 x i8] c"; Path=\00", align 1
+@.str.331 = private unnamed_addr constant [11 x i8] c"; HttpOnly\00", align 1
+@.str.332 = private unnamed_addr constant [9 x i8] c"; Secure\00", align 1
+@.str.333 = private unnamed_addr constant [12 x i8] c"; SameSite=\00", align 1
+@.str.334 = private unnamed_addr constant [11 x i8] c"; Max-Age=\00", align 1
+@.str.335 = private unnamed_addr constant [10 x i8] c"; Domain=\00", align 1
+@.str.336 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.337 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.338 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.339 = private unnamed_addr constant [2 x i8] c";\00", align 1
+@.str.340 = private unnamed_addr constant [2 x i8] c";\00", align 1
+@.str.341 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.342 = private unnamed_addr constant [2 x i8] c" \00", align 1
+@.str.343 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.344 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.345 = private unnamed_addr constant [2 x i8] c"=\00", align 1
+@.str.346 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.347 = private unnamed_addr constant [7 x i8] c"Cookie\00", align 1
+@.str.348 = private unnamed_addr constant [7 x i8] c"cookie\00", align 1
+@.str.349 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.350 = private unnamed_addr constant [1 x i8] c"\00", align 1
 
 declare i32 @printf(i8*, ...)
 declare i32 @sprintf(i8*, i8*, ...)
@@ -1458,6 +1471,80 @@ entry:
   ret void
 }
 
+define void @_Response_setCookie(%struct.Response* %this, i8* %key, i8* %value, i8* %optionsStr) {
+entry:
+  %t0 = alloca %struct.Response*, align 8
+  store %struct.Response* %this, %struct.Response** %t0, align 8
+  %t1 = alloca i8*, align 8
+  store i8* %key, i8** %t1, align 8
+  %t2 = alloca i8*, align 8
+  store i8* %value, i8** %t2, align 8
+  %t3 = alloca i8*, align 8
+  store i8* %optionsStr, i8** %t3, align 8
+  %t4 = load i8*, i8** %t1, align 8
+  %t5 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.27, i64 0, i64 0
+  %t7 = call i64 @strlen(i8* %t4)
+  %t8 = call i64 @strlen(i8* %t5)
+  %t9 = add i64 %t7, %t8
+  %t10 = add i64 %t9, 1
+  %t11 = call i8* @malloc(i64 %t10)
+  %t12 = call i8* @strcpy(i8* %t11, i8* %t4)
+  %t13 = call i8* @strcat(i8* %t11, i8* %t5)
+  %t14 = load i8*, i8** %t2, align 8
+  %t16 = call i64 @strlen(i8* %t11)
+  %t17 = call i64 @strlen(i8* %t14)
+  %t18 = add i64 %t16, %t17
+  %t19 = add i64 %t18, 1
+  %t20 = call i8* @malloc(i64 %t19)
+  %t21 = call i8* @strcpy(i8* %t20, i8* %t11)
+  %t22 = call i8* @strcat(i8* %t20, i8* %t14)
+  %cookieHeader.addr = alloca i8*, align 8
+  store i8* %t20, i8** %cookieHeader.addr, align 8
+  %t23 = load i8*, i8** %t3, align 8
+  %t24 = call i64 @strlen(i8* %t23)
+  %t25 = uitofp i64 %t24 to double
+  %t26 = fcmp ogt double %t25, 0.0
+  br i1 %t26, label %then.126, label %else.127
+then.126:
+  %t27 = load i8*, i8** %cookieHeader.addr, align 8
+  %t28 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.28, i64 0, i64 0
+  %t30 = call i64 @strlen(i8* %t27)
+  %t31 = call i64 @strlen(i8* %t28)
+  %t32 = add i64 %t30, %t31
+  %t33 = add i64 %t32, 1
+  %t34 = call i8* @malloc(i64 %t33)
+  %t35 = call i8* @strcpy(i8* %t34, i8* %t27)
+  %t36 = call i8* @strcat(i8* %t34, i8* %t28)
+  %t37 = load i8*, i8** %t3, align 8
+  %t39 = call i64 @strlen(i8* %t34)
+  %t40 = call i64 @strlen(i8* %t37)
+  %t41 = add i64 %t39, %t40
+  %t42 = add i64 %t41, 1
+  %t43 = call i8* @malloc(i64 %t42)
+  %t44 = call i8* @strcpy(i8* %t43, i8* %t34)
+  %t45 = call i8* @strcat(i8* %t43, i8* %t37)
+  store i8* %t43, i8** %cookieHeader.addr, align 8
+  br label %merge.128
+else.127:
+  %t46 = load i8*, i8** %cookieHeader.addr, align 8
+  %t47 = getelementptr inbounds [33 x i8], [33 x i8]* @.str.29, i64 0, i64 0
+  %t49 = call i64 @strlen(i8* %t46)
+  %t50 = call i64 @strlen(i8* %t47)
+  %t51 = add i64 %t49, %t50
+  %t52 = add i64 %t51, 1
+  %t53 = call i8* @malloc(i64 %t52)
+  %t54 = call i8* @strcpy(i8* %t53, i8* %t46)
+  %t55 = call i8* @strcat(i8* %t53, i8* %t47)
+  store i8* %t53, i8** %cookieHeader.addr, align 8
+  br label %merge.128
+merge.128:
+  %t56 = load %struct.Response*, %struct.Response** %t0, align 8
+  %t57 = getelementptr inbounds [11 x i8], [11 x i8]* @.str.30, i64 0, i64 0
+  %t58 = load i8*, i8** %cookieHeader.addr, align 8
+  call void @_Response_setHeader(%struct.Response* %t56, i8* %t57, i8* %t58)
+  ret void
+}
+
 define %struct.Response* @_Response_setStatus(%struct.Response* %this, double %code) {
 entry:
   %t0 = alloca %struct.Response*, align 8
@@ -1470,78 +1557,78 @@ entry:
   store double %t4, double* %t3, align 8
   %t5 = load %struct.Response*, %struct.Response** %t0, align 8
   %t6 = getelementptr inbounds %struct.Response, %struct.Response* %t5, i32 0, i32 1
-  %t7 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.27, i64 0, i64 0
+  %t7 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.31, i64 0, i64 0
   store i8* %t7, i8** %t6, align 8
   %t8 = load double, double* %t1, align 8
   %t9 = fcmp oeq double %t8, 201.0
-  br i1 %t9, label %then.126, label %merge.128
-then.126:
+  br i1 %t9, label %then.129, label %merge.131
+then.129:
   %t10 = load %struct.Response*, %struct.Response** %t0, align 8
   %t11 = getelementptr inbounds %struct.Response, %struct.Response* %t10, i32 0, i32 1
-  %t12 = getelementptr inbounds [8 x i8], [8 x i8]* @.str.28, i64 0, i64 0
+  %t12 = getelementptr inbounds [8 x i8], [8 x i8]* @.str.32, i64 0, i64 0
   store i8* %t12, i8** %t11, align 8
-  br label %merge.128
-merge.128:
-  %t13 = load double, double* %t1, align 8
-  %t14 = fcmp oeq double %t13, 204.0
-  br i1 %t14, label %then.129, label %merge.131
-then.129:
-  %t15 = load %struct.Response*, %struct.Response** %t0, align 8
-  %t16 = getelementptr inbounds %struct.Response, %struct.Response* %t15, i32 0, i32 1
-  %t17 = getelementptr inbounds [11 x i8], [11 x i8]* @.str.29, i64 0, i64 0
-  store i8* %t17, i8** %t16, align 8
   br label %merge.131
 merge.131:
-  %t18 = load double, double* %t1, align 8
-  %t19 = fcmp oeq double %t18, 400.0
-  br i1 %t19, label %then.132, label %merge.134
+  %t13 = load double, double* %t1, align 8
+  %t14 = fcmp oeq double %t13, 204.0
+  br i1 %t14, label %then.132, label %merge.134
 then.132:
-  %t20 = load %struct.Response*, %struct.Response** %t0, align 8
-  %t21 = getelementptr inbounds %struct.Response, %struct.Response* %t20, i32 0, i32 1
-  %t22 = getelementptr inbounds [12 x i8], [12 x i8]* @.str.30, i64 0, i64 0
-  store i8* %t22, i8** %t21, align 8
+  %t15 = load %struct.Response*, %struct.Response** %t0, align 8
+  %t16 = getelementptr inbounds %struct.Response, %struct.Response* %t15, i32 0, i32 1
+  %t17 = getelementptr inbounds [11 x i8], [11 x i8]* @.str.33, i64 0, i64 0
+  store i8* %t17, i8** %t16, align 8
   br label %merge.134
 merge.134:
-  %t23 = load double, double* %t1, align 8
-  %t24 = fcmp oeq double %t23, 401.0
-  br i1 %t24, label %then.135, label %merge.137
+  %t18 = load double, double* %t1, align 8
+  %t19 = fcmp oeq double %t18, 400.0
+  br i1 %t19, label %then.135, label %merge.137
 then.135:
-  %t25 = load %struct.Response*, %struct.Response** %t0, align 8
-  %t26 = getelementptr inbounds %struct.Response, %struct.Response* %t25, i32 0, i32 1
-  %t27 = getelementptr inbounds [13 x i8], [13 x i8]* @.str.31, i64 0, i64 0
-  store i8* %t27, i8** %t26, align 8
+  %t20 = load %struct.Response*, %struct.Response** %t0, align 8
+  %t21 = getelementptr inbounds %struct.Response, %struct.Response* %t20, i32 0, i32 1
+  %t22 = getelementptr inbounds [12 x i8], [12 x i8]* @.str.34, i64 0, i64 0
+  store i8* %t22, i8** %t21, align 8
   br label %merge.137
 merge.137:
-  %t28 = load double, double* %t1, align 8
-  %t29 = fcmp oeq double %t28, 403.0
-  br i1 %t29, label %then.138, label %merge.140
+  %t23 = load double, double* %t1, align 8
+  %t24 = fcmp oeq double %t23, 401.0
+  br i1 %t24, label %then.138, label %merge.140
 then.138:
-  %t30 = load %struct.Response*, %struct.Response** %t0, align 8
-  %t31 = getelementptr inbounds %struct.Response, %struct.Response* %t30, i32 0, i32 1
-  %t32 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.32, i64 0, i64 0
-  store i8* %t32, i8** %t31, align 8
+  %t25 = load %struct.Response*, %struct.Response** %t0, align 8
+  %t26 = getelementptr inbounds %struct.Response, %struct.Response* %t25, i32 0, i32 1
+  %t27 = getelementptr inbounds [13 x i8], [13 x i8]* @.str.35, i64 0, i64 0
+  store i8* %t27, i8** %t26, align 8
   br label %merge.140
 merge.140:
-  %t33 = load double, double* %t1, align 8
-  %t34 = fcmp oeq double %t33, 404.0
-  br i1 %t34, label %then.141, label %merge.143
+  %t28 = load double, double* %t1, align 8
+  %t29 = fcmp oeq double %t28, 403.0
+  br i1 %t29, label %then.141, label %merge.143
 then.141:
-  %t35 = load %struct.Response*, %struct.Response** %t0, align 8
-  %t36 = getelementptr inbounds %struct.Response, %struct.Response* %t35, i32 0, i32 1
-  %t37 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.33, i64 0, i64 0
-  store i8* %t37, i8** %t36, align 8
+  %t30 = load %struct.Response*, %struct.Response** %t0, align 8
+  %t31 = getelementptr inbounds %struct.Response, %struct.Response* %t30, i32 0, i32 1
+  %t32 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.36, i64 0, i64 0
+  store i8* %t32, i8** %t31, align 8
   br label %merge.143
 merge.143:
-  %t38 = load double, double* %t1, align 8
-  %t39 = fcmp oeq double %t38, 500.0
-  br i1 %t39, label %then.144, label %merge.146
+  %t33 = load double, double* %t1, align 8
+  %t34 = fcmp oeq double %t33, 404.0
+  br i1 %t34, label %then.144, label %merge.146
 then.144:
-  %t40 = load %struct.Response*, %struct.Response** %t0, align 8
-  %t41 = getelementptr inbounds %struct.Response, %struct.Response* %t40, i32 0, i32 1
-  %t42 = getelementptr inbounds [22 x i8], [22 x i8]* @.str.34, i64 0, i64 0
-  store i8* %t42, i8** %t41, align 8
+  %t35 = load %struct.Response*, %struct.Response** %t0, align 8
+  %t36 = getelementptr inbounds %struct.Response, %struct.Response* %t35, i32 0, i32 1
+  %t37 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.37, i64 0, i64 0
+  store i8* %t37, i8** %t36, align 8
   br label %merge.146
 merge.146:
+  %t38 = load double, double* %t1, align 8
+  %t39 = fcmp oeq double %t38, 500.0
+  br i1 %t39, label %then.147, label %merge.149
+then.147:
+  %t40 = load %struct.Response*, %struct.Response** %t0, align 8
+  %t41 = getelementptr inbounds %struct.Response, %struct.Response* %t40, i32 0, i32 1
+  %t42 = getelementptr inbounds [22 x i8], [22 x i8]* @.str.38, i64 0, i64 0
+  store i8* %t42, i8** %t41, align 8
+  br label %merge.149
+merge.149:
   %t43 = load %struct.Response*, %struct.Response** %t0, align 8
   ret %struct.Response* %t43
 }
@@ -1555,21 +1642,21 @@ entry:
   %t2 = load %struct.Response*, %struct.Response** %t0, align 8
   %t3 = getelementptr inbounds %struct.Response, %struct.Response* %t2, i32 0, i32 4
   %t4 = load i1, i1* %t3, align 8
-  br i1 %t4, label %then.147, label %merge.149
-then.147:
+  br i1 %t4, label %then.150, label %merge.152
+then.150:
   ret void
-merge.149:
+merge.152:
   %t5 = load %struct.Response*, %struct.Response** %t0, align 8
   %t6 = getelementptr inbounds %struct.Response, %struct.Response* %t5, i32 0, i32 0
   %t7 = load double, double* %t6, align 8
   %t8 = fcmp oeq double %t7, 0.0
-  br i1 %t8, label %then.150, label %merge.152
-then.150:
+  br i1 %t8, label %then.153, label %merge.155
+then.153:
   %t9 = load %struct.Response*, %struct.Response** %t0, align 8
   %t10 = call %struct.Response* @_Response_setStatus(%struct.Response* %t9, double 200.0)
-  br label %merge.152
-merge.152:
-  %t11 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.35, i64 0, i64 0
+  br label %merge.155
+merge.155:
+  %t11 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.39, i64 0, i64 0
   %t12 = load %struct.Response*, %struct.Response** %t0, align 8
   %t13 = getelementptr inbounds %struct.Response, %struct.Response* %t12, i32 0, i32 0
   %t14 = load double, double* %t13, align 8
@@ -1583,7 +1670,7 @@ merge.152:
   %t22 = call i8* @malloc(i64 %t21)
   %t23 = call i8* @strcpy(i8* %t22, i8* %t11)
   %t24 = call i8* @strcat(i8* %t22, i8* %t16)
-  %t25 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.36, i64 0, i64 0
+  %t25 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.40, i64 0, i64 0
   %t27 = call i64 @strlen(i8* %t22)
   %t28 = call i64 @strlen(i8* %t25)
   %t29 = add i64 %t27, %t28
@@ -1601,7 +1688,7 @@ merge.152:
   %t42 = call i8* @malloc(i64 %t41)
   %t43 = call i8* @strcpy(i8* %t42, i8* %t31)
   %t44 = call i8* @strcat(i8* %t42, i8* %t36)
-  %t45 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.37, i64 0, i64 0
+  %t45 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.41, i64 0, i64 0
   %t47 = call i64 @strlen(i8* %t42)
   %t48 = call i64 @strlen(i8* %t45)
   %t49 = add i64 %t47, %t48
@@ -1609,7 +1696,7 @@ merge.152:
   %t51 = call i8* @malloc(i64 %t50)
   %t52 = call i8* @strcpy(i8* %t51, i8* %t42)
   %t53 = call i8* @strcat(i8* %t51, i8* %t45)
-  %t54 = getelementptr inbounds [42 x i8], [42 x i8]* @.str.38, i64 0, i64 0
+  %t54 = getelementptr inbounds [42 x i8], [42 x i8]* @.str.42, i64 0, i64 0
   %t56 = call i64 @strlen(i8* %t51)
   %t57 = call i64 @strlen(i8* %t54)
   %t58 = add i64 %t56, %t57
@@ -1617,7 +1704,7 @@ merge.152:
   %t60 = call i8* @malloc(i64 %t59)
   %t61 = call i8* @strcpy(i8* %t60, i8* %t51)
   %t62 = call i8* @strcat(i8* %t60, i8* %t54)
-  %t63 = getelementptr inbounds [17 x i8], [17 x i8]* @.str.39, i64 0, i64 0
+  %t63 = getelementptr inbounds [17 x i8], [17 x i8]* @.str.43, i64 0, i64 0
   %t65 = call i64 @strlen(i8* %t60)
   %t66 = call i64 @strlen(i8* %t63)
   %t67 = add i64 %t65, %t66
@@ -1638,7 +1725,7 @@ merge.152:
   %t82 = call i8* @malloc(i64 %t81)
   %t83 = call i8* @strcpy(i8* %t82, i8* %t69)
   %t84 = call i8* @strcat(i8* %t82, i8* %t76)
-  %t85 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.40, i64 0, i64 0
+  %t85 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.44, i64 0, i64 0
   %t87 = call i64 @strlen(i8* %t82)
   %t88 = call i64 @strlen(i8* %t85)
   %t89 = add i64 %t87, %t88
@@ -1656,7 +1743,7 @@ merge.152:
   %t102 = call i8* @malloc(i64 %t101)
   %t103 = call i8* @strcpy(i8* %t102, i8* %t91)
   %t104 = call i8* @strcat(i8* %t102, i8* %t96)
-  %t105 = getelementptr inbounds [22 x i8], [22 x i8]* @.str.41, i64 0, i64 0
+  %t105 = getelementptr inbounds [22 x i8], [22 x i8]* @.str.45, i64 0, i64 0
   %t107 = call i64 @strlen(i8* %t102)
   %t108 = call i64 @strlen(i8* %t105)
   %t109 = add i64 %t107, %t108
@@ -1669,14 +1756,14 @@ merge.152:
   %t114 = load %struct.Response*, %struct.Response** %t0, align 8
   %t115 = getelementptr inbounds %struct.Response, %struct.Response* %t114, i32 0, i32 5
   %t116 = load i1, i1* %t115, align 8
-  br i1 %t116, label %then.153, label %else.154
-then.153:
+  br i1 %t116, label %then.156, label %else.157
+then.156:
   %t117 = load %struct.Response*, %struct.Response** %t0, align 8
   %t118 = getelementptr inbounds %struct.Response, %struct.Response* %t117, i32 0, i32 6
   %t119 = load i8*, i8** %t1, align 8
   store i8* %t119, i8** %t118, align 8
-  br label %merge.155
-else.154:
+  br label %merge.158
+else.157:
   %t120 = load %struct.Response*, %struct.Response** %t0, align 8
   %t121 = getelementptr inbounds %struct.Response, %struct.Response* %t120, i32 0, i32 3
   %t122 = load %struct.TcpStream*, %struct.TcpStream** %t121, align 8
@@ -1694,8 +1781,8 @@ else.154:
   %t135 = getelementptr inbounds %struct.Response, %struct.Response* %t134, i32 0, i32 3
   %t136 = load %struct.TcpStream*, %struct.TcpStream** %t135, align 8
   call void @_TcpStream_close(%struct.TcpStream* %t136)
-  br label %merge.155
-merge.155:
+  br label %merge.158
+merge.158:
   %t137 = load %struct.Response*, %struct.Response** %t0, align 8
   %t138 = getelementptr inbounds %struct.Response, %struct.Response* %t137, i32 0, i32 4
   store i1 true, i1* %t138, align 8
@@ -1711,21 +1798,21 @@ entry:
   %t2 = load %struct.Response*, %struct.Response** %t0, align 8
   %t3 = getelementptr inbounds %struct.Response, %struct.Response* %t2, i32 0, i32 4
   %t4 = load i1, i1* %t3, align 8
-  br i1 %t4, label %then.156, label %merge.158
-then.156:
+  br i1 %t4, label %then.159, label %merge.161
+then.159:
   ret void
-merge.158:
+merge.161:
   %t5 = load %struct.Response*, %struct.Response** %t0, align 8
   %t6 = getelementptr inbounds %struct.Response, %struct.Response* %t5, i32 0, i32 0
   %t7 = load double, double* %t6, align 8
   %t8 = fcmp oeq double %t7, 0.0
-  br i1 %t8, label %then.159, label %merge.161
-then.159:
+  br i1 %t8, label %then.162, label %merge.164
+then.162:
   %t9 = load %struct.Response*, %struct.Response** %t0, align 8
   %t10 = call %struct.Response* @_Response_setStatus(%struct.Response* %t9, double 200.0)
-  br label %merge.161
-merge.161:
-  %t11 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.42, i64 0, i64 0
+  br label %merge.164
+merge.164:
+  %t11 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.46, i64 0, i64 0
   %t12 = load %struct.Response*, %struct.Response** %t0, align 8
   %t13 = getelementptr inbounds %struct.Response, %struct.Response* %t12, i32 0, i32 0
   %t14 = load double, double* %t13, align 8
@@ -1739,7 +1826,7 @@ merge.161:
   %t22 = call i8* @malloc(i64 %t21)
   %t23 = call i8* @strcpy(i8* %t22, i8* %t11)
   %t24 = call i8* @strcat(i8* %t22, i8* %t16)
-  %t25 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.43, i64 0, i64 0
+  %t25 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.47, i64 0, i64 0
   %t27 = call i64 @strlen(i8* %t22)
   %t28 = call i64 @strlen(i8* %t25)
   %t29 = add i64 %t27, %t28
@@ -1757,7 +1844,7 @@ merge.161:
   %t42 = call i8* @malloc(i64 %t41)
   %t43 = call i8* @strcpy(i8* %t42, i8* %t31)
   %t44 = call i8* @strcat(i8* %t42, i8* %t36)
-  %t45 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.44, i64 0, i64 0
+  %t45 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.48, i64 0, i64 0
   %t47 = call i64 @strlen(i8* %t42)
   %t48 = call i64 @strlen(i8* %t45)
   %t49 = add i64 %t47, %t48
@@ -1765,7 +1852,7 @@ merge.161:
   %t51 = call i8* @malloc(i64 %t50)
   %t52 = call i8* @strcpy(i8* %t51, i8* %t42)
   %t53 = call i8* @strcat(i8* %t51, i8* %t45)
-  %t54 = getelementptr inbounds [41 x i8], [41 x i8]* @.str.45, i64 0, i64 0
+  %t54 = getelementptr inbounds [41 x i8], [41 x i8]* @.str.49, i64 0, i64 0
   %t56 = call i64 @strlen(i8* %t51)
   %t57 = call i64 @strlen(i8* %t54)
   %t58 = add i64 %t56, %t57
@@ -1773,7 +1860,7 @@ merge.161:
   %t60 = call i8* @malloc(i64 %t59)
   %t61 = call i8* @strcpy(i8* %t60, i8* %t51)
   %t62 = call i8* @strcat(i8* %t60, i8* %t54)
-  %t63 = getelementptr inbounds [17 x i8], [17 x i8]* @.str.46, i64 0, i64 0
+  %t63 = getelementptr inbounds [17 x i8], [17 x i8]* @.str.50, i64 0, i64 0
   %t65 = call i64 @strlen(i8* %t60)
   %t66 = call i64 @strlen(i8* %t63)
   %t67 = add i64 %t65, %t66
@@ -1794,7 +1881,7 @@ merge.161:
   %t82 = call i8* @malloc(i64 %t81)
   %t83 = call i8* @strcpy(i8* %t82, i8* %t69)
   %t84 = call i8* @strcat(i8* %t82, i8* %t76)
-  %t85 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.47, i64 0, i64 0
+  %t85 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.51, i64 0, i64 0
   %t87 = call i64 @strlen(i8* %t82)
   %t88 = call i64 @strlen(i8* %t85)
   %t89 = add i64 %t87, %t88
@@ -1812,7 +1899,7 @@ merge.161:
   %t102 = call i8* @malloc(i64 %t101)
   %t103 = call i8* @strcpy(i8* %t102, i8* %t91)
   %t104 = call i8* @strcat(i8* %t102, i8* %t96)
-  %t105 = getelementptr inbounds [22 x i8], [22 x i8]* @.str.48, i64 0, i64 0
+  %t105 = getelementptr inbounds [22 x i8], [22 x i8]* @.str.52, i64 0, i64 0
   %t107 = call i64 @strlen(i8* %t102)
   %t108 = call i64 @strlen(i8* %t105)
   %t109 = add i64 %t107, %t108
@@ -1825,14 +1912,14 @@ merge.161:
   %t114 = load %struct.Response*, %struct.Response** %t0, align 8
   %t115 = getelementptr inbounds %struct.Response, %struct.Response* %t114, i32 0, i32 5
   %t116 = load i1, i1* %t115, align 8
-  br i1 %t116, label %then.162, label %else.163
-then.162:
+  br i1 %t116, label %then.165, label %else.166
+then.165:
   %t117 = load %struct.Response*, %struct.Response** %t0, align 8
   %t118 = getelementptr inbounds %struct.Response, %struct.Response* %t117, i32 0, i32 6
   %t119 = load i8*, i8** %t1, align 8
   store i8* %t119, i8** %t118, align 8
-  br label %merge.164
-else.163:
+  br label %merge.167
+else.166:
   %t120 = load %struct.Response*, %struct.Response** %t0, align 8
   %t121 = getelementptr inbounds %struct.Response, %struct.Response* %t120, i32 0, i32 3
   %t122 = load %struct.TcpStream*, %struct.TcpStream** %t121, align 8
@@ -1850,8 +1937,8 @@ else.163:
   %t135 = getelementptr inbounds %struct.Response, %struct.Response* %t134, i32 0, i32 3
   %t136 = load %struct.TcpStream*, %struct.TcpStream** %t135, align 8
   call void @_TcpStream_close(%struct.TcpStream* %t136)
-  br label %merge.164
-merge.164:
+  br label %merge.167
+merge.167:
   %t137 = load %struct.Response*, %struct.Response** %t0, align 8
   %t138 = getelementptr inbounds %struct.Response, %struct.Response* %t137, i32 0, i32 4
   store i1 true, i1* %t138, align 8
@@ -1867,21 +1954,21 @@ entry:
   %t2 = load %struct.Response*, %struct.Response** %t0, align 8
   %t3 = getelementptr inbounds %struct.Response, %struct.Response* %t2, i32 0, i32 4
   %t4 = load i1, i1* %t3, align 8
-  br i1 %t4, label %then.165, label %merge.167
-then.165:
+  br i1 %t4, label %then.168, label %merge.170
+then.168:
   ret void
-merge.167:
+merge.170:
   %t5 = load %struct.Response*, %struct.Response** %t0, align 8
   %t6 = getelementptr inbounds %struct.Response, %struct.Response* %t5, i32 0, i32 0
   %t7 = load double, double* %t6, align 8
   %t8 = fcmp oeq double %t7, 0.0
-  br i1 %t8, label %then.168, label %merge.170
-then.168:
+  br i1 %t8, label %then.171, label %merge.173
+then.171:
   %t9 = load %struct.Response*, %struct.Response** %t0, align 8
   %t10 = call %struct.Response* @_Response_setStatus(%struct.Response* %t9, double 200.0)
-  br label %merge.170
-merge.170:
-  %t11 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.49, i64 0, i64 0
+  br label %merge.173
+merge.173:
+  %t11 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.53, i64 0, i64 0
   %t12 = load %struct.Response*, %struct.Response** %t0, align 8
   %t13 = getelementptr inbounds %struct.Response, %struct.Response* %t12, i32 0, i32 0
   %t14 = load double, double* %t13, align 8
@@ -1895,7 +1982,7 @@ merge.170:
   %t22 = call i8* @malloc(i64 %t21)
   %t23 = call i8* @strcpy(i8* %t22, i8* %t11)
   %t24 = call i8* @strcat(i8* %t22, i8* %t16)
-  %t25 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.50, i64 0, i64 0
+  %t25 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.54, i64 0, i64 0
   %t27 = call i64 @strlen(i8* %t22)
   %t28 = call i64 @strlen(i8* %t25)
   %t29 = add i64 %t27, %t28
@@ -1913,7 +2000,7 @@ merge.170:
   %t42 = call i8* @malloc(i64 %t41)
   %t43 = call i8* @strcpy(i8* %t42, i8* %t31)
   %t44 = call i8* @strcat(i8* %t42, i8* %t36)
-  %t45 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.51, i64 0, i64 0
+  %t45 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.55, i64 0, i64 0
   %t47 = call i64 @strlen(i8* %t42)
   %t48 = call i64 @strlen(i8* %t45)
   %t49 = add i64 %t47, %t48
@@ -1921,7 +2008,7 @@ merge.170:
   %t51 = call i8* @malloc(i64 %t50)
   %t52 = call i8* @strcpy(i8* %t51, i8* %t42)
   %t53 = call i8* @strcat(i8* %t51, i8* %t45)
-  %t54 = getelementptr inbounds [48 x i8], [48 x i8]* @.str.52, i64 0, i64 0
+  %t54 = getelementptr inbounds [48 x i8], [48 x i8]* @.str.56, i64 0, i64 0
   %t56 = call i64 @strlen(i8* %t51)
   %t57 = call i64 @strlen(i8* %t54)
   %t58 = add i64 %t56, %t57
@@ -1929,7 +2016,7 @@ merge.170:
   %t60 = call i8* @malloc(i64 %t59)
   %t61 = call i8* @strcpy(i8* %t60, i8* %t51)
   %t62 = call i8* @strcat(i8* %t60, i8* %t54)
-  %t63 = getelementptr inbounds [17 x i8], [17 x i8]* @.str.53, i64 0, i64 0
+  %t63 = getelementptr inbounds [17 x i8], [17 x i8]* @.str.57, i64 0, i64 0
   %t65 = call i64 @strlen(i8* %t60)
   %t66 = call i64 @strlen(i8* %t63)
   %t67 = add i64 %t65, %t66
@@ -1950,7 +2037,7 @@ merge.170:
   %t82 = call i8* @malloc(i64 %t81)
   %t83 = call i8* @strcpy(i8* %t82, i8* %t69)
   %t84 = call i8* @strcat(i8* %t82, i8* %t76)
-  %t85 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.54, i64 0, i64 0
+  %t85 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.58, i64 0, i64 0
   %t87 = call i64 @strlen(i8* %t82)
   %t88 = call i64 @strlen(i8* %t85)
   %t89 = add i64 %t87, %t88
@@ -1968,7 +2055,7 @@ merge.170:
   %t102 = call i8* @malloc(i64 %t101)
   %t103 = call i8* @strcpy(i8* %t102, i8* %t91)
   %t104 = call i8* @strcat(i8* %t102, i8* %t96)
-  %t105 = getelementptr inbounds [22 x i8], [22 x i8]* @.str.55, i64 0, i64 0
+  %t105 = getelementptr inbounds [22 x i8], [22 x i8]* @.str.59, i64 0, i64 0
   %t107 = call i64 @strlen(i8* %t102)
   %t108 = call i64 @strlen(i8* %t105)
   %t109 = add i64 %t107, %t108
@@ -1981,14 +2068,14 @@ merge.170:
   %t114 = load %struct.Response*, %struct.Response** %t0, align 8
   %t115 = getelementptr inbounds %struct.Response, %struct.Response* %t114, i32 0, i32 5
   %t116 = load i1, i1* %t115, align 8
-  br i1 %t116, label %then.171, label %else.172
-then.171:
+  br i1 %t116, label %then.174, label %else.175
+then.174:
   %t117 = load %struct.Response*, %struct.Response** %t0, align 8
   %t118 = getelementptr inbounds %struct.Response, %struct.Response* %t117, i32 0, i32 6
   %t119 = load i8*, i8** %t1, align 8
   store i8* %t119, i8** %t118, align 8
-  br label %merge.173
-else.172:
+  br label %merge.176
+else.175:
   %t120 = load %struct.Response*, %struct.Response** %t0, align 8
   %t121 = getelementptr inbounds %struct.Response, %struct.Response* %t120, i32 0, i32 3
   %t122 = load %struct.TcpStream*, %struct.TcpStream** %t121, align 8
@@ -2006,8 +2093,8 @@ else.172:
   %t135 = getelementptr inbounds %struct.Response, %struct.Response* %t134, i32 0, i32 3
   %t136 = load %struct.TcpStream*, %struct.TcpStream** %t135, align 8
   call void @_TcpStream_close(%struct.TcpStream* %t136)
-  br label %merge.173
-merge.173:
+  br label %merge.176
+merge.176:
   %t137 = load %struct.Response*, %struct.Response** %t0, align 8
   %t138 = getelementptr inbounds %struct.Response, %struct.Response* %t137, i32 0, i32 4
   store i1 true, i1* %t138, align 8
@@ -2023,25 +2110,25 @@ entry:
   %t2 = load %struct.Response*, %struct.Response** %t0, align 8
   %t3 = getelementptr inbounds %struct.Response, %struct.Response* %t2, i32 0, i32 4
   %t4 = load i1, i1* %t3, align 8
-  br i1 %t4, label %then.174, label %merge.176
-then.174:
+  br i1 %t4, label %then.177, label %merge.179
+then.177:
   ret void
-merge.176:
+merge.179:
   %t5 = load %struct.Response*, %struct.Response** %t0, align 8
   %t6 = getelementptr inbounds %struct.Response, %struct.Response* %t5, i32 0, i32 0
   %t7 = load double, double* %t6, align 8
   %t8 = fcmp oeq double %t7, 0.0
-  br i1 %t8, label %then.177, label %merge.179
-then.177:
+  br i1 %t8, label %then.180, label %merge.182
+then.180:
   %t9 = load %struct.Response*, %struct.Response** %t0, align 8
   %t10 = call %struct.Response* @_Response_setStatus(%struct.Response* %t9, double 200.0)
-  br label %merge.179
-merge.179:
+  br label %merge.182
+merge.182:
   %t11 = load %struct.Response*, %struct.Response** %t0, align 8
   %t12 = getelementptr inbounds %struct.Response, %struct.Response* %t11, i32 0, i32 5
   %t13 = load i1, i1* %t12, align 8
-  br i1 %t13, label %then.180, label %else.181
-then.180:
+  br i1 %t13, label %then.183, label %else.184
+then.183:
   %t14 = load %struct.Response*, %struct.Response** %t0, align 8
   %t15 = getelementptr inbounds %struct.Response, %struct.Response* %t14, i32 0, i32 6
   %t16 = load %struct.Response*, %struct.Response** %t0, align 8
@@ -2056,15 +2143,15 @@ then.180:
   %t26 = call i8* @strcpy(i8* %t25, i8* %t18)
   %t27 = call i8* @strcat(i8* %t25, i8* %t19)
   store i8* %t25, i8** %t15, align 8
-  br label %merge.182
-else.181:
+  br label %merge.185
+else.184:
   %t28 = load %struct.Response*, %struct.Response** %t0, align 8
   %t29 = getelementptr inbounds %struct.Response, %struct.Response* %t28, i32 0, i32 3
   %t30 = load %struct.TcpStream*, %struct.TcpStream** %t29, align 8
   %t31 = load i8*, i8** %t1, align 8
   %t32 = call double @_TcpStream_write(%struct.TcpStream* %t30, i8* %t31)
-  br label %merge.182
-merge.182:
+  br label %merge.185
+merge.185:
   ret void
 }
 
@@ -2077,27 +2164,27 @@ entry:
   store double 0.0, double* %t2, align 8
   %t3 = load %struct.Container*, %struct.Container** %t0, align 8
   %t4 = getelementptr inbounds %struct.Container, %struct.Container* %t3, i32 0, i32 0
-  %t5 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.56, i64 0, i64 0
+  %t5 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.60, i64 0, i64 0
   store i8* %t5, i8** %t4, align 8
   %t6 = load %struct.Container*, %struct.Container** %t0, align 8
   %t7 = getelementptr inbounds %struct.Container, %struct.Container* %t6, i32 0, i32 1
-  %t8 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.57, i64 0, i64 0
+  %t8 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.61, i64 0, i64 0
   store i8* %t8, i8** %t7, align 8
   %t9 = load %struct.Container*, %struct.Container** %t0, align 8
   %t10 = getelementptr inbounds %struct.Container, %struct.Container* %t9, i32 0, i32 2
-  %t11 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.58, i64 0, i64 0
+  %t11 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.62, i64 0, i64 0
   store i8* %t11, i8** %t10, align 8
   %t12 = load %struct.Container*, %struct.Container** %t0, align 8
   %t13 = getelementptr inbounds %struct.Container, %struct.Container* %t12, i32 0, i32 3
-  %t14 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.59, i64 0, i64 0
+  %t14 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.63, i64 0, i64 0
   store i8* %t14, i8** %t13, align 8
   %t15 = load %struct.Container*, %struct.Container** %t0, align 8
   %t16 = getelementptr inbounds %struct.Container, %struct.Container* %t15, i32 0, i32 4
-  %t17 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.60, i64 0, i64 0
+  %t17 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.64, i64 0, i64 0
   store i8* %t17, i8** %t16, align 8
   %t18 = load %struct.Container*, %struct.Container** %t0, align 8
   %t19 = getelementptr inbounds %struct.Container, %struct.Container* %t18, i32 0, i32 5
-  %t20 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.61, i64 0, i64 0
+  %t20 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.65, i64 0, i64 0
   store i8* %t20, i8** %t19, align 8
   ret void
 }
@@ -2114,8 +2201,8 @@ entry:
   %t4 = getelementptr inbounds %struct.Container, %struct.Container* %t3, i32 0, i32 6
   %t5 = load double, double* %t4, align 8
   %t6 = fcmp oeq double %t5, 0.0
-  br i1 %t6, label %then.183, label %merge.185
-then.183:
+  br i1 %t6, label %then.186, label %merge.188
+then.186:
   %t7 = load %struct.Container*, %struct.Container** %t0, align 8
   %t8 = getelementptr inbounds %struct.Container, %struct.Container* %t7, i32 0, i32 0
   %t9 = load i8*, i8** %t1, align 8
@@ -2124,14 +2211,14 @@ then.183:
   %t11 = getelementptr inbounds %struct.Container, %struct.Container* %t10, i32 0, i32 1
   %t12 = load i8*, i8** %t2, align 8
   store i8* %t12, i8** %t11, align 8
-  br label %merge.185
-merge.185:
+  br label %merge.188
+merge.188:
   %t13 = load %struct.Container*, %struct.Container** %t0, align 8
   %t14 = getelementptr inbounds %struct.Container, %struct.Container* %t13, i32 0, i32 6
   %t15 = load double, double* %t14, align 8
   %t16 = fcmp oeq double %t15, 1.0
-  br i1 %t16, label %then.186, label %merge.188
-then.186:
+  br i1 %t16, label %then.189, label %merge.191
+then.189:
   %t17 = load %struct.Container*, %struct.Container** %t0, align 8
   %t18 = getelementptr inbounds %struct.Container, %struct.Container* %t17, i32 0, i32 2
   %t19 = load i8*, i8** %t1, align 8
@@ -2140,14 +2227,14 @@ then.186:
   %t21 = getelementptr inbounds %struct.Container, %struct.Container* %t20, i32 0, i32 3
   %t22 = load i8*, i8** %t2, align 8
   store i8* %t22, i8** %t21, align 8
-  br label %merge.188
-merge.188:
+  br label %merge.191
+merge.191:
   %t23 = load %struct.Container*, %struct.Container** %t0, align 8
   %t24 = getelementptr inbounds %struct.Container, %struct.Container* %t23, i32 0, i32 6
   %t25 = load double, double* %t24, align 8
   %t26 = fcmp oeq double %t25, 2.0
-  br i1 %t26, label %then.189, label %merge.191
-then.189:
+  br i1 %t26, label %then.192, label %merge.194
+then.192:
   %t27 = load %struct.Container*, %struct.Container** %t0, align 8
   %t28 = getelementptr inbounds %struct.Container, %struct.Container* %t27, i32 0, i32 4
   %t29 = load i8*, i8** %t1, align 8
@@ -2156,8 +2243,8 @@ then.189:
   %t31 = getelementptr inbounds %struct.Container, %struct.Container* %t30, i32 0, i32 5
   %t32 = load i8*, i8** %t2, align 8
   store i8* %t32, i8** %t31, align 8
-  br label %merge.191
-merge.191:
+  br label %merge.194
+merge.194:
   %t33 = load %struct.Container*, %struct.Container** %t0, align 8
   %t34 = getelementptr inbounds %struct.Container, %struct.Container* %t33, i32 0, i32 6
   %t35 = load %struct.Container*, %struct.Container** %t0, align 8
@@ -2180,40 +2267,40 @@ entry:
   %t5 = load i8*, i8** %t1, align 8
   %t7 = call i32 @strcmp(i8* %t4, i8* %t5)
   %t6 = icmp eq i32 %t7, 0
-  br i1 %t6, label %then.192, label %merge.194
-then.192:
+  br i1 %t6, label %then.195, label %merge.197
+then.195:
   %t8 = load %struct.Container*, %struct.Container** %t0, align 8
   %t9 = getelementptr inbounds %struct.Container, %struct.Container* %t8, i32 0, i32 1
   %t10 = load i8*, i8** %t9, align 8
   ret i8* %t10
-merge.194:
+merge.197:
   %t11 = load %struct.Container*, %struct.Container** %t0, align 8
   %t12 = getelementptr inbounds %struct.Container, %struct.Container* %t11, i32 0, i32 2
   %t13 = load i8*, i8** %t12, align 8
   %t14 = load i8*, i8** %t1, align 8
   %t16 = call i32 @strcmp(i8* %t13, i8* %t14)
   %t15 = icmp eq i32 %t16, 0
-  br i1 %t15, label %then.195, label %merge.197
-then.195:
+  br i1 %t15, label %then.198, label %merge.200
+then.198:
   %t17 = load %struct.Container*, %struct.Container** %t0, align 8
   %t18 = getelementptr inbounds %struct.Container, %struct.Container* %t17, i32 0, i32 3
   %t19 = load i8*, i8** %t18, align 8
   ret i8* %t19
-merge.197:
+merge.200:
   %t20 = load %struct.Container*, %struct.Container** %t0, align 8
   %t21 = getelementptr inbounds %struct.Container, %struct.Container* %t20, i32 0, i32 4
   %t22 = load i8*, i8** %t21, align 8
   %t23 = load i8*, i8** %t1, align 8
   %t25 = call i32 @strcmp(i8* %t22, i8* %t23)
   %t24 = icmp eq i32 %t25, 0
-  br i1 %t24, label %then.198, label %merge.200
-then.198:
+  br i1 %t24, label %then.201, label %merge.203
+then.201:
   %t26 = load %struct.Container*, %struct.Container** %t0, align 8
   %t27 = getelementptr inbounds %struct.Container, %struct.Container* %t26, i32 0, i32 5
   %t28 = load i8*, i8** %t27, align 8
   ret i8* %t28
-merge.200:
-  %t29 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.62, i64 0, i64 0
+merge.203:
+  %t29 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.66, i64 0, i64 0
   ret i8* %t29
 }
 
@@ -2228,7 +2315,7 @@ entry:
   %t3 = load %struct.VitoGroup*, %struct.VitoGroup** %t0, align 8
   %t4 = getelementptr inbounds %struct.VitoGroup, %struct.VitoGroup* %t3, i32 0, i32 0
   %t5 = load %struct.VitoApp*, %struct.VitoApp** %t4, align 8
-  %t6 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.63, i64 0, i64 0
+  %t6 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.67, i64 0, i64 0
   %t7 = load %struct.VitoGroup*, %struct.VitoGroup** %t0, align 8
   %t8 = getelementptr inbounds %struct.VitoGroup, %struct.VitoGroup* %t7, i32 0, i32 1
   %t9 = load i8*, i8** %t8, align 8
@@ -2256,7 +2343,7 @@ entry:
   %t3 = load %struct.VitoGroup*, %struct.VitoGroup** %t0, align 8
   %t4 = getelementptr inbounds %struct.VitoGroup, %struct.VitoGroup* %t3, i32 0, i32 0
   %t5 = load %struct.VitoApp*, %struct.VitoApp** %t4, align 8
-  %t6 = getelementptr inbounds [5 x i8], [5 x i8]* @.str.64, i64 0, i64 0
+  %t6 = getelementptr inbounds [5 x i8], [5 x i8]* @.str.68, i64 0, i64 0
   %t7 = load %struct.VitoGroup*, %struct.VitoGroup** %t0, align 8
   %t8 = getelementptr inbounds %struct.VitoGroup, %struct.VitoGroup* %t7, i32 0, i32 1
   %t9 = load i8*, i8** %t8, align 8
@@ -2284,7 +2371,7 @@ entry:
   %t3 = load %struct.VitoGroup*, %struct.VitoGroup** %t0, align 8
   %t4 = getelementptr inbounds %struct.VitoGroup, %struct.VitoGroup* %t3, i32 0, i32 0
   %t5 = load %struct.VitoApp*, %struct.VitoApp** %t4, align 8
-  %t6 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.65, i64 0, i64 0
+  %t6 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.69, i64 0, i64 0
   %t7 = load %struct.VitoGroup*, %struct.VitoGroup** %t0, align 8
   %t8 = getelementptr inbounds %struct.VitoGroup, %struct.VitoGroup* %t7, i32 0, i32 1
   %t9 = load i8*, i8** %t8, align 8
@@ -2312,7 +2399,7 @@ entry:
   %t3 = load %struct.VitoGroup*, %struct.VitoGroup** %t0, align 8
   %t4 = getelementptr inbounds %struct.VitoGroup, %struct.VitoGroup* %t3, i32 0, i32 0
   %t5 = load %struct.VitoApp*, %struct.VitoApp** %t4, align 8
-  %t6 = getelementptr inbounds [7 x i8], [7 x i8]* @.str.66, i64 0, i64 0
+  %t6 = getelementptr inbounds [7 x i8], [7 x i8]* @.str.70, i64 0, i64 0
   %t7 = load %struct.VitoGroup*, %struct.VitoGroup** %t0, align 8
   %t8 = getelementptr inbounds %struct.VitoGroup, %struct.VitoGroup* %t7, i32 0, i32 1
   %t9 = load i8*, i8** %t8, align 8
@@ -2383,67 +2470,67 @@ entry:
   store i1 false, i1* %t32, align 8
   %t33 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t34 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t33, i32 0, i32 0
-  %t35 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.67, i64 0, i64 0
+  %t35 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.71, i64 0, i64 0
   store i8* %t35, i8** %t34, align 8
   %t36 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t37 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t36, i32 0, i32 1
-  %t38 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.68, i64 0, i64 0
+  %t38 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.72, i64 0, i64 0
   store i8* %t38, i8** %t37, align 8
   %t39 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t40 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t39, i32 0, i32 4
-  %t41 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.69, i64 0, i64 0
+  %t41 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.73, i64 0, i64 0
   store i8* %t41, i8** %t40, align 8
   %t42 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t43 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t42, i32 0, i32 5
-  %t44 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.70, i64 0, i64 0
+  %t44 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.74, i64 0, i64 0
   store i8* %t44, i8** %t43, align 8
   %t45 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t46 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t45, i32 0, i32 8
-  %t47 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.71, i64 0, i64 0
+  %t47 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.75, i64 0, i64 0
   store i8* %t47, i8** %t46, align 8
   %t48 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t49 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t48, i32 0, i32 9
-  %t50 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.72, i64 0, i64 0
+  %t50 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.76, i64 0, i64 0
   store i8* %t50, i8** %t49, align 8
   %t51 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t52 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t51, i32 0, i32 12
-  %t53 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.73, i64 0, i64 0
+  %t53 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.77, i64 0, i64 0
   store i8* %t53, i8** %t52, align 8
   %t54 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t55 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t54, i32 0, i32 13
-  %t56 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.74, i64 0, i64 0
+  %t56 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.78, i64 0, i64 0
   store i8* %t56, i8** %t55, align 8
   %t57 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t58 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t57, i32 0, i32 16
-  %t59 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.75, i64 0, i64 0
+  %t59 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.79, i64 0, i64 0
   store i8* %t59, i8** %t58, align 8
   %t60 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t61 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t60, i32 0, i32 17
-  %t62 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.76, i64 0, i64 0
+  %t62 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.80, i64 0, i64 0
   store i8* %t62, i8** %t61, align 8
   %t63 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t64 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t63, i32 0, i32 20
-  %t65 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.77, i64 0, i64 0
+  %t65 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.81, i64 0, i64 0
   store i8* %t65, i8** %t64, align 8
   %t66 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t67 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t66, i32 0, i32 21
-  %t68 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.78, i64 0, i64 0
+  %t68 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.82, i64 0, i64 0
   store i8* %t68, i8** %t67, align 8
   %t69 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t70 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t69, i32 0, i32 24
-  %t71 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.79, i64 0, i64 0
+  %t71 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.83, i64 0, i64 0
   store i8* %t71, i8** %t70, align 8
   %t72 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t73 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t72, i32 0, i32 25
-  %t74 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.80, i64 0, i64 0
+  %t74 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.84, i64 0, i64 0
   store i8* %t74, i8** %t73, align 8
   %t75 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t76 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t75, i32 0, i32 28
-  %t77 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.81, i64 0, i64 0
+  %t77 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.85, i64 0, i64 0
   store i8* %t77, i8** %t76, align 8
   %t78 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t79 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t78, i32 0, i32 29
-  %t80 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.82, i64 0, i64 0
+  %t80 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.86, i64 0, i64 0
   store i8* %t80, i8** %t79, align 8
   %t81 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t82 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t81, i32 0, i32 45
@@ -2489,8 +2576,8 @@ entry:
   %t2 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t1, i32 0, i32 47
   %t3 = load i1, i1* %t2, align 8
   %t4 = xor i1 %t3, true
-  br i1 %t4, label %then.201, label %merge.203
-then.201:
+  br i1 %t4, label %then.204, label %merge.206
+then.204:
   %t5 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t6 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t5, i32 0, i32 47
   store i1 true, i1* %t6, align 8
@@ -2502,13 +2589,13 @@ then.201:
   %t12 = fadd double %t11, 1.0
   store double %t12, double* %t8, align 8
   ret double 0.0
-merge.203:
+merge.206:
   %t13 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t14 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t13, i32 0, i32 48
   %t15 = load i1, i1* %t14, align 8
   %t16 = xor i1 %t15, true
-  br i1 %t16, label %then.204, label %merge.206
-then.204:
+  br i1 %t16, label %then.207, label %merge.209
+then.207:
   %t17 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t18 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t17, i32 0, i32 48
   store i1 true, i1* %t18, align 8
@@ -2520,13 +2607,13 @@ then.204:
   %t24 = fadd double %t23, 1.0
   store double %t24, double* %t20, align 8
   ret double 1.0
-merge.206:
+merge.209:
   %t25 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t26 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t25, i32 0, i32 49
   %t27 = load i1, i1* %t26, align 8
   %t28 = xor i1 %t27, true
-  br i1 %t28, label %then.207, label %merge.209
-then.207:
+  br i1 %t28, label %then.210, label %merge.212
+then.210:
   %t29 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t30 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t29, i32 0, i32 49
   store i1 true, i1* %t30, align 8
@@ -2538,13 +2625,13 @@ then.207:
   %t36 = fadd double %t35, 1.0
   store double %t36, double* %t32, align 8
   ret double 2.0
-merge.209:
+merge.212:
   %t37 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t38 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t37, i32 0, i32 50
   %t39 = load i1, i1* %t38, align 8
   %t40 = xor i1 %t39, true
-  br i1 %t40, label %then.210, label %merge.212
-then.210:
+  br i1 %t40, label %then.213, label %merge.215
+then.213:
   %t41 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t42 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t41, i32 0, i32 50
   store i1 true, i1* %t42, align 8
@@ -2556,7 +2643,7 @@ then.210:
   %t48 = fadd double %t47, 1.0
   store double %t48, double* %t44, align 8
   ret double 3.0
-merge.212:
+merge.215:
   %t49 = fneg double 1.0
   ret double %t49
 }
@@ -2569,16 +2656,16 @@ entry:
   store double %slotId, double* %t1, align 8
   %t2 = load double, double* %t1, align 8
   %t3 = fcmp oeq double %t2, 0.0
-  br i1 %t3, label %log.rhs.213, label %log.merge.214
-log.rhs.213:
+  br i1 %t3, label %log.rhs.216, label %log.merge.217
+log.rhs.216:
   %t5 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t6 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t5, i32 0, i32 47
   %t7 = load i1, i1* %t6, align 8
-  br label %log.merge.214
-log.merge.214:
-  %t4 = phi i1 [ false, %entry ], [ %t7, %log.rhs.213 ]
-  br i1 %t4, label %then.215, label %merge.217
-then.215:
+  br label %log.merge.217
+log.merge.217:
+  %t4 = phi i1 [ false, %entry ], [ %t7, %log.rhs.216 ]
+  br i1 %t4, label %then.218, label %merge.220
+then.218:
   %t8 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t9 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t8, i32 0, i32 47
   store i1 false, i1* %t9, align 8
@@ -2589,20 +2676,20 @@ then.215:
   %t14 = load double, double* %t13, align 8
   %t15 = fsub double %t14, 1.0
   store double %t15, double* %t11, align 8
-  br label %merge.217
-merge.217:
+  br label %merge.220
+merge.220:
   %t16 = load double, double* %t1, align 8
   %t17 = fcmp oeq double %t16, 1.0
-  br i1 %t17, label %log.rhs.218, label %log.merge.219
-log.rhs.218:
+  br i1 %t17, label %log.rhs.221, label %log.merge.222
+log.rhs.221:
   %t19 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t20 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t19, i32 0, i32 48
   %t21 = load i1, i1* %t20, align 8
-  br label %log.merge.219
-log.merge.219:
-  %t18 = phi i1 [ false, %merge.217 ], [ %t21, %log.rhs.218 ]
-  br i1 %t18, label %then.220, label %merge.222
-then.220:
+  br label %log.merge.222
+log.merge.222:
+  %t18 = phi i1 [ false, %merge.220 ], [ %t21, %log.rhs.221 ]
+  br i1 %t18, label %then.223, label %merge.225
+then.223:
   %t22 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t23 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t22, i32 0, i32 48
   store i1 false, i1* %t23, align 8
@@ -2613,20 +2700,20 @@ then.220:
   %t28 = load double, double* %t27, align 8
   %t29 = fsub double %t28, 1.0
   store double %t29, double* %t25, align 8
-  br label %merge.222
-merge.222:
+  br label %merge.225
+merge.225:
   %t30 = load double, double* %t1, align 8
   %t31 = fcmp oeq double %t30, 2.0
-  br i1 %t31, label %log.rhs.223, label %log.merge.224
-log.rhs.223:
+  br i1 %t31, label %log.rhs.226, label %log.merge.227
+log.rhs.226:
   %t33 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t34 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t33, i32 0, i32 49
   %t35 = load i1, i1* %t34, align 8
-  br label %log.merge.224
-log.merge.224:
-  %t32 = phi i1 [ false, %merge.222 ], [ %t35, %log.rhs.223 ]
-  br i1 %t32, label %then.225, label %merge.227
-then.225:
+  br label %log.merge.227
+log.merge.227:
+  %t32 = phi i1 [ false, %merge.225 ], [ %t35, %log.rhs.226 ]
+  br i1 %t32, label %then.228, label %merge.230
+then.228:
   %t36 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t37 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t36, i32 0, i32 49
   store i1 false, i1* %t37, align 8
@@ -2637,20 +2724,20 @@ then.225:
   %t42 = load double, double* %t41, align 8
   %t43 = fsub double %t42, 1.0
   store double %t43, double* %t39, align 8
-  br label %merge.227
-merge.227:
+  br label %merge.230
+merge.230:
   %t44 = load double, double* %t1, align 8
   %t45 = fcmp oeq double %t44, 3.0
-  br i1 %t45, label %log.rhs.228, label %log.merge.229
-log.rhs.228:
+  br i1 %t45, label %log.rhs.231, label %log.merge.232
+log.rhs.231:
   %t47 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t48 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t47, i32 0, i32 50
   %t49 = load i1, i1* %t48, align 8
-  br label %log.merge.229
-log.merge.229:
-  %t46 = phi i1 [ false, %merge.227 ], [ %t49, %log.rhs.228 ]
-  br i1 %t46, label %then.230, label %merge.232
-then.230:
+  br label %log.merge.232
+log.merge.232:
+  %t46 = phi i1 [ false, %merge.230 ], [ %t49, %log.rhs.231 ]
+  br i1 %t46, label %then.233, label %merge.235
+then.233:
   %t50 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t51 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t50, i32 0, i32 50
   store i1 false, i1* %t51, align 8
@@ -2661,8 +2748,8 @@ then.230:
   %t56 = load double, double* %t55, align 8
   %t57 = fsub double %t56, 1.0
   store double %t57, double* %t53, align 8
-  br label %merge.232
-merge.232:
+  br label %merge.235
+merge.235:
   ret void
 }
 
@@ -2674,46 +2761,46 @@ entry:
   %t2 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t1, i32 0, i32 52
   %t3 = load i1, i1* %t2, align 8
   %t4 = xor i1 %t3, true
-  br i1 %t4, label %then.233, label %merge.235
-then.233:
+  br i1 %t4, label %then.236, label %merge.238
+then.236:
   %t5 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t6 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t5, i32 0, i32 52
   store i1 true, i1* %t6, align 8
   ret double 0.0
-merge.235:
+merge.238:
   %t7 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t8 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t7, i32 0, i32 53
   %t9 = load i1, i1* %t8, align 8
   %t10 = xor i1 %t9, true
-  br i1 %t10, label %then.236, label %merge.238
-then.236:
+  br i1 %t10, label %then.239, label %merge.241
+then.239:
   %t11 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t12 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t11, i32 0, i32 53
   store i1 true, i1* %t12, align 8
   ret double 1.0
-merge.238:
+merge.241:
   %t13 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t14 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t13, i32 0, i32 54
   %t15 = load i1, i1* %t14, align 8
   %t16 = xor i1 %t15, true
-  br i1 %t16, label %then.239, label %merge.241
-then.239:
+  br i1 %t16, label %then.242, label %merge.244
+then.242:
   %t17 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t18 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t17, i32 0, i32 54
   store i1 true, i1* %t18, align 8
   ret double 2.0
-merge.241:
+merge.244:
   %t19 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t20 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t19, i32 0, i32 55
   %t21 = load i1, i1* %t20, align 8
   %t22 = xor i1 %t21, true
-  br i1 %t22, label %then.242, label %merge.244
-then.242:
+  br i1 %t22, label %then.245, label %merge.247
+then.245:
   %t23 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t24 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t23, i32 0, i32 55
   store i1 true, i1* %t24, align 8
   ret double 3.0
-merge.244:
+merge.247:
   %t25 = fneg double 1.0
   ret double %t25
 }
@@ -2726,40 +2813,40 @@ entry:
   store double %bufId, double* %t1, align 8
   %t2 = load double, double* %t1, align 8
   %t3 = fcmp oeq double %t2, 0.0
-  br i1 %t3, label %then.245, label %merge.247
-then.245:
+  br i1 %t3, label %then.248, label %merge.250
+then.248:
   %t4 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t5 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t4, i32 0, i32 52
   store i1 false, i1* %t5, align 8
-  br label %merge.247
-merge.247:
+  br label %merge.250
+merge.250:
   %t6 = load double, double* %t1, align 8
   %t7 = fcmp oeq double %t6, 1.0
-  br i1 %t7, label %then.248, label %merge.250
-then.248:
+  br i1 %t7, label %then.251, label %merge.253
+then.251:
   %t8 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t9 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t8, i32 0, i32 53
   store i1 false, i1* %t9, align 8
-  br label %merge.250
-merge.250:
+  br label %merge.253
+merge.253:
   %t10 = load double, double* %t1, align 8
   %t11 = fcmp oeq double %t10, 2.0
-  br i1 %t11, label %then.251, label %merge.253
-then.251:
+  br i1 %t11, label %then.254, label %merge.256
+then.254:
   %t12 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t13 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t12, i32 0, i32 54
   store i1 false, i1* %t13, align 8
-  br label %merge.253
-merge.253:
+  br label %merge.256
+merge.256:
   %t14 = load double, double* %t1, align 8
   %t15 = fcmp oeq double %t14, 3.0
-  br i1 %t15, label %then.254, label %merge.256
-then.254:
+  br i1 %t15, label %then.257, label %merge.259
+then.257:
   %t16 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t17 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t16, i32 0, i32 55
   store i1 false, i1* %t17, align 8
-  br label %merge.256
-merge.256:
+  br label %merge.259
+merge.259:
   %t18 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t19 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t18, i32 0, i32 51
   %t20 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
@@ -2809,8 +2896,8 @@ entry:
   %t3 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t2, i32 0, i32 39
   %t4 = load double, double* %t3, align 8
   %t5 = fcmp oeq double %t4, 0.0
-  br i1 %t5, label %then.257, label %merge.259
-then.257:
+  br i1 %t5, label %then.260, label %merge.262
+then.260:
   %t6 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t7 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t6, i32 0, i32 33
   %t8 = load i8*, i8** %t1, align 8
@@ -2818,14 +2905,14 @@ then.257:
   %t9 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t10 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t9, i32 0, i32 32
   store i1 true, i1* %t10, align 8
-  br label %merge.259
-merge.259:
+  br label %merge.262
+merge.262:
   %t11 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t12 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t11, i32 0, i32 39
   %t13 = load double, double* %t12, align 8
   %t14 = fcmp oeq double %t13, 1.0
-  br i1 %t14, label %then.260, label %merge.262
-then.260:
+  br i1 %t14, label %then.263, label %merge.265
+then.263:
   %t15 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t16 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t15, i32 0, i32 35
   %t17 = load i8*, i8** %t1, align 8
@@ -2833,14 +2920,14 @@ then.260:
   %t18 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t19 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t18, i32 0, i32 34
   store i1 true, i1* %t19, align 8
-  br label %merge.262
-merge.262:
+  br label %merge.265
+merge.265:
   %t20 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t21 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t20, i32 0, i32 39
   %t22 = load double, double* %t21, align 8
   %t23 = fcmp oeq double %t22, 2.0
-  br i1 %t23, label %then.263, label %merge.265
-then.263:
+  br i1 %t23, label %then.266, label %merge.268
+then.266:
   %t24 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t25 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t24, i32 0, i32 37
   %t26 = load i8*, i8** %t1, align 8
@@ -2848,8 +2935,8 @@ then.263:
   %t27 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t28 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t27, i32 0, i32 36
   store i1 true, i1* %t28, align 8
-  br label %merge.265
-merge.265:
+  br label %merge.268
+merge.268:
   %t29 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t30 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t29, i32 0, i32 39
   %t31 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
@@ -2911,7 +2998,7 @@ entry:
   %t2 = alloca i8*, align 8
   store i8* %handler, i8** %t2, align 8
   %t3 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
-  %t4 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.83, i64 0, i64 0
+  %t4 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.87, i64 0, i64 0
   %t5 = load i8*, i8** %t1, align 8
   %t6 = load i8*, i8** %t2, align 8
   call void @_VitoApp_addRoute(%struct.VitoApp* %t3, i8* %t4, i8* %t5, i8* %t6)
@@ -2927,7 +3014,7 @@ entry:
   %t2 = alloca i8*, align 8
   store i8* %handler, i8** %t2, align 8
   %t3 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
-  %t4 = getelementptr inbounds [5 x i8], [5 x i8]* @.str.84, i64 0, i64 0
+  %t4 = getelementptr inbounds [5 x i8], [5 x i8]* @.str.88, i64 0, i64 0
   %t5 = load i8*, i8** %t1, align 8
   %t6 = load i8*, i8** %t2, align 8
   call void @_VitoApp_addRoute(%struct.VitoApp* %t3, i8* %t4, i8* %t5, i8* %t6)
@@ -2943,7 +3030,7 @@ entry:
   %t2 = alloca i8*, align 8
   store i8* %handler, i8** %t2, align 8
   %t3 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
-  %t4 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.85, i64 0, i64 0
+  %t4 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.89, i64 0, i64 0
   %t5 = load i8*, i8** %t1, align 8
   %t6 = load i8*, i8** %t2, align 8
   call void @_VitoApp_addRoute(%struct.VitoApp* %t3, i8* %t4, i8* %t5, i8* %t6)
@@ -2959,7 +3046,7 @@ entry:
   %t2 = alloca i8*, align 8
   store i8* %handler, i8** %t2, align 8
   %t3 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
-  %t4 = getelementptr inbounds [7 x i8], [7 x i8]* @.str.86, i64 0, i64 0
+  %t4 = getelementptr inbounds [7 x i8], [7 x i8]* @.str.90, i64 0, i64 0
   %t5 = load i8*, i8** %t1, align 8
   %t6 = load i8*, i8** %t2, align 8
   call void @_VitoApp_addRoute(%struct.VitoApp* %t3, i8* %t4, i8* %t5, i8* %t6)
@@ -2980,8 +3067,8 @@ entry:
   %t5 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t4, i32 0, i32 38
   %t6 = load double, double* %t5, align 8
   %t7 = fcmp oeq double %t6, 0.0
-  br i1 %t7, label %then.266, label %merge.268
-then.266:
+  br i1 %t7, label %then.269, label %merge.271
+then.269:
   %t8 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t9 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t8, i32 0, i32 0
   %t10 = load i8*, i8** %t1, align 8
@@ -2997,14 +3084,14 @@ then.266:
   %t17 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t18 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t17, i32 0, i32 2
   store i1 true, i1* %t18, align 8
-  br label %merge.268
-merge.268:
+  br label %merge.271
+merge.271:
   %t19 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t20 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t19, i32 0, i32 38
   %t21 = load double, double* %t20, align 8
   %t22 = fcmp oeq double %t21, 1.0
-  br i1 %t22, label %then.269, label %merge.271
-then.269:
+  br i1 %t22, label %then.272, label %merge.274
+then.272:
   %t23 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t24 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t23, i32 0, i32 4
   %t25 = load i8*, i8** %t1, align 8
@@ -3020,14 +3107,14 @@ then.269:
   %t32 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t33 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t32, i32 0, i32 6
   store i1 true, i1* %t33, align 8
-  br label %merge.271
-merge.271:
+  br label %merge.274
+merge.274:
   %t34 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t35 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t34, i32 0, i32 38
   %t36 = load double, double* %t35, align 8
   %t37 = fcmp oeq double %t36, 2.0
-  br i1 %t37, label %then.272, label %merge.274
-then.272:
+  br i1 %t37, label %then.275, label %merge.277
+then.275:
   %t38 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t39 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t38, i32 0, i32 8
   %t40 = load i8*, i8** %t1, align 8
@@ -3039,14 +3126,14 @@ then.272:
   %t44 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t45 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t44, i32 0, i32 10
   store i1 true, i1* %t45, align 8
-  br label %merge.274
-merge.274:
+  br label %merge.277
+merge.277:
   %t46 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t47 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t46, i32 0, i32 38
   %t48 = load double, double* %t47, align 8
   %t49 = fcmp oeq double %t48, 3.0
-  br i1 %t49, label %then.275, label %merge.277
-then.275:
+  br i1 %t49, label %then.278, label %merge.280
+then.278:
   %t50 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t51 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t50, i32 0, i32 12
   %t52 = load i8*, i8** %t1, align 8
@@ -3058,14 +3145,14 @@ then.275:
   %t56 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t57 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t56, i32 0, i32 14
   store i1 true, i1* %t57, align 8
-  br label %merge.277
-merge.277:
+  br label %merge.280
+merge.280:
   %t58 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t59 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t58, i32 0, i32 38
   %t60 = load double, double* %t59, align 8
   %t61 = fcmp oeq double %t60, 4.0
-  br i1 %t61, label %then.278, label %merge.280
-then.278:
+  br i1 %t61, label %then.281, label %merge.283
+then.281:
   %t62 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t63 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t62, i32 0, i32 16
   %t64 = load i8*, i8** %t1, align 8
@@ -3077,14 +3164,14 @@ then.278:
   %t68 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t69 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t68, i32 0, i32 18
   store i1 true, i1* %t69, align 8
-  br label %merge.280
-merge.280:
+  br label %merge.283
+merge.283:
   %t70 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t71 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t70, i32 0, i32 38
   %t72 = load double, double* %t71, align 8
   %t73 = fcmp oeq double %t72, 5.0
-  br i1 %t73, label %then.281, label %merge.283
-then.281:
+  br i1 %t73, label %then.284, label %merge.286
+then.284:
   %t74 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t75 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t74, i32 0, i32 20
   %t76 = load i8*, i8** %t1, align 8
@@ -3096,14 +3183,14 @@ then.281:
   %t80 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t81 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t80, i32 0, i32 22
   store i1 true, i1* %t81, align 8
-  br label %merge.283
-merge.283:
+  br label %merge.286
+merge.286:
   %t82 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t83 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t82, i32 0, i32 38
   %t84 = load double, double* %t83, align 8
   %t85 = fcmp oeq double %t84, 6.0
-  br i1 %t85, label %then.284, label %merge.286
-then.284:
+  br i1 %t85, label %then.287, label %merge.289
+then.287:
   %t86 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t87 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t86, i32 0, i32 24
   %t88 = load i8*, i8** %t1, align 8
@@ -3115,14 +3202,14 @@ then.284:
   %t92 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t93 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t92, i32 0, i32 26
   store i1 true, i1* %t93, align 8
-  br label %merge.286
-merge.286:
+  br label %merge.289
+merge.289:
   %t94 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t95 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t94, i32 0, i32 38
   %t96 = load double, double* %t95, align 8
   %t97 = fcmp oeq double %t96, 7.0
-  br i1 %t97, label %then.287, label %merge.289
-then.287:
+  br i1 %t97, label %then.290, label %merge.292
+then.290:
   %t98 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t99 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t98, i32 0, i32 28
   %t100 = load i8*, i8** %t1, align 8
@@ -3134,8 +3221,8 @@ then.287:
   %t104 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t105 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t104, i32 0, i32 30
   store i1 true, i1* %t105, align 8
-  br label %merge.289
-merge.289:
+  br label %merge.292
+merge.292:
   %t106 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t107 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t106, i32 0, i32 38
   %t108 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
@@ -3161,8 +3248,8 @@ entry:
   %t5 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t6 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t5, i32 0, i32 43
   %t7 = load i1, i1* %t6, align 8
-  br i1 %t7, label %then.290, label %merge.292
-then.290:
+  br i1 %t7, label %then.293, label %merge.295
+then.293:
   %t8 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t9 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t8, i32 0, i32 42
   %t10 = load i8*, i8** %t9, align 8
@@ -3176,26 +3263,26 @@ then.290:
   %t15 = load %struct.Response*, %struct.Response** %t2, align 8
   %t16 = getelementptr inbounds %struct.Response, %struct.Response* %t15, i32 0, i32 4
   %t17 = load i1, i1* %t16, align 8
-  br i1 %t17, label %then.293, label %merge.295
-then.293:
+  br i1 %t17, label %then.296, label %merge.298
+then.296:
   %t18 = load double, double* %slotId.addr, align 8
   %t19 = fcmp oge double %t18, 0.0
-  br i1 %t19, label %then.296, label %merge.298
-then.296:
+  br i1 %t19, label %then.299, label %merge.301
+then.299:
   %t20 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t21 = load double, double* %slotId.addr, align 8
   call void @_VitoApp_releaseArenaSlot(%struct.VitoApp* %t20, double %t21)
-  br label %merge.298
-merge.298:
+  br label %merge.301
+merge.301:
   ret void
+merge.298:
+  br label %merge.295
 merge.295:
-  br label %merge.292
-merge.292:
   %t22 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t23 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t22, i32 0, i32 32
   %t24 = load i1, i1* %t23, align 8
-  br i1 %t24, label %then.299, label %merge.301
-then.299:
+  br i1 %t24, label %then.302, label %merge.304
+then.302:
   %t25 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t26 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t25, i32 0, i32 33
   %t27 = load i8*, i8** %t26, align 8
@@ -3207,34 +3294,34 @@ then.299:
   %t31 = bitcast i8* %t30 to i1 (%struct.Request*, %struct.Response*)*
   %t32 = call i1 %t31(%struct.Request* %t28, %struct.Response* %t29)
   %t33 = xor i1 %t32, true
-  br i1 %t33, label %log.merge.303, label %log.rhs.302
-log.rhs.302:
+  br i1 %t33, label %log.merge.306, label %log.rhs.305
+log.rhs.305:
   %t35 = load %struct.Response*, %struct.Response** %t2, align 8
   %t36 = getelementptr inbounds %struct.Response, %struct.Response* %t35, i32 0, i32 4
   %t37 = load i1, i1* %t36, align 8
-  br label %log.merge.303
-log.merge.303:
-  %t34 = phi i1 [ true, %then.299 ], [ %t37, %log.rhs.302 ]
-  br i1 %t34, label %then.304, label %merge.306
-then.304:
+  br label %log.merge.306
+log.merge.306:
+  %t34 = phi i1 [ true, %then.302 ], [ %t37, %log.rhs.305 ]
+  br i1 %t34, label %then.307, label %merge.309
+then.307:
   %t38 = load double, double* %slotId.addr, align 8
   %t39 = fcmp oge double %t38, 0.0
-  br i1 %t39, label %then.307, label %merge.309
-then.307:
+  br i1 %t39, label %then.310, label %merge.312
+then.310:
   %t40 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t41 = load double, double* %slotId.addr, align 8
   call void @_VitoApp_releaseArenaSlot(%struct.VitoApp* %t40, double %t41)
-  br label %merge.309
-merge.309:
+  br label %merge.312
+merge.312:
   ret void
-merge.306:
-  br label %merge.301
-merge.301:
+merge.309:
+  br label %merge.304
+merge.304:
   %t42 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t43 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t42, i32 0, i32 34
   %t44 = load i1, i1* %t43, align 8
-  br i1 %t44, label %then.310, label %merge.312
-then.310:
+  br i1 %t44, label %then.313, label %merge.315
+then.313:
   %t45 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t46 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t45, i32 0, i32 35
   %t47 = load i8*, i8** %t46, align 8
@@ -3246,34 +3333,34 @@ then.310:
   %t51 = bitcast i8* %t50 to i1 (%struct.Request*, %struct.Response*)*
   %t52 = call i1 %t51(%struct.Request* %t48, %struct.Response* %t49)
   %t53 = xor i1 %t52, true
-  br i1 %t53, label %log.merge.314, label %log.rhs.313
-log.rhs.313:
+  br i1 %t53, label %log.merge.317, label %log.rhs.316
+log.rhs.316:
   %t55 = load %struct.Response*, %struct.Response** %t2, align 8
   %t56 = getelementptr inbounds %struct.Response, %struct.Response* %t55, i32 0, i32 4
   %t57 = load i1, i1* %t56, align 8
-  br label %log.merge.314
-log.merge.314:
-  %t54 = phi i1 [ true, %then.310 ], [ %t57, %log.rhs.313 ]
-  br i1 %t54, label %then.315, label %merge.317
-then.315:
+  br label %log.merge.317
+log.merge.317:
+  %t54 = phi i1 [ true, %then.313 ], [ %t57, %log.rhs.316 ]
+  br i1 %t54, label %then.318, label %merge.320
+then.318:
   %t58 = load double, double* %slotId.addr, align 8
   %t59 = fcmp oge double %t58, 0.0
-  br i1 %t59, label %then.318, label %merge.320
-then.318:
+  br i1 %t59, label %then.321, label %merge.323
+then.321:
   %t60 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t61 = load double, double* %slotId.addr, align 8
   call void @_VitoApp_releaseArenaSlot(%struct.VitoApp* %t60, double %t61)
-  br label %merge.320
-merge.320:
+  br label %merge.323
+merge.323:
   ret void
-merge.317:
-  br label %merge.312
-merge.312:
+merge.320:
+  br label %merge.315
+merge.315:
   %t62 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t63 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t62, i32 0, i32 36
   %t64 = load i1, i1* %t63, align 8
-  br i1 %t64, label %then.321, label %merge.323
-then.321:
+  br i1 %t64, label %then.324, label %merge.326
+then.324:
   %t65 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t66 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t65, i32 0, i32 37
   %t67 = load i8*, i8** %t66, align 8
@@ -3285,29 +3372,29 @@ then.321:
   %t71 = bitcast i8* %t70 to i1 (%struct.Request*, %struct.Response*)*
   %t72 = call i1 %t71(%struct.Request* %t68, %struct.Response* %t69)
   %t73 = xor i1 %t72, true
-  br i1 %t73, label %log.merge.325, label %log.rhs.324
-log.rhs.324:
+  br i1 %t73, label %log.merge.328, label %log.rhs.327
+log.rhs.327:
   %t75 = load %struct.Response*, %struct.Response** %t2, align 8
   %t76 = getelementptr inbounds %struct.Response, %struct.Response* %t75, i32 0, i32 4
   %t77 = load i1, i1* %t76, align 8
-  br label %log.merge.325
-log.merge.325:
-  %t74 = phi i1 [ true, %then.321 ], [ %t77, %log.rhs.324 ]
-  br i1 %t74, label %then.326, label %merge.328
-then.326:
+  br label %log.merge.328
+log.merge.328:
+  %t74 = phi i1 [ true, %then.324 ], [ %t77, %log.rhs.327 ]
+  br i1 %t74, label %then.329, label %merge.331
+then.329:
   %t78 = load double, double* %slotId.addr, align 8
   %t79 = fcmp oge double %t78, 0.0
-  br i1 %t79, label %then.329, label %merge.331
-then.329:
+  br i1 %t79, label %then.332, label %merge.334
+then.332:
   %t80 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t81 = load double, double* %slotId.addr, align 8
   call void @_VitoApp_releaseArenaSlot(%struct.VitoApp* %t80, double %t81)
-  br label %merge.331
-merge.331:
+  br label %merge.334
+merge.334:
   ret void
-merge.328:
-  br label %merge.323
-merge.323:
+merge.331:
+  br label %merge.326
+merge.326:
   %matched.addr = alloca i1, align 8
   store i1 false, i1* %matched.addr, align 8
   %t82 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
@@ -3318,8 +3405,8 @@ merge.323:
   %t85 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t86 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t85, i32 0, i32 2
   %t87 = load i1, i1* %t86, align 8
-  br i1 %t87, label %log.rhs.334, label %log.merge.335
-log.rhs.334:
+  br i1 %t87, label %log.rhs.337, label %log.merge.338
+log.rhs.337:
   %t89 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t90 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t89, i32 0, i32 0
   %t91 = load i8*, i8** %t90, align 8
@@ -3328,11 +3415,11 @@ log.rhs.334:
   %t94 = load i8*, i8** %t93, align 8
   %t96 = call i32 @strcmp(i8* %t91, i8* %t94)
   %t95 = icmp eq i32 %t96, 0
-  br label %log.merge.335
-log.merge.335:
-  %t88 = phi i1 [ false, %merge.323 ], [ %t95, %log.rhs.334 ]
-  br i1 %t88, label %log.rhs.332, label %log.merge.333
-log.rhs.332:
+  br label %log.merge.338
+log.merge.338:
+  %t88 = phi i1 [ false, %merge.326 ], [ %t95, %log.rhs.337 ]
+  br i1 %t88, label %log.rhs.335, label %log.merge.336
+log.rhs.335:
   %t98 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t99 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t98, i32 0, i32 1
   %t100 = load i8*, i8** %t99, align 8
@@ -3342,11 +3429,11 @@ log.rhs.332:
   %t104 = load %struct.Request*, %struct.Request** %t1, align 8
   %t105 = load i1, i1* %isStrict.addr, align 8
   %t106 = call i1 @matchRoutePattern(i8* %t100, i8* %t103, %struct.Request* %t104, i1 %t105)
-  br label %log.merge.333
-log.merge.333:
-  %t97 = phi i1 [ false, %log.merge.335 ], [ %t106, %log.rhs.332 ]
-  br i1 %t97, label %then.336, label %else.337
-then.336:
+  br label %log.merge.336
+log.merge.336:
+  %t97 = phi i1 [ false, %log.merge.338 ], [ %t106, %log.rhs.335 ]
+  br i1 %t97, label %then.339, label %else.340
+then.339:
   store i1 true, i1* %matched.addr, align 8
   %t107 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t108 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t107, i32 0, i32 3
@@ -3358,13 +3445,13 @@ then.336:
   %t112 = load i8*, i8** %rfn0.addr, align 8
   %t113 = bitcast i8* %t112 to void (%struct.Request*, %struct.Response*)*
   call void %t113(%struct.Request* %t110, %struct.Response* %t111)
-  br label %merge.338
-else.337:
+  br label %merge.341
+else.340:
   %t114 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t115 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t114, i32 0, i32 6
   %t116 = load i1, i1* %t115, align 8
-  br i1 %t116, label %log.rhs.341, label %log.merge.342
-log.rhs.341:
+  br i1 %t116, label %log.rhs.344, label %log.merge.345
+log.rhs.344:
   %t118 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t119 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t118, i32 0, i32 4
   %t120 = load i8*, i8** %t119, align 8
@@ -3373,11 +3460,11 @@ log.rhs.341:
   %t123 = load i8*, i8** %t122, align 8
   %t125 = call i32 @strcmp(i8* %t120, i8* %t123)
   %t124 = icmp eq i32 %t125, 0
-  br label %log.merge.342
-log.merge.342:
-  %t117 = phi i1 [ false, %else.337 ], [ %t124, %log.rhs.341 ]
-  br i1 %t117, label %log.rhs.339, label %log.merge.340
-log.rhs.339:
+  br label %log.merge.345
+log.merge.345:
+  %t117 = phi i1 [ false, %else.340 ], [ %t124, %log.rhs.344 ]
+  br i1 %t117, label %log.rhs.342, label %log.merge.343
+log.rhs.342:
   %t127 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t128 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t127, i32 0, i32 5
   %t129 = load i8*, i8** %t128, align 8
@@ -3387,11 +3474,11 @@ log.rhs.339:
   %t133 = load %struct.Request*, %struct.Request** %t1, align 8
   %t134 = load i1, i1* %isStrict.addr, align 8
   %t135 = call i1 @matchRoutePattern(i8* %t129, i8* %t132, %struct.Request* %t133, i1 %t134)
-  br label %log.merge.340
-log.merge.340:
-  %t126 = phi i1 [ false, %log.merge.342 ], [ %t135, %log.rhs.339 ]
-  br i1 %t126, label %then.343, label %else.344
-then.343:
+  br label %log.merge.343
+log.merge.343:
+  %t126 = phi i1 [ false, %log.merge.345 ], [ %t135, %log.rhs.342 ]
+  br i1 %t126, label %then.346, label %else.347
+then.346:
   store i1 true, i1* %matched.addr, align 8
   %t136 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t137 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t136, i32 0, i32 7
@@ -3403,13 +3490,13 @@ then.343:
   %t141 = load i8*, i8** %rfn1.addr, align 8
   %t142 = bitcast i8* %t141 to void (%struct.Request*, %struct.Response*)*
   call void %t142(%struct.Request* %t139, %struct.Response* %t140)
-  br label %merge.345
-else.344:
+  br label %merge.348
+else.347:
   %t143 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t144 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t143, i32 0, i32 10
   %t145 = load i1, i1* %t144, align 8
-  br i1 %t145, label %log.rhs.348, label %log.merge.349
-log.rhs.348:
+  br i1 %t145, label %log.rhs.351, label %log.merge.352
+log.rhs.351:
   %t147 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t148 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t147, i32 0, i32 8
   %t149 = load i8*, i8** %t148, align 8
@@ -3418,11 +3505,11 @@ log.rhs.348:
   %t152 = load i8*, i8** %t151, align 8
   %t154 = call i32 @strcmp(i8* %t149, i8* %t152)
   %t153 = icmp eq i32 %t154, 0
-  br label %log.merge.349
-log.merge.349:
-  %t146 = phi i1 [ false, %else.344 ], [ %t153, %log.rhs.348 ]
-  br i1 %t146, label %log.rhs.346, label %log.merge.347
-log.rhs.346:
+  br label %log.merge.352
+log.merge.352:
+  %t146 = phi i1 [ false, %else.347 ], [ %t153, %log.rhs.351 ]
+  br i1 %t146, label %log.rhs.349, label %log.merge.350
+log.rhs.349:
   %t156 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t157 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t156, i32 0, i32 9
   %t158 = load i8*, i8** %t157, align 8
@@ -3432,11 +3519,11 @@ log.rhs.346:
   %t162 = load %struct.Request*, %struct.Request** %t1, align 8
   %t163 = load i1, i1* %isStrict.addr, align 8
   %t164 = call i1 @matchRoutePattern(i8* %t158, i8* %t161, %struct.Request* %t162, i1 %t163)
-  br label %log.merge.347
-log.merge.347:
-  %t155 = phi i1 [ false, %log.merge.349 ], [ %t164, %log.rhs.346 ]
-  br i1 %t155, label %then.350, label %else.351
-then.350:
+  br label %log.merge.350
+log.merge.350:
+  %t155 = phi i1 [ false, %log.merge.352 ], [ %t164, %log.rhs.349 ]
+  br i1 %t155, label %then.353, label %else.354
+then.353:
   store i1 true, i1* %matched.addr, align 8
   %t165 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t166 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t165, i32 0, i32 11
@@ -3448,13 +3535,13 @@ then.350:
   %t170 = load i8*, i8** %rfn2.addr, align 8
   %t171 = bitcast i8* %t170 to void (%struct.Request*, %struct.Response*)*
   call void %t171(%struct.Request* %t168, %struct.Response* %t169)
-  br label %merge.352
-else.351:
+  br label %merge.355
+else.354:
   %t172 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t173 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t172, i32 0, i32 14
   %t174 = load i1, i1* %t173, align 8
-  br i1 %t174, label %log.rhs.355, label %log.merge.356
-log.rhs.355:
+  br i1 %t174, label %log.rhs.358, label %log.merge.359
+log.rhs.358:
   %t176 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t177 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t176, i32 0, i32 12
   %t178 = load i8*, i8** %t177, align 8
@@ -3463,11 +3550,11 @@ log.rhs.355:
   %t181 = load i8*, i8** %t180, align 8
   %t183 = call i32 @strcmp(i8* %t178, i8* %t181)
   %t182 = icmp eq i32 %t183, 0
-  br label %log.merge.356
-log.merge.356:
-  %t175 = phi i1 [ false, %else.351 ], [ %t182, %log.rhs.355 ]
-  br i1 %t175, label %log.rhs.353, label %log.merge.354
-log.rhs.353:
+  br label %log.merge.359
+log.merge.359:
+  %t175 = phi i1 [ false, %else.354 ], [ %t182, %log.rhs.358 ]
+  br i1 %t175, label %log.rhs.356, label %log.merge.357
+log.rhs.356:
   %t185 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t186 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t185, i32 0, i32 13
   %t187 = load i8*, i8** %t186, align 8
@@ -3477,11 +3564,11 @@ log.rhs.353:
   %t191 = load %struct.Request*, %struct.Request** %t1, align 8
   %t192 = load i1, i1* %isStrict.addr, align 8
   %t193 = call i1 @matchRoutePattern(i8* %t187, i8* %t190, %struct.Request* %t191, i1 %t192)
-  br label %log.merge.354
-log.merge.354:
-  %t184 = phi i1 [ false, %log.merge.356 ], [ %t193, %log.rhs.353 ]
-  br i1 %t184, label %then.357, label %else.358
-then.357:
+  br label %log.merge.357
+log.merge.357:
+  %t184 = phi i1 [ false, %log.merge.359 ], [ %t193, %log.rhs.356 ]
+  br i1 %t184, label %then.360, label %else.361
+then.360:
   store i1 true, i1* %matched.addr, align 8
   %t194 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t195 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t194, i32 0, i32 15
@@ -3493,13 +3580,13 @@ then.357:
   %t199 = load i8*, i8** %rfn3.addr, align 8
   %t200 = bitcast i8* %t199 to void (%struct.Request*, %struct.Response*)*
   call void %t200(%struct.Request* %t197, %struct.Response* %t198)
-  br label %merge.359
-else.358:
+  br label %merge.362
+else.361:
   %t201 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t202 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t201, i32 0, i32 18
   %t203 = load i1, i1* %t202, align 8
-  br i1 %t203, label %log.rhs.362, label %log.merge.363
-log.rhs.362:
+  br i1 %t203, label %log.rhs.365, label %log.merge.366
+log.rhs.365:
   %t205 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t206 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t205, i32 0, i32 16
   %t207 = load i8*, i8** %t206, align 8
@@ -3508,11 +3595,11 @@ log.rhs.362:
   %t210 = load i8*, i8** %t209, align 8
   %t212 = call i32 @strcmp(i8* %t207, i8* %t210)
   %t211 = icmp eq i32 %t212, 0
-  br label %log.merge.363
-log.merge.363:
-  %t204 = phi i1 [ false, %else.358 ], [ %t211, %log.rhs.362 ]
-  br i1 %t204, label %log.rhs.360, label %log.merge.361
-log.rhs.360:
+  br label %log.merge.366
+log.merge.366:
+  %t204 = phi i1 [ false, %else.361 ], [ %t211, %log.rhs.365 ]
+  br i1 %t204, label %log.rhs.363, label %log.merge.364
+log.rhs.363:
   %t214 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t215 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t214, i32 0, i32 17
   %t216 = load i8*, i8** %t215, align 8
@@ -3522,11 +3609,11 @@ log.rhs.360:
   %t220 = load %struct.Request*, %struct.Request** %t1, align 8
   %t221 = load i1, i1* %isStrict.addr, align 8
   %t222 = call i1 @matchRoutePattern(i8* %t216, i8* %t219, %struct.Request* %t220, i1 %t221)
-  br label %log.merge.361
-log.merge.361:
-  %t213 = phi i1 [ false, %log.merge.363 ], [ %t222, %log.rhs.360 ]
-  br i1 %t213, label %then.364, label %else.365
-then.364:
+  br label %log.merge.364
+log.merge.364:
+  %t213 = phi i1 [ false, %log.merge.366 ], [ %t222, %log.rhs.363 ]
+  br i1 %t213, label %then.367, label %else.368
+then.367:
   store i1 true, i1* %matched.addr, align 8
   %t223 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t224 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t223, i32 0, i32 19
@@ -3538,13 +3625,13 @@ then.364:
   %t228 = load i8*, i8** %rfn4.addr, align 8
   %t229 = bitcast i8* %t228 to void (%struct.Request*, %struct.Response*)*
   call void %t229(%struct.Request* %t226, %struct.Response* %t227)
-  br label %merge.366
-else.365:
+  br label %merge.369
+else.368:
   %t230 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t231 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t230, i32 0, i32 22
   %t232 = load i1, i1* %t231, align 8
-  br i1 %t232, label %log.rhs.369, label %log.merge.370
-log.rhs.369:
+  br i1 %t232, label %log.rhs.372, label %log.merge.373
+log.rhs.372:
   %t234 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t235 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t234, i32 0, i32 20
   %t236 = load i8*, i8** %t235, align 8
@@ -3553,11 +3640,11 @@ log.rhs.369:
   %t239 = load i8*, i8** %t238, align 8
   %t241 = call i32 @strcmp(i8* %t236, i8* %t239)
   %t240 = icmp eq i32 %t241, 0
-  br label %log.merge.370
-log.merge.370:
-  %t233 = phi i1 [ false, %else.365 ], [ %t240, %log.rhs.369 ]
-  br i1 %t233, label %log.rhs.367, label %log.merge.368
-log.rhs.367:
+  br label %log.merge.373
+log.merge.373:
+  %t233 = phi i1 [ false, %else.368 ], [ %t240, %log.rhs.372 ]
+  br i1 %t233, label %log.rhs.370, label %log.merge.371
+log.rhs.370:
   %t243 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t244 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t243, i32 0, i32 21
   %t245 = load i8*, i8** %t244, align 8
@@ -3567,11 +3654,11 @@ log.rhs.367:
   %t249 = load %struct.Request*, %struct.Request** %t1, align 8
   %t250 = load i1, i1* %isStrict.addr, align 8
   %t251 = call i1 @matchRoutePattern(i8* %t245, i8* %t248, %struct.Request* %t249, i1 %t250)
-  br label %log.merge.368
-log.merge.368:
-  %t242 = phi i1 [ false, %log.merge.370 ], [ %t251, %log.rhs.367 ]
-  br i1 %t242, label %then.371, label %else.372
-then.371:
+  br label %log.merge.371
+log.merge.371:
+  %t242 = phi i1 [ false, %log.merge.373 ], [ %t251, %log.rhs.370 ]
+  br i1 %t242, label %then.374, label %else.375
+then.374:
   store i1 true, i1* %matched.addr, align 8
   %t252 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t253 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t252, i32 0, i32 23
@@ -3583,13 +3670,13 @@ then.371:
   %t257 = load i8*, i8** %rfn5.addr, align 8
   %t258 = bitcast i8* %t257 to void (%struct.Request*, %struct.Response*)*
   call void %t258(%struct.Request* %t255, %struct.Response* %t256)
-  br label %merge.373
-else.372:
+  br label %merge.376
+else.375:
   %t259 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t260 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t259, i32 0, i32 26
   %t261 = load i1, i1* %t260, align 8
-  br i1 %t261, label %log.rhs.376, label %log.merge.377
-log.rhs.376:
+  br i1 %t261, label %log.rhs.379, label %log.merge.380
+log.rhs.379:
   %t263 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t264 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t263, i32 0, i32 24
   %t265 = load i8*, i8** %t264, align 8
@@ -3598,11 +3685,11 @@ log.rhs.376:
   %t268 = load i8*, i8** %t267, align 8
   %t270 = call i32 @strcmp(i8* %t265, i8* %t268)
   %t269 = icmp eq i32 %t270, 0
-  br label %log.merge.377
-log.merge.377:
-  %t262 = phi i1 [ false, %else.372 ], [ %t269, %log.rhs.376 ]
-  br i1 %t262, label %log.rhs.374, label %log.merge.375
-log.rhs.374:
+  br label %log.merge.380
+log.merge.380:
+  %t262 = phi i1 [ false, %else.375 ], [ %t269, %log.rhs.379 ]
+  br i1 %t262, label %log.rhs.377, label %log.merge.378
+log.rhs.377:
   %t272 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t273 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t272, i32 0, i32 25
   %t274 = load i8*, i8** %t273, align 8
@@ -3612,11 +3699,11 @@ log.rhs.374:
   %t278 = load %struct.Request*, %struct.Request** %t1, align 8
   %t279 = load i1, i1* %isStrict.addr, align 8
   %t280 = call i1 @matchRoutePattern(i8* %t274, i8* %t277, %struct.Request* %t278, i1 %t279)
-  br label %log.merge.375
-log.merge.375:
-  %t271 = phi i1 [ false, %log.merge.377 ], [ %t280, %log.rhs.374 ]
-  br i1 %t271, label %then.378, label %else.379
-then.378:
+  br label %log.merge.378
+log.merge.378:
+  %t271 = phi i1 [ false, %log.merge.380 ], [ %t280, %log.rhs.377 ]
+  br i1 %t271, label %then.381, label %else.382
+then.381:
   store i1 true, i1* %matched.addr, align 8
   %t281 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t282 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t281, i32 0, i32 27
@@ -3628,13 +3715,13 @@ then.378:
   %t286 = load i8*, i8** %rfn6.addr, align 8
   %t287 = bitcast i8* %t286 to void (%struct.Request*, %struct.Response*)*
   call void %t287(%struct.Request* %t284, %struct.Response* %t285)
-  br label %merge.380
-else.379:
+  br label %merge.383
+else.382:
   %t288 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t289 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t288, i32 0, i32 30
   %t290 = load i1, i1* %t289, align 8
-  br i1 %t290, label %log.rhs.383, label %log.merge.384
-log.rhs.383:
+  br i1 %t290, label %log.rhs.386, label %log.merge.387
+log.rhs.386:
   %t292 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t293 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t292, i32 0, i32 28
   %t294 = load i8*, i8** %t293, align 8
@@ -3643,11 +3730,11 @@ log.rhs.383:
   %t297 = load i8*, i8** %t296, align 8
   %t299 = call i32 @strcmp(i8* %t294, i8* %t297)
   %t298 = icmp eq i32 %t299, 0
-  br label %log.merge.384
-log.merge.384:
-  %t291 = phi i1 [ false, %else.379 ], [ %t298, %log.rhs.383 ]
-  br i1 %t291, label %log.rhs.381, label %log.merge.382
-log.rhs.381:
+  br label %log.merge.387
+log.merge.387:
+  %t291 = phi i1 [ false, %else.382 ], [ %t298, %log.rhs.386 ]
+  br i1 %t291, label %log.rhs.384, label %log.merge.385
+log.rhs.384:
   %t301 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t302 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t301, i32 0, i32 29
   %t303 = load i8*, i8** %t302, align 8
@@ -3657,11 +3744,11 @@ log.rhs.381:
   %t307 = load %struct.Request*, %struct.Request** %t1, align 8
   %t308 = load i1, i1* %isStrict.addr, align 8
   %t309 = call i1 @matchRoutePattern(i8* %t303, i8* %t306, %struct.Request* %t307, i1 %t308)
-  br label %log.merge.382
-log.merge.382:
-  %t300 = phi i1 [ false, %log.merge.384 ], [ %t309, %log.rhs.381 ]
-  br i1 %t300, label %then.385, label %merge.387
-then.385:
+  br label %log.merge.385
+log.merge.385:
+  %t300 = phi i1 [ false, %log.merge.387 ], [ %t309, %log.rhs.384 ]
+  br i1 %t300, label %then.388, label %merge.390
+then.388:
   store i1 true, i1* %matched.addr, align 8
   %t310 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t311 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t310, i32 0, i32 31
@@ -3673,40 +3760,40 @@ then.385:
   %t315 = load i8*, i8** %rfn7.addr, align 8
   %t316 = bitcast i8* %t315 to void (%struct.Request*, %struct.Response*)*
   call void %t316(%struct.Request* %t313, %struct.Response* %t314)
-  br label %merge.387
-merge.387:
-  br label %merge.380
-merge.380:
-  br label %merge.373
-merge.373:
-  br label %merge.366
-merge.366:
-  br label %merge.359
-merge.359:
-  br label %merge.352
-merge.352:
-  br label %merge.345
-merge.345:
-  br label %merge.338
-merge.338:
+  br label %merge.390
+merge.390:
+  br label %merge.383
+merge.383:
+  br label %merge.376
+merge.376:
+  br label %merge.369
+merge.369:
+  br label %merge.362
+merge.362:
+  br label %merge.355
+merge.355:
+  br label %merge.348
+merge.348:
+  br label %merge.341
+merge.341:
   %t317 = load i1, i1* %matched.addr, align 8
   %t318 = xor i1 %t317, true
-  br i1 %t318, label %log.rhs.388, label %log.merge.389
-log.rhs.388:
+  br i1 %t318, label %log.rhs.391, label %log.merge.392
+log.rhs.391:
   %t320 = load %struct.Response*, %struct.Response** %t2, align 8
   %t321 = getelementptr inbounds %struct.Response, %struct.Response* %t320, i32 0, i32 4
   %t322 = load i1, i1* %t321, align 8
   %t323 = xor i1 %t322, true
-  br label %log.merge.389
-log.merge.389:
-  %t319 = phi i1 [ false, %merge.338 ], [ %t323, %log.rhs.388 ]
-  br i1 %t319, label %then.390, label %merge.392
-then.390:
+  br label %log.merge.392
+log.merge.392:
+  %t319 = phi i1 [ false, %merge.341 ], [ %t323, %log.rhs.391 ]
+  br i1 %t319, label %then.393, label %merge.395
+then.393:
   %t324 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t325 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t324, i32 0, i32 41
   %t326 = load i1, i1* %t325, align 8
-  br i1 %t326, label %then.393, label %else.394
-then.393:
+  br i1 %t326, label %then.396, label %else.397
+then.396:
   %t327 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t328 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t327, i32 0, i32 40
   %t329 = load i8*, i8** %t328, align 8
@@ -3717,11 +3804,11 @@ then.393:
   %t332 = load i8*, i8** %nfFn.addr, align 8
   %t333 = bitcast i8* %t332 to void (%struct.Request*, %struct.Response*)*
   call void %t333(%struct.Request* %t330, %struct.Response* %t331)
-  br label %merge.395
-else.394:
+  br label %merge.398
+else.397:
   %t334 = load %struct.Response*, %struct.Response** %t2, align 8
   %t335 = call %struct.Response* @_Response_setStatus(%struct.Response* %t334, double 404.0)
-  %t336 = getelementptr inbounds [36 x i8], [36 x i8]* @.str.87, i64 0, i64 0
+  %t336 = getelementptr inbounds [36 x i8], [36 x i8]* @.str.91, i64 0, i64 0
   %t337 = load %struct.Request*, %struct.Request** %t1, align 8
   %t338 = getelementptr inbounds %struct.Request, %struct.Request* %t337, i32 0, i32 1
   %t339 = load i8*, i8** %t338, align 8
@@ -3732,7 +3819,7 @@ else.394:
   %t345 = call i8* @malloc(i64 %t344)
   %t346 = call i8* @strcpy(i8* %t345, i8* %t336)
   %t347 = call i8* @strcat(i8* %t345, i8* %t339)
-  %t348 = getelementptr inbounds [13 x i8], [13 x i8]* @.str.88, i64 0, i64 0
+  %t348 = getelementptr inbounds [13 x i8], [13 x i8]* @.str.92, i64 0, i64 0
   %t350 = call i64 @strlen(i8* %t345)
   %t351 = call i64 @strlen(i8* %t348)
   %t352 = add i64 %t350, %t351
@@ -3750,7 +3837,7 @@ else.394:
   %t365 = call i8* @malloc(i64 %t364)
   %t366 = call i8* @strcpy(i8* %t365, i8* %t354)
   %t367 = call i8* @strcat(i8* %t365, i8* %t359)
-  %t368 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.89, i64 0, i64 0
+  %t368 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.93, i64 0, i64 0
   %t370 = call i64 @strlen(i8* %t365)
   %t371 = call i64 @strlen(i8* %t368)
   %t372 = add i64 %t370, %t371
@@ -3759,19 +3846,19 @@ else.394:
   %t375 = call i8* @strcpy(i8* %t374, i8* %t365)
   %t376 = call i8* @strcat(i8* %t374, i8* %t368)
   call void @_Response_json(%struct.Response* %t335, i8* %t374)
+  br label %merge.398
+merge.398:
   br label %merge.395
 merge.395:
-  br label %merge.392
-merge.392:
   %t377 = load double, double* %slotId.addr, align 8
   %t378 = fcmp oge double %t377, 0.0
-  br i1 %t378, label %then.396, label %merge.398
-then.396:
+  br i1 %t378, label %then.399, label %merge.401
+then.399:
   %t379 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t380 = load double, double* %slotId.addr, align 8
   call void @_VitoApp_releaseArenaSlot(%struct.VitoApp* %t379, double %t380)
-  br label %merge.398
-merge.398:
+  br label %merge.401
+merge.401:
   ret void
 }
 
@@ -3784,7 +3871,7 @@ entry:
   %t2 = alloca i8*, align 8
   store i8* %path, i8** %t2, align 8
   %t3 = load i8*, i8** %t1, align 8
-  %t4 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.90, i64 0, i64 0
+  %t4 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.94, i64 0, i64 0
   %t6 = call i64 @strlen(i8* %t3)
   %t7 = call i64 @strlen(i8* %t4)
   %t8 = add i64 %t6, %t7
@@ -3800,7 +3887,7 @@ entry:
   %t19 = call i8* @malloc(i64 %t18)
   %t20 = call i8* @strcpy(i8* %t19, i8* %t10)
   %t21 = call i8* @strcat(i8* %t19, i8* %t13)
-  %t22 = getelementptr inbounds [31 x i8], [31 x i8]* @.str.91, i64 0, i64 0
+  %t22 = getelementptr inbounds [31 x i8], [31 x i8]* @.str.95, i64 0, i64 0
   %t24 = call i64 @strlen(i8* %t19)
   %t25 = call i64 @strlen(i8* %t22)
   %t26 = add i64 %t24, %t25
@@ -3824,11 +3911,11 @@ entry:
   store double 200.0, double* %t36, align 8
   %t37 = load %struct.Response*, %struct.Response** %res.addr, align 8
   %t38 = getelementptr inbounds %struct.Response, %struct.Response* %t37, i32 0, i32 1
-  %t39 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.92, i64 0, i64 0
+  %t39 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.96, i64 0, i64 0
   store i8* %t39, i8** %t38, align 8
   %t40 = load %struct.Response*, %struct.Response** %res.addr, align 8
   %t41 = getelementptr inbounds %struct.Response, %struct.Response* %t40, i32 0, i32 2
-  %t42 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.93, i64 0, i64 0
+  %t42 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.97, i64 0, i64 0
   store i8* %t42, i8** %t41, align 8
   %t43 = load %struct.Response*, %struct.Response** %res.addr, align 8
   %t44 = getelementptr inbounds %struct.Response, %struct.Response* %t43, i32 0, i32 4
@@ -3838,7 +3925,7 @@ entry:
   store i1 true, i1* %t46, align 8
   %t47 = load %struct.Response*, %struct.Response** %res.addr, align 8
   %t48 = getelementptr inbounds %struct.Response, %struct.Response* %t47, i32 0, i32 6
-  %t49 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.94, i64 0, i64 0
+  %t49 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.98, i64 0, i64 0
   store i8* %t49, i8** %t48, align 8
   %t50 = load %struct.Response*, %struct.Response** %res.addr, align 8
   %t51 = getelementptr inbounds %struct.Response, %struct.Response* %t50, i32 0, i32 3
@@ -3860,13 +3947,13 @@ entry:
   store %struct.VitoApp* %this, %struct.VitoApp** %t0, align 8
   %t1 = alloca double, align 8
   store double %port, double* %t1, align 8
-  %t2 = getelementptr inbounds [42 x i8], [42 x i8]* @.str.95, i64 0, i64 0
+  %t2 = getelementptr inbounds [42 x i8], [42 x i8]* @.str.99, i64 0, i64 0
   %t3 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
   %t4 = call i32 (i8*, ...) @printf(i8* %t3, i8* %t2)
-  %t5 = getelementptr inbounds [47 x i8], [47 x i8]* @.str.96, i64 0, i64 0
+  %t5 = getelementptr inbounds [47 x i8], [47 x i8]* @.str.100, i64 0, i64 0
   %t6 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
   %t7 = call i32 (i8*, ...) @printf(i8* %t6, i8* %t5)
-  %t8 = getelementptr inbounds [31 x i8], [31 x i8]* @.str.97, i64 0, i64 0
+  %t8 = getelementptr inbounds [31 x i8], [31 x i8]* @.str.101, i64 0, i64 0
   %t9 = load double, double* %t1, align 8
   %t11 = call i8* @malloc(i64 64)
   %t12 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_num, i64 0, i64 0
@@ -3880,7 +3967,7 @@ entry:
   %t19 = call i8* @strcat(i8* %t17, i8* %t11)
   %t20 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
   %t21 = call i32 (i8*, ...) @printf(i8* %t20, i8* %t17)
-  %t22 = getelementptr inbounds [25 x i8], [25 x i8]* @.str.98, i64 0, i64 0
+  %t22 = getelementptr inbounds [25 x i8], [25 x i8]* @.str.102, i64 0, i64 0
   %t23 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t24 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t23, i32 0, i32 45
   %t25 = load double, double* %t24, align 8
@@ -3894,7 +3981,7 @@ entry:
   %t33 = call i8* @malloc(i64 %t32)
   %t34 = call i8* @strcpy(i8* %t33, i8* %t22)
   %t35 = call i8* @strcat(i8* %t33, i8* %t27)
-  %t36 = getelementptr inbounds [7 x i8], [7 x i8]* @.str.99, i64 0, i64 0
+  %t36 = getelementptr inbounds [7 x i8], [7 x i8]* @.str.103, i64 0, i64 0
   %t38 = call i64 @strlen(i8* %t33)
   %t39 = call i64 @strlen(i8* %t36)
   %t40 = add i64 %t38, %t39
@@ -3904,7 +3991,7 @@ entry:
   %t44 = call i8* @strcat(i8* %t42, i8* %t36)
   %t45 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
   %t46 = call i32 (i8*, ...) @printf(i8* %t45, i8* %t42)
-  %t47 = getelementptr inbounds [21 x i8], [21 x i8]* @.str.100, i64 0, i64 0
+  %t47 = getelementptr inbounds [21 x i8], [21 x i8]* @.str.104, i64 0, i64 0
   %t48 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t49 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t48, i32 0, i32 38
   %t50 = load double, double* %t49, align 8
@@ -3920,7 +4007,7 @@ entry:
   %t60 = call i8* @strcat(i8* %t58, i8* %t52)
   %t61 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
   %t62 = call i32 (i8*, ...) @printf(i8* %t61, i8* %t58)
-  %t63 = getelementptr inbounds [22 x i8], [22 x i8]* @.str.101, i64 0, i64 0
+  %t63 = getelementptr inbounds [22 x i8], [22 x i8]* @.str.105, i64 0, i64 0
   %t64 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t65 = getelementptr inbounds %struct.VitoApp, %struct.VitoApp* %t64, i32 0, i32 39
   %t66 = load double, double* %t65, align 8
@@ -3936,20 +4023,20 @@ entry:
   %t76 = call i8* @strcat(i8* %t74, i8* %t68)
   %t77 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
   %t78 = call i32 (i8*, ...) @printf(i8* %t77, i8* %t74)
-  %t79 = getelementptr inbounds [42 x i8], [42 x i8]* @.str.102, i64 0, i64 0
+  %t79 = getelementptr inbounds [42 x i8], [42 x i8]* @.str.106, i64 0, i64 0
   %t80 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
   %t81 = call i32 (i8*, ...) @printf(i8* %t80, i8* %t79)
-  %t82 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.103, i64 0, i64 0
+  %t82 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.107, i64 0, i64 0
   %t83 = load double, double* %t1, align 8
   %t84 = call %struct.TcpListener* @listenTcp(i8* %t82, double %t83)
   %listener.addr = alloca %struct.TcpListener*, align 8
   %t85 = alloca %struct.TcpListener, align 8
   store %struct.TcpListener* %t85, %struct.TcpListener** %listener.addr, align 8
   store %struct.TcpListener* %t84, %struct.TcpListener** %listener.addr, align 8
-  br label %while.cond.399
-while.cond.399:
-  br i1 true, label %while.body.400, label %while.end.401
-while.body.400:
+  br label %while.cond.402
+while.cond.402:
+  br i1 true, label %while.body.403, label %while.end.404
+while.body.403:
   %t86 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t87 = call double @_VitoApp_acquireBuffer(%struct.VitoApp* %t86)
   %bufId.addr = alloca double, align 8
@@ -3968,8 +4055,8 @@ while.body.400:
   %t94 = call i64 @strlen(i8* %t93)
   %t95 = uitofp i64 %t94 to double
   %t96 = fcmp ogt double %t95, 0.0
-  br i1 %t96, label %then.402, label %else.403
-then.402:
+  br i1 %t96, label %then.405, label %else.406
+then.405:
   %t97 = load i8*, i8** %rawData.addr, align 8
   %t98 = call %struct.Request* @parseHttpRequest(i8* %t97)
   %req.addr = alloca %struct.Request*, align 8
@@ -3984,11 +4071,11 @@ then.402:
   store double 200.0, double* %t102, align 8
   %t103 = load %struct.Response*, %struct.Response** %res.addr, align 8
   %t104 = getelementptr inbounds %struct.Response, %struct.Response* %t103, i32 0, i32 1
-  %t105 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.104, i64 0, i64 0
+  %t105 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.108, i64 0, i64 0
   store i8* %t105, i8** %t104, align 8
   %t106 = load %struct.Response*, %struct.Response** %res.addr, align 8
   %t107 = getelementptr inbounds %struct.Response, %struct.Response* %t106, i32 0, i32 2
-  %t108 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.105, i64 0, i64 0
+  %t108 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.109, i64 0, i64 0
   store i8* %t108, i8** %t107, align 8
   %t109 = load %struct.Response*, %struct.Response** %res.addr, align 8
   %t110 = getelementptr inbounds %struct.Response, %struct.Response* %t109, i32 0, i32 3
@@ -4002,240 +4089,1260 @@ then.402:
   store i1 false, i1* %t115, align 8
   %t116 = load %struct.Response*, %struct.Response** %res.addr, align 8
   %t117 = getelementptr inbounds %struct.Response, %struct.Response* %t116, i32 0, i32 6
-  %t118 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.106, i64 0, i64 0
+  %t118 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.110, i64 0, i64 0
   store i8* %t118, i8** %t117, align 8
   %t119 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t120 = load %struct.Request*, %struct.Request** %req.addr, align 8
   %t121 = load %struct.Response*, %struct.Response** %res.addr, align 8
   call void @_VitoApp_handleRequest(%struct.VitoApp* %t119, %struct.Request* %t120, %struct.Response* %t121)
-  br label %merge.404
-else.403:
+  br label %merge.407
+else.406:
   %t122 = load %struct.TcpStream*, %struct.TcpStream** %stream.addr, align 8
   call void @_TcpStream_close(%struct.TcpStream* %t122)
-  br label %merge.404
-merge.404:
+  br label %merge.407
+merge.407:
   %t123 = load double, double* %bufId.addr, align 8
   %t124 = fcmp oge double %t123, 0.0
-  br i1 %t124, label %then.405, label %merge.407
-then.405:
+  br i1 %t124, label %then.408, label %merge.410
+then.408:
   %t125 = load %struct.VitoApp*, %struct.VitoApp** %t0, align 8
   %t126 = load double, double* %bufId.addr, align 8
   call void @_VitoApp_releaseBuffer(%struct.VitoApp* %t125, double %t126)
-  br label %merge.407
-merge.407:
-  br label %while.cond.399
-while.end.401:
+  br label %merge.410
+merge.410:
+  br label %while.cond.402
+while.end.404:
   ret void
+}
+
+define %struct.FileValidationEngine* @_FileValidationEngine_init(%struct.FileValidationEngine* %this, double %maxSize, i8* %exts, i8* %mimes) {
+entry:
+  %t0 = alloca %struct.FileValidationEngine*, align 8
+  store %struct.FileValidationEngine* %this, %struct.FileValidationEngine** %t0, align 8
+  %t1 = alloca double, align 8
+  store double %maxSize, double* %t1, align 8
+  %t2 = alloca i8*, align 8
+  store i8* %exts, i8** %t2, align 8
+  %t3 = alloca i8*, align 8
+  store i8* %mimes, i8** %t3, align 8
+  %t4 = load %struct.FileValidationEngine*, %struct.FileValidationEngine** %t0, align 8
+  %t5 = getelementptr inbounds %struct.FileValidationEngine, %struct.FileValidationEngine* %t4, i32 0, i32 0
+  %t6 = load double, double* %t1, align 8
+  store double %t6, double* %t5, align 8
+  %t7 = load %struct.FileValidationEngine*, %struct.FileValidationEngine** %t0, align 8
+  %t8 = getelementptr inbounds %struct.FileValidationEngine, %struct.FileValidationEngine* %t7, i32 0, i32 1
+  %t9 = load i8*, i8** %t2, align 8
+  store i8* %t9, i8** %t8, align 8
+  %t10 = load %struct.FileValidationEngine*, %struct.FileValidationEngine** %t0, align 8
+  %t11 = getelementptr inbounds %struct.FileValidationEngine, %struct.FileValidationEngine* %t10, i32 0, i32 2
+  %t12 = load i8*, i8** %t3, align 8
+  store i8* %t12, i8** %t11, align 8
+  %t13 = load %struct.FileValidationEngine*, %struct.FileValidationEngine** %t0, align 8
+  ret %struct.FileValidationEngine* %t13
+}
+
+define i1 @_FileValidationEngine_validate(%struct.FileValidationEngine* %this, %struct.UploadedFile* %file) {
+entry:
+  %t0 = alloca %struct.FileValidationEngine*, align 8
+  store %struct.FileValidationEngine* %this, %struct.FileValidationEngine** %t0, align 8
+  %t1 = alloca %struct.UploadedFile*, align 8
+  store %struct.UploadedFile* %file, %struct.UploadedFile** %t1, align 8
+  %t2 = load %struct.UploadedFile*, %struct.UploadedFile** %t1, align 8
+  %t3 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t2, i32 0, i32 5
+  %t4 = load i1, i1* %t3, align 8
+  %t5 = xor i1 %t4, true
+  br i1 %t5, label %then.411, label %merge.413
+then.411:
+  ret i1 false
+merge.413:
+  %t6 = load %struct.UploadedFile*, %struct.UploadedFile** %t1, align 8
+  %t7 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t6, i32 0, i32 3
+  %t8 = load double, double* %t7, align 8
+  %t9 = load %struct.FileValidationEngine*, %struct.FileValidationEngine** %t0, align 8
+  %t10 = getelementptr inbounds %struct.FileValidationEngine, %struct.FileValidationEngine* %t9, i32 0, i32 0
+  %t11 = load double, double* %t10, align 8
+  %t12 = fcmp ogt double %t8, %t11
+  br i1 %t12, label %then.414, label %merge.416
+then.414:
+  %t13 = load %struct.UploadedFile*, %struct.UploadedFile** %t1, align 8
+  %t14 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t13, i32 0, i32 5
+  store i1 false, i1* %t14, align 8
+  %t15 = load %struct.UploadedFile*, %struct.UploadedFile** %t1, align 8
+  %t16 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t15, i32 0, i32 6
+  %t17 = getelementptr inbounds [26 x i8], [26 x i8]* @.str.111, i64 0, i64 0
+  %t18 = load %struct.UploadedFile*, %struct.UploadedFile** %t1, align 8
+  %t19 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t18, i32 0, i32 3
+  %t20 = load double, double* %t19, align 8
+  %t22 = call i8* @malloc(i64 64)
+  %t23 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_num, i64 0, i64 0
+  call i32 (i8*, i8*, ...) @sprintf(i8* %t22, i8* %t23, double %t20)
+  %t24 = call i64 @strlen(i8* %t17)
+  %t25 = call i64 @strlen(i8* %t22)
+  %t26 = add i64 %t24, %t25
+  %t27 = add i64 %t26, 1
+  %t28 = call i8* @malloc(i64 %t27)
+  %t29 = call i8* @strcpy(i8* %t28, i8* %t17)
+  %t30 = call i8* @strcat(i8* %t28, i8* %t22)
+  %t31 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.112, i64 0, i64 0
+  %t33 = call i64 @strlen(i8* %t28)
+  %t34 = call i64 @strlen(i8* %t31)
+  %t35 = add i64 %t33, %t34
+  %t36 = add i64 %t35, 1
+  %t37 = call i8* @malloc(i64 %t36)
+  %t38 = call i8* @strcpy(i8* %t37, i8* %t28)
+  %t39 = call i8* @strcat(i8* %t37, i8* %t31)
+  %t40 = load %struct.FileValidationEngine*, %struct.FileValidationEngine** %t0, align 8
+  %t41 = getelementptr inbounds %struct.FileValidationEngine, %struct.FileValidationEngine* %t40, i32 0, i32 0
+  %t42 = load double, double* %t41, align 8
+  %t44 = call i8* @malloc(i64 64)
+  %t45 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_num, i64 0, i64 0
+  call i32 (i8*, i8*, ...) @sprintf(i8* %t44, i8* %t45, double %t42)
+  %t46 = call i64 @strlen(i8* %t37)
+  %t47 = call i64 @strlen(i8* %t44)
+  %t48 = add i64 %t46, %t47
+  %t49 = add i64 %t48, 1
+  %t50 = call i8* @malloc(i64 %t49)
+  %t51 = call i8* @strcpy(i8* %t50, i8* %t37)
+  %t52 = call i8* @strcat(i8* %t50, i8* %t44)
+  %t53 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.113, i64 0, i64 0
+  %t55 = call i64 @strlen(i8* %t50)
+  %t56 = call i64 @strlen(i8* %t53)
+  %t57 = add i64 %t55, %t56
+  %t58 = add i64 %t57, 1
+  %t59 = call i8* @malloc(i64 %t58)
+  %t60 = call i8* @strcpy(i8* %t59, i8* %t50)
+  %t61 = call i8* @strcat(i8* %t59, i8* %t53)
+  store i8* %t59, i8** %t16, align 8
+  ret i1 false
+merge.416:
+  %t62 = load %struct.FileValidationEngine*, %struct.FileValidationEngine** %t0, align 8
+  %t63 = getelementptr inbounds %struct.FileValidationEngine, %struct.FileValidationEngine* %t62, i32 0, i32 2
+  %t64 = load i8*, i8** %t63, align 8
+  %t65 = call i64 @strlen(i8* %t64)
+  %t66 = uitofp i64 %t65 to double
+  %t67 = fcmp ogt double %t66, 0.0
+  br i1 %t67, label %log.rhs.417, label %log.merge.418
+log.rhs.417:
+  %t69 = load %struct.FileValidationEngine*, %struct.FileValidationEngine** %t0, align 8
+  %t70 = getelementptr inbounds %struct.FileValidationEngine, %struct.FileValidationEngine* %t69, i32 0, i32 2
+  %t71 = load i8*, i8** %t70, align 8
+  %t72 = load %struct.UploadedFile*, %struct.UploadedFile** %t1, align 8
+  %t73 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t72, i32 0, i32 2
+  %t74 = load i8*, i8** %t73, align 8
+  %t75 = call double @uploadStringIndexOf(i8* %t71, i8* %t74)
+  %t76 = fcmp olt double %t75, 0.0
+  br label %log.merge.418
+log.merge.418:
+  %t68 = phi i1 [ false, %merge.416 ], [ %t76, %log.rhs.417 ]
+  br i1 %t68, label %then.419, label %merge.421
+then.419:
+  %t77 = load %struct.UploadedFile*, %struct.UploadedFile** %t1, align 8
+  %t78 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t77, i32 0, i32 5
+  store i1 false, i1* %t78, align 8
+  %t79 = load %struct.UploadedFile*, %struct.UploadedFile** %t1, align 8
+  %t80 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t79, i32 0, i32 6
+  %t81 = getelementptr inbounds [24 x i8], [24 x i8]* @.str.114, i64 0, i64 0
+  %t82 = load %struct.UploadedFile*, %struct.UploadedFile** %t1, align 8
+  %t83 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t82, i32 0, i32 2
+  %t84 = load i8*, i8** %t83, align 8
+  %t86 = call i64 @strlen(i8* %t81)
+  %t87 = call i64 @strlen(i8* %t84)
+  %t88 = add i64 %t86, %t87
+  %t89 = add i64 %t88, 1
+  %t90 = call i8* @malloc(i64 %t89)
+  %t91 = call i8* @strcpy(i8* %t90, i8* %t81)
+  %t92 = call i8* @strcat(i8* %t90, i8* %t84)
+  store i8* %t90, i8** %t80, align 8
+  ret i1 false
+merge.421:
+  ret i1 true
+}
+
+define void @_SessionStore_init(%struct.SessionStore* %this) {
+entry:
+  %t0 = alloca %struct.SessionStore*, align 8
+  store %struct.SessionStore* %this, %struct.SessionStore** %t0, align 8
+  %t1 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t2 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t1, i32 0, i32 0
+  %t3 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.115, i64 0, i64 0
+  store i8* %t3, i8** %t2, align 8
+  %t4 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t5 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t4, i32 0, i32 1
+  %t6 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.116, i64 0, i64 0
+  store i8* %t6, i8** %t5, align 8
+  %t7 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t8 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t7, i32 0, i32 2
+  store i1 false, i1* %t8, align 8
+  %t9 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t10 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t9, i32 0, i32 3
+  %t11 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.117, i64 0, i64 0
+  store i8* %t11, i8** %t10, align 8
+  %t12 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t13 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t12, i32 0, i32 4
+  %t14 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.118, i64 0, i64 0
+  store i8* %t14, i8** %t13, align 8
+  %t15 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t16 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t15, i32 0, i32 5
+  store i1 false, i1* %t16, align 8
+  %t17 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t18 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t17, i32 0, i32 6
+  %t19 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.119, i64 0, i64 0
+  store i8* %t19, i8** %t18, align 8
+  %t20 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t21 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t20, i32 0, i32 7
+  %t22 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.120, i64 0, i64 0
+  store i8* %t22, i8** %t21, align 8
+  %t23 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t24 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t23, i32 0, i32 8
+  store i1 false, i1* %t24, align 8
+  %t25 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t26 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t25, i32 0, i32 9
+  store double 0.0, double* %t26, align 8
+  ret void
+}
+
+define void @_SessionStore_createSession(%struct.SessionStore* %this, i8* %sid, i8* %data) {
+entry:
+  %t0 = alloca %struct.SessionStore*, align 8
+  store %struct.SessionStore* %this, %struct.SessionStore** %t0, align 8
+  %t1 = alloca i8*, align 8
+  store i8* %sid, i8** %t1, align 8
+  %t2 = alloca i8*, align 8
+  store i8* %data, i8** %t2, align 8
+  %t3 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t4 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t3, i32 0, i32 2
+  %t5 = load i1, i1* %t4, align 8
+  %t6 = xor i1 %t5, true
+  br i1 %t6, label %then.422, label %else.423
+then.422:
+  %t7 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t8 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t7, i32 0, i32 0
+  %t9 = load i8*, i8** %t1, align 8
+  store i8* %t9, i8** %t8, align 8
+  %t10 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t11 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t10, i32 0, i32 1
+  %t12 = load i8*, i8** %t2, align 8
+  store i8* %t12, i8** %t11, align 8
+  %t13 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t14 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t13, i32 0, i32 2
+  store i1 true, i1* %t14, align 8
+  br label %merge.424
+else.423:
+  %t15 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t16 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t15, i32 0, i32 5
+  %t17 = load i1, i1* %t16, align 8
+  %t18 = xor i1 %t17, true
+  br i1 %t18, label %then.425, label %else.426
+then.425:
+  %t19 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t20 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t19, i32 0, i32 3
+  %t21 = load i8*, i8** %t1, align 8
+  store i8* %t21, i8** %t20, align 8
+  %t22 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t23 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t22, i32 0, i32 4
+  %t24 = load i8*, i8** %t2, align 8
+  store i8* %t24, i8** %t23, align 8
+  %t25 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t26 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t25, i32 0, i32 5
+  store i1 true, i1* %t26, align 8
+  br label %merge.427
+else.426:
+  %t27 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t28 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t27, i32 0, i32 8
+  %t29 = load i1, i1* %t28, align 8
+  %t30 = xor i1 %t29, true
+  br i1 %t30, label %then.428, label %merge.430
+then.428:
+  %t31 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t32 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t31, i32 0, i32 6
+  %t33 = load i8*, i8** %t1, align 8
+  store i8* %t33, i8** %t32, align 8
+  %t34 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t35 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t34, i32 0, i32 7
+  %t36 = load i8*, i8** %t2, align 8
+  store i8* %t36, i8** %t35, align 8
+  %t37 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t38 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t37, i32 0, i32 8
+  store i1 true, i1* %t38, align 8
+  br label %merge.430
+merge.430:
+  br label %merge.427
+merge.427:
+  br label %merge.424
+merge.424:
+  %t39 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t40 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t39, i32 0, i32 9
+  %t41 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t42 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t41, i32 0, i32 9
+  %t43 = load double, double* %t42, align 8
+  %t44 = fadd double %t43, 1.0
+  store double %t44, double* %t40, align 8
+  ret void
+}
+
+define i8* @_SessionStore_getSession(%struct.SessionStore* %this, i8* %sid) {
+entry:
+  %t0 = alloca %struct.SessionStore*, align 8
+  store %struct.SessionStore* %this, %struct.SessionStore** %t0, align 8
+  %t1 = alloca i8*, align 8
+  store i8* %sid, i8** %t1, align 8
+  %t2 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t3 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t2, i32 0, i32 2
+  %t4 = load i1, i1* %t3, align 8
+  br i1 %t4, label %log.rhs.431, label %log.merge.432
+log.rhs.431:
+  %t6 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t7 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t6, i32 0, i32 0
+  %t8 = load i8*, i8** %t7, align 8
+  %t9 = load i8*, i8** %t1, align 8
+  %t11 = call i32 @strcmp(i8* %t8, i8* %t9)
+  %t10 = icmp eq i32 %t11, 0
+  br label %log.merge.432
+log.merge.432:
+  %t5 = phi i1 [ false, %entry ], [ %t10, %log.rhs.431 ]
+  br i1 %t5, label %then.433, label %merge.435
+then.433:
+  %t12 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t13 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t12, i32 0, i32 1
+  %t14 = load i8*, i8** %t13, align 8
+  ret i8* %t14
+merge.435:
+  %t15 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t16 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t15, i32 0, i32 5
+  %t17 = load i1, i1* %t16, align 8
+  br i1 %t17, label %log.rhs.436, label %log.merge.437
+log.rhs.436:
+  %t19 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t20 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t19, i32 0, i32 3
+  %t21 = load i8*, i8** %t20, align 8
+  %t22 = load i8*, i8** %t1, align 8
+  %t24 = call i32 @strcmp(i8* %t21, i8* %t22)
+  %t23 = icmp eq i32 %t24, 0
+  br label %log.merge.437
+log.merge.437:
+  %t18 = phi i1 [ false, %merge.435 ], [ %t23, %log.rhs.436 ]
+  br i1 %t18, label %then.438, label %merge.440
+then.438:
+  %t25 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t26 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t25, i32 0, i32 4
+  %t27 = load i8*, i8** %t26, align 8
+  ret i8* %t27
+merge.440:
+  %t28 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t29 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t28, i32 0, i32 8
+  %t30 = load i1, i1* %t29, align 8
+  br i1 %t30, label %log.rhs.441, label %log.merge.442
+log.rhs.441:
+  %t32 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t33 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t32, i32 0, i32 6
+  %t34 = load i8*, i8** %t33, align 8
+  %t35 = load i8*, i8** %t1, align 8
+  %t37 = call i32 @strcmp(i8* %t34, i8* %t35)
+  %t36 = icmp eq i32 %t37, 0
+  br label %log.merge.442
+log.merge.442:
+  %t31 = phi i1 [ false, %merge.440 ], [ %t36, %log.rhs.441 ]
+  br i1 %t31, label %then.443, label %merge.445
+then.443:
+  %t38 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t39 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t38, i32 0, i32 7
+  %t40 = load i8*, i8** %t39, align 8
+  ret i8* %t40
+merge.445:
+  %t41 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.121, i64 0, i64 0
+  ret i8* %t41
+}
+
+define void @_SessionStore_destroySession(%struct.SessionStore* %this, i8* %sid) {
+entry:
+  %t0 = alloca %struct.SessionStore*, align 8
+  store %struct.SessionStore* %this, %struct.SessionStore** %t0, align 8
+  %t1 = alloca i8*, align 8
+  store i8* %sid, i8** %t1, align 8
+  %t2 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t3 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t2, i32 0, i32 2
+  %t4 = load i1, i1* %t3, align 8
+  br i1 %t4, label %log.rhs.446, label %log.merge.447
+log.rhs.446:
+  %t6 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t7 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t6, i32 0, i32 0
+  %t8 = load i8*, i8** %t7, align 8
+  %t9 = load i8*, i8** %t1, align 8
+  %t11 = call i32 @strcmp(i8* %t8, i8* %t9)
+  %t10 = icmp eq i32 %t11, 0
+  br label %log.merge.447
+log.merge.447:
+  %t5 = phi i1 [ false, %entry ], [ %t10, %log.rhs.446 ]
+  br i1 %t5, label %then.448, label %merge.450
+then.448:
+  %t12 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t13 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t12, i32 0, i32 2
+  store i1 false, i1* %t13, align 8
+  br label %merge.450
+merge.450:
+  %t14 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t15 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t14, i32 0, i32 5
+  %t16 = load i1, i1* %t15, align 8
+  br i1 %t16, label %log.rhs.451, label %log.merge.452
+log.rhs.451:
+  %t18 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t19 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t18, i32 0, i32 3
+  %t20 = load i8*, i8** %t19, align 8
+  %t21 = load i8*, i8** %t1, align 8
+  %t23 = call i32 @strcmp(i8* %t20, i8* %t21)
+  %t22 = icmp eq i32 %t23, 0
+  br label %log.merge.452
+log.merge.452:
+  %t17 = phi i1 [ false, %merge.450 ], [ %t22, %log.rhs.451 ]
+  br i1 %t17, label %then.453, label %merge.455
+then.453:
+  %t24 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t25 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t24, i32 0, i32 5
+  store i1 false, i1* %t25, align 8
+  br label %merge.455
+merge.455:
+  %t26 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t27 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t26, i32 0, i32 8
+  %t28 = load i1, i1* %t27, align 8
+  br i1 %t28, label %log.rhs.456, label %log.merge.457
+log.rhs.456:
+  %t30 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t31 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t30, i32 0, i32 6
+  %t32 = load i8*, i8** %t31, align 8
+  %t33 = load i8*, i8** %t1, align 8
+  %t35 = call i32 @strcmp(i8* %t32, i8* %t33)
+  %t34 = icmp eq i32 %t35, 0
+  br label %log.merge.457
+log.merge.457:
+  %t29 = phi i1 [ false, %merge.455 ], [ %t34, %log.rhs.456 ]
+  br i1 %t29, label %then.458, label %merge.460
+then.458:
+  %t36 = load %struct.SessionStore*, %struct.SessionStore** %t0, align 8
+  %t37 = getelementptr inbounds %struct.SessionStore, %struct.SessionStore* %t36, i32 0, i32 8
+  store i1 false, i1* %t37, align 8
+  br label %merge.460
+merge.460:
+  ret void
+}
+
+define void @_HealthEngine_init(%struct.HealthEngine* %this) {
+entry:
+  %t0 = alloca %struct.HealthEngine*, align 8
+  store %struct.HealthEngine* %this, %struct.HealthEngine** %t0, align 8
+  %t1 = load %struct.HealthEngine*, %struct.HealthEngine** %t0, align 8
+  %t2 = getelementptr inbounds %struct.HealthEngine, %struct.HealthEngine* %t1, i32 0, i32 0
+  store double 0.0, double* %t2, align 8
+  %t3 = load %struct.HealthEngine*, %struct.HealthEngine** %t0, align 8
+  %t4 = getelementptr inbounds %struct.HealthEngine, %struct.HealthEngine* %t3, i32 0, i32 1
+  store double 0.0, double* %t4, align 8
+  %t5 = load %struct.HealthEngine*, %struct.HealthEngine** %t0, align 8
+  %t6 = getelementptr inbounds %struct.HealthEngine, %struct.HealthEngine* %t5, i32 0, i32 2
+  store i1 false, i1* %t6, align 8
+  ret void
+}
+
+define void @_HealthEngine_increment(%struct.HealthEngine* %this) {
+entry:
+  %t0 = alloca %struct.HealthEngine*, align 8
+  store %struct.HealthEngine* %this, %struct.HealthEngine** %t0, align 8
+  %t1 = load %struct.HealthEngine*, %struct.HealthEngine** %t0, align 8
+  %t2 = getelementptr inbounds %struct.HealthEngine, %struct.HealthEngine* %t1, i32 0, i32 0
+  %t3 = load %struct.HealthEngine*, %struct.HealthEngine** %t0, align 8
+  %t4 = getelementptr inbounds %struct.HealthEngine, %struct.HealthEngine* %t3, i32 0, i32 0
+  %t5 = load double, double* %t4, align 8
+  %t6 = fadd double %t5, 1.0
+  store double %t6, double* %t2, align 8
+  %t7 = load %struct.HealthEngine*, %struct.HealthEngine** %t0, align 8
+  %t8 = getelementptr inbounds %struct.HealthEngine, %struct.HealthEngine* %t7, i32 0, i32 1
+  %t9 = load %struct.HealthEngine*, %struct.HealthEngine** %t0, align 8
+  %t10 = getelementptr inbounds %struct.HealthEngine, %struct.HealthEngine* %t9, i32 0, i32 1
+  %t11 = load double, double* %t10, align 8
+  %t12 = fadd double %t11, 1.0
+  store double %t12, double* %t8, align 8
+  ret void
+}
+
+define void @_HealthEngine_decrement(%struct.HealthEngine* %this) {
+entry:
+  %t0 = alloca %struct.HealthEngine*, align 8
+  store %struct.HealthEngine* %this, %struct.HealthEngine** %t0, align 8
+  %t1 = load %struct.HealthEngine*, %struct.HealthEngine** %t0, align 8
+  %t2 = getelementptr inbounds %struct.HealthEngine, %struct.HealthEngine* %t1, i32 0, i32 0
+  %t3 = load double, double* %t2, align 8
+  %t4 = fcmp ogt double %t3, 0.0
+  br i1 %t4, label %then.461, label %merge.463
+then.461:
+  %t5 = load %struct.HealthEngine*, %struct.HealthEngine** %t0, align 8
+  %t6 = getelementptr inbounds %struct.HealthEngine, %struct.HealthEngine* %t5, i32 0, i32 0
+  %t7 = load %struct.HealthEngine*, %struct.HealthEngine** %t0, align 8
+  %t8 = getelementptr inbounds %struct.HealthEngine, %struct.HealthEngine* %t7, i32 0, i32 0
+  %t9 = load double, double* %t8, align 8
+  %t10 = fsub double %t9, 1.0
+  store double %t10, double* %t6, align 8
+  br label %merge.463
+merge.463:
+  ret void
+}
+
+define void @_HealthEngine_triggerShutdown(%struct.HealthEngine* %this) {
+entry:
+  %t0 = alloca %struct.HealthEngine*, align 8
+  store %struct.HealthEngine* %this, %struct.HealthEngine** %t0, align 8
+  %t1 = load %struct.HealthEngine*, %struct.HealthEngine** %t0, align 8
+  %t2 = getelementptr inbounds %struct.HealthEngine, %struct.HealthEngine* %t1, i32 0, i32 2
+  store i1 true, i1* %t2, align 8
+  ret void
+}
+
+define i1 @_HealthEngine_handleRequest(%struct.HealthEngine* %this, %struct.Request* %req, %struct.Response* %res) {
+entry:
+  %t0 = alloca %struct.HealthEngine*, align 8
+  store %struct.HealthEngine* %this, %struct.HealthEngine** %t0, align 8
+  %t1 = alloca %struct.Request*, align 8
+  store %struct.Request* %req, %struct.Request** %t1, align 8
+  %t2 = alloca %struct.Response*, align 8
+  store %struct.Response* %res, %struct.Response** %t2, align 8
+  %t3 = load %struct.Request*, %struct.Request** %t1, align 8
+  %t4 = getelementptr inbounds %struct.Request, %struct.Request* %t3, i32 0, i32 0
+  %t5 = load i8*, i8** %t4, align 8
+  %t6 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.122, i64 0, i64 0
+  %t8 = call i32 @strcmp(i8* %t5, i8* %t6)
+  %t7 = icmp eq i32 %t8, 0
+  br i1 %t7, label %log.rhs.464, label %log.merge.465
+log.rhs.464:
+  %t10 = load %struct.Request*, %struct.Request** %t1, align 8
+  %t11 = getelementptr inbounds %struct.Request, %struct.Request* %t10, i32 0, i32 1
+  %t12 = load i8*, i8** %t11, align 8
+  %t13 = getelementptr inbounds [9 x i8], [9 x i8]* @.str.123, i64 0, i64 0
+  %t15 = call i32 @strcmp(i8* %t12, i8* %t13)
+  %t14 = icmp eq i32 %t15, 0
+  br label %log.merge.465
+log.merge.465:
+  %t9 = phi i1 [ false, %entry ], [ %t14, %log.rhs.464 ]
+  br i1 %t9, label %then.466, label %merge.468
+then.466:
+  %t16 = load %struct.HealthEngine*, %struct.HealthEngine** %t0, align 8
+  %t17 = getelementptr inbounds %struct.HealthEngine, %struct.HealthEngine* %t16, i32 0, i32 0
+  %t18 = load double, double* %t17, align 8
+  %active.addr = alloca double, align 8
+  store double %t18, double* %active.addr, align 8
+  %t19 = load %struct.HealthEngine*, %struct.HealthEngine** %t0, align 8
+  %t20 = getelementptr inbounds %struct.HealthEngine, %struct.HealthEngine* %t19, i32 0, i32 1
+  %t21 = load double, double* %t20, align 8
+  %total.addr = alloca double, align 8
+  store double %t21, double* %total.addr, align 8
+  %t22 = load %struct.Response*, %struct.Response** %t2, align 8
+  %t23 = call %struct.Response* @_Response_setStatus(%struct.Response* %t22, double 200.0)
+  %t24 = getelementptr inbounds [37 x i8], [37 x i8]* @.str.124, i64 0, i64 0
+  %t25 = load double, double* %active.addr, align 8
+  %t27 = call i8* @malloc(i64 64)
+  %t28 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_num, i64 0, i64 0
+  call i32 (i8*, i8*, ...) @sprintf(i8* %t27, i8* %t28, double %t25)
+  %t29 = call i64 @strlen(i8* %t24)
+  %t30 = call i64 @strlen(i8* %t27)
+  %t31 = add i64 %t29, %t30
+  %t32 = add i64 %t31, 1
+  %t33 = call i8* @malloc(i64 %t32)
+  %t34 = call i8* @strcpy(i8* %t33, i8* %t24)
+  %t35 = call i8* @strcat(i8* %t33, i8* %t27)
+  %t36 = getelementptr inbounds [22 x i8], [22 x i8]* @.str.125, i64 0, i64 0
+  %t38 = call i64 @strlen(i8* %t33)
+  %t39 = call i64 @strlen(i8* %t36)
+  %t40 = add i64 %t38, %t39
+  %t41 = add i64 %t40, 1
+  %t42 = call i8* @malloc(i64 %t41)
+  %t43 = call i8* @strcpy(i8* %t42, i8* %t33)
+  %t44 = call i8* @strcat(i8* %t42, i8* %t36)
+  %t45 = load double, double* %total.addr, align 8
+  %t47 = call i8* @malloc(i64 64)
+  %t48 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_num, i64 0, i64 0
+  call i32 (i8*, i8*, ...) @sprintf(i8* %t47, i8* %t48, double %t45)
+  %t49 = call i64 @strlen(i8* %t42)
+  %t50 = call i64 @strlen(i8* %t47)
+  %t51 = add i64 %t49, %t50
+  %t52 = add i64 %t51, 1
+  %t53 = call i8* @malloc(i64 %t52)
+  %t54 = call i8* @strcpy(i8* %t53, i8* %t42)
+  %t55 = call i8* @strcat(i8* %t53, i8* %t47)
+  %t56 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.126, i64 0, i64 0
+  %t58 = call i64 @strlen(i8* %t53)
+  %t59 = call i64 @strlen(i8* %t56)
+  %t60 = add i64 %t58, %t59
+  %t61 = add i64 %t60, 1
+  %t62 = call i8* @malloc(i64 %t61)
+  %t63 = call i8* @strcpy(i8* %t62, i8* %t53)
+  %t64 = call i8* @strcat(i8* %t62, i8* %t56)
+  call void @_Response_json(%struct.Response* %t23, i8* %t62)
+  ret i1 false
+merge.468:
+  %t65 = load %struct.Request*, %struct.Request** %t1, align 8
+  %t66 = getelementptr inbounds %struct.Request, %struct.Request* %t65, i32 0, i32 0
+  %t67 = load i8*, i8** %t66, align 8
+  %t68 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.127, i64 0, i64 0
+  %t70 = call i32 @strcmp(i8* %t67, i8* %t68)
+  %t69 = icmp eq i32 %t70, 0
+  br i1 %t69, label %log.rhs.469, label %log.merge.470
+log.rhs.469:
+  %t72 = load %struct.Request*, %struct.Request** %t1, align 8
+  %t73 = getelementptr inbounds %struct.Request, %struct.Request* %t72, i32 0, i32 1
+  %t74 = load i8*, i8** %t73, align 8
+  %t75 = getelementptr inbounds [8 x i8], [8 x i8]* @.str.128, i64 0, i64 0
+  %t77 = call i32 @strcmp(i8* %t74, i8* %t75)
+  %t76 = icmp eq i32 %t77, 0
+  br label %log.merge.470
+log.merge.470:
+  %t71 = phi i1 [ false, %merge.468 ], [ %t76, %log.rhs.469 ]
+  br i1 %t71, label %then.471, label %merge.473
+then.471:
+  %t78 = load %struct.HealthEngine*, %struct.HealthEngine** %t0, align 8
+  %t79 = getelementptr inbounds %struct.HealthEngine, %struct.HealthEngine* %t78, i32 0, i32 2
+  %t80 = load i1, i1* %t79, align 8
+  br i1 %t80, label %then.474, label %else.475
+then.474:
+  %t81 = load %struct.Response*, %struct.Response** %t2, align 8
+  %t82 = call %struct.Response* @_Response_setStatus(%struct.Response* %t81, double 503.0)
+  %t83 = getelementptr inbounds [59 x i8], [59 x i8]* @.str.129, i64 0, i64 0
+  call void @_Response_json(%struct.Response* %t82, i8* %t83)
+  br label %merge.476
+else.475:
+  %t84 = load %struct.Response*, %struct.Response** %t2, align 8
+  %t85 = call %struct.Response* @_Response_setStatus(%struct.Response* %t84, double 200.0)
+  %t86 = getelementptr inbounds [59 x i8], [59 x i8]* @.str.130, i64 0, i64 0
+  call void @_Response_json(%struct.Response* %t85, i8* %t86)
+  br label %merge.476
+merge.476:
+  ret i1 false
+merge.473:
+  %t87 = load %struct.HealthEngine*, %struct.HealthEngine** %t0, align 8
+  %t88 = getelementptr inbounds %struct.HealthEngine, %struct.HealthEngine* %t87, i32 0, i32 2
+  %t89 = load i1, i1* %t88, align 8
+  br i1 %t89, label %then.477, label %merge.479
+then.477:
+  %t90 = load %struct.Response*, %struct.Response** %t2, align 8
+  %t91 = call %struct.Response* @_Response_setStatus(%struct.Response* %t90, double 503.0)
+  %t92 = getelementptr inbounds [83 x i8], [83 x i8]* @.str.131, i64 0, i64 0
+  call void @_Response_json(%struct.Response* %t91, i8* %t92)
+  ret i1 false
+merge.479:
+  ret i1 true
 }
 
 define i32 @main(i32 %argc, i8** %argv) {
 entry:
   call void @__vit_init_args(i32 %argc, i8** %argv)
-  %t0 = getelementptr inbounds [42 x i8], [42 x i8]* @.str.107, i64 0, i64 0
+  %t0 = getelementptr inbounds [66 x i8], [66 x i8]* @.str.132, i64 0, i64 0
   %t1 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
   %t2 = call i32 (i8*, ...) @printf(i8* %t1, i8* %t0)
-  %t3 = getelementptr inbounds [45 x i8], [45 x i8]* @.str.108, i64 0, i64 0
+  %t3 = getelementptr inbounds [62 x i8], [62 x i8]* @.str.133, i64 0, i64 0
   %t4 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
   %t5 = call i32 (i8*, ...) @printf(i8* %t4, i8* %t3)
-  %t6 = getelementptr inbounds [42 x i8], [42 x i8]* @.str.109, i64 0, i64 0
+  %t6 = getelementptr inbounds [66 x i8], [66 x i8]* @.str.134, i64 0, i64 0
   %t7 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
   %t8 = call i32 (i8*, ...) @printf(i8* %t7, i8* %t6)
-  %t9 = call %struct.VitoApp* @createApp()
-  %app.addr = alloca %struct.VitoApp*, align 8
-  %t10 = alloca %struct.VitoApp, align 8
-  store %struct.VitoApp* %t10, %struct.VitoApp** %app.addr, align 8
-  store %struct.VitoApp* %t9, %struct.VitoApp** %app.addr, align 8
-  %t11 = load %struct.VitoApp*, %struct.VitoApp** %app.addr, align 8
-  %t12 = bitcast i8* (%struct.Request*, %struct.Response*)* @__lambda_0 to i8*
-  call void @_VitoApp_onRequest(%struct.VitoApp* %t11, i8* %t12)
-  %t13 = load %struct.VitoApp*, %struct.VitoApp** %app.addr, align 8
-  %t14 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.112, i64 0, i64 0
-  %t15 = bitcast void (%struct.Request*, %struct.Response*)* @__lambda_1 to i8*
-  call void @_VitoApp_get(%struct.VitoApp* %t13, i8* %t14, i8* %t15)
-  %t16 = load %struct.VitoApp*, %struct.VitoApp** %app.addr, align 8
-  %t17 = getelementptr inbounds [11 x i8], [11 x i8]* @.str.114, i64 0, i64 0
-  %t18 = bitcast void (%struct.Request*, %struct.Response*)* @__lambda_2 to i8*
-  call void @_VitoApp_get(%struct.VitoApp* %t16, i8* %t17, i8* %t18)
-  %t19 = load %struct.VitoApp*, %struct.VitoApp** %app.addr, align 8
-  %t20 = getelementptr inbounds [36 x i8], [36 x i8]* @.str.118, i64 0, i64 0
-  %t21 = bitcast void (%struct.Request*, %struct.Response*)* @__lambda_3 to i8*
-  call void @_VitoApp_get(%struct.VitoApp* %t19, i8* %t20, i8* %t21)
-  %t22 = getelementptr inbounds [56 x i8], [56 x i8]* @.str.124, i64 0, i64 0
-  %t23 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
-  %t24 = call i32 (i8*, ...) @printf(i8* %t23, i8* %t22)
-  %t25 = load %struct.VitoApp*, %struct.VitoApp** %app.addr, align 8
-  %t26 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.125, i64 0, i64 0
-  %t27 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.126, i64 0, i64 0
-  %t28 = call %struct.Response* @_VitoApp_inject(%struct.VitoApp* %t25, i8* %t26, i8* %t27)
-  %res1.addr = alloca %struct.Response*, align 8
-  %t29 = alloca %struct.Response, align 8
-  store %struct.Response* %t29, %struct.Response** %res1.addr, align 8
-  store %struct.Response* %t28, %struct.Response** %res1.addr, align 8
-  %t30 = getelementptr inbounds [27 x i8], [27 x i8]* @.str.127, i64 0, i64 0
-  %t31 = load %struct.Response*, %struct.Response** %res1.addr, align 8
-  %t32 = getelementptr inbounds %struct.Response, %struct.Response* %t31, i32 0, i32 0
-  %t33 = load double, double* %t32, align 8
-  %t35 = call i8* @malloc(i64 64)
-  %t36 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_num, i64 0, i64 0
-  call i32 (i8*, i8*, ...) @sprintf(i8* %t35, i8* %t36, double %t33)
-  %t37 = call i64 @strlen(i8* %t30)
-  %t38 = call i64 @strlen(i8* %t35)
-  %t39 = add i64 %t37, %t38
-  %t40 = add i64 %t39, 1
-  %t41 = call i8* @malloc(i64 %t40)
-  %t42 = call i8* @strcpy(i8* %t41, i8* %t30)
-  %t43 = call i8* @strcat(i8* %t41, i8* %t35)
-  %t44 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.128, i64 0, i64 0
-  %t46 = call i64 @strlen(i8* %t41)
-  %t47 = call i64 @strlen(i8* %t44)
-  %t48 = add i64 %t46, %t47
-  %t49 = add i64 %t48, 1
-  %t50 = call i8* @malloc(i64 %t49)
-  %t51 = call i8* @strcpy(i8* %t50, i8* %t41)
-  %t52 = call i8* @strcat(i8* %t50, i8* %t44)
-  %t53 = load %struct.Response*, %struct.Response** %res1.addr, align 8
-  %t54 = getelementptr inbounds %struct.Response, %struct.Response* %t53, i32 0, i32 6
-  %t55 = load i8*, i8** %t54, align 8
-  %t57 = call i64 @strlen(i8* %t50)
+  %t9 = getelementptr inbounds [67 x i8], [67 x i8]* @.str.135, i64 0, i64 0
+  %t10 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
+  %t11 = call i32 (i8*, ...) @printf(i8* %t10, i8* %t9)
+  %t12 = getelementptr inbounds [68 x i8], [68 x i8]* @.str.136, i64 0, i64 0
+  %contentType.addr = alloca i8*, align 8
+  store i8* %t12, i8** %contentType.addr, align 8
+  %t13 = load i8*, i8** %contentType.addr, align 8
+  %t14 = call i8* @extractBoundary(i8* %t13)
+  %boundary.addr = alloca i8*, align 8
+  store i8* %t14, i8** %boundary.addr, align 8
+  %t15 = getelementptr inbounds [33 x i8], [33 x i8]* @.str.137, i64 0, i64 0
+  %t16 = load i8*, i8** %boundary.addr, align 8
+  %t18 = call i64 @strlen(i8* %t15)
+  %t19 = call i64 @strlen(i8* %t16)
+  %t20 = add i64 %t18, %t19
+  %t21 = add i64 %t20, 1
+  %t22 = call i8* @malloc(i64 %t21)
+  %t23 = call i8* @strcpy(i8* %t22, i8* %t15)
+  %t24 = call i8* @strcat(i8* %t22, i8* %t16)
+  %t25 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
+  %t26 = call i32 (i8*, ...) @printf(i8* %t25, i8* %t22)
+  %t27 = getelementptr inbounds [42 x i8], [42 x i8]* @.str.138, i64 0, i64 0
+  %t28 = getelementptr inbounds [72 x i8], [72 x i8]* @.str.139, i64 0, i64 0
+  %t30 = call i64 @strlen(i8* %t27)
+  %t31 = call i64 @strlen(i8* %t28)
+  %t32 = add i64 %t30, %t31
+  %t33 = add i64 %t32, 1
+  %t34 = call i8* @malloc(i64 %t33)
+  %t35 = call i8* @strcpy(i8* %t34, i8* %t27)
+  %t36 = call i8* @strcat(i8* %t34, i8* %t28)
+  %t37 = getelementptr inbounds [28 x i8], [28 x i8]* @.str.140, i64 0, i64 0
+  %t39 = call i64 @strlen(i8* %t34)
+  %t40 = call i64 @strlen(i8* %t37)
+  %t41 = add i64 %t39, %t40
+  %t42 = add i64 %t41, 1
+  %t43 = call i8* @malloc(i64 %t42)
+  %t44 = call i8* @strcpy(i8* %t43, i8* %t34)
+  %t45 = call i8* @strcat(i8* %t43, i8* %t37)
+  %t46 = getelementptr inbounds [41 x i8], [41 x i8]* @.str.141, i64 0, i64 0
+  %t48 = call i64 @strlen(i8* %t43)
+  %t49 = call i64 @strlen(i8* %t46)
+  %t50 = add i64 %t48, %t49
+  %t51 = add i64 %t50, 1
+  %t52 = call i8* @malloc(i64 %t51)
+  %t53 = call i8* @strcpy(i8* %t52, i8* %t43)
+  %t54 = call i8* @strcat(i8* %t52, i8* %t46)
+  %t55 = getelementptr inbounds [42 x i8], [42 x i8]* @.str.142, i64 0, i64 0
+  %t57 = call i64 @strlen(i8* %t52)
   %t58 = call i64 @strlen(i8* %t55)
   %t59 = add i64 %t57, %t58
   %t60 = add i64 %t59, 1
   %t61 = call i8* @malloc(i64 %t60)
-  %t62 = call i8* @strcpy(i8* %t61, i8* %t50)
+  %t62 = call i8* @strcpy(i8* %t61, i8* %t52)
   %t63 = call i8* @strcat(i8* %t61, i8* %t55)
-  %t64 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
-  %t65 = call i32 (i8*, ...) @printf(i8* %t64, i8* %t61)
-  %t66 = load %struct.VitoApp*, %struct.VitoApp** %app.addr, align 8
-  %t67 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.129, i64 0, i64 0
-  %t68 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.130, i64 0, i64 0
-  %t69 = call %struct.Response* @_VitoApp_inject(%struct.VitoApp* %t66, i8* %t67, i8* %t68)
-  %res2.addr = alloca %struct.Response*, align 8
-  %t70 = alloca %struct.Response, align 8
-  store %struct.Response* %t70, %struct.Response** %res2.addr, align 8
-  store %struct.Response* %t69, %struct.Response** %res2.addr, align 8
-  %t71 = getelementptr inbounds [35 x i8], [35 x i8]* @.str.131, i64 0, i64 0
-  %t72 = load %struct.Response*, %struct.Response** %res2.addr, align 8
-  %t73 = getelementptr inbounds %struct.Response, %struct.Response* %t72, i32 0, i32 0
-  %t74 = load double, double* %t73, align 8
-  %t76 = call i8* @malloc(i64 64)
-  %t77 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_num, i64 0, i64 0
-  call i32 (i8*, i8*, ...) @sprintf(i8* %t76, i8* %t77, double %t74)
-  %t78 = call i64 @strlen(i8* %t71)
-  %t79 = call i64 @strlen(i8* %t76)
-  %t80 = add i64 %t78, %t79
-  %t81 = add i64 %t80, 1
-  %t82 = call i8* @malloc(i64 %t81)
-  %t83 = call i8* @strcpy(i8* %t82, i8* %t71)
-  %t84 = call i8* @strcat(i8* %t82, i8* %t76)
-  %t85 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.132, i64 0, i64 0
-  %t87 = call i64 @strlen(i8* %t82)
-  %t88 = call i64 @strlen(i8* %t85)
-  %t89 = add i64 %t87, %t88
-  %t90 = add i64 %t89, 1
-  %t91 = call i8* @malloc(i64 %t90)
-  %t92 = call i8* @strcpy(i8* %t91, i8* %t82)
-  %t93 = call i8* @strcat(i8* %t91, i8* %t85)
-  %t94 = load %struct.Response*, %struct.Response** %res2.addr, align 8
-  %t95 = getelementptr inbounds %struct.Response, %struct.Response* %t94, i32 0, i32 6
-  %t96 = load i8*, i8** %t95, align 8
-  %t98 = call i64 @strlen(i8* %t91)
-  %t99 = call i64 @strlen(i8* %t96)
-  %t100 = add i64 %t98, %t99
-  %t101 = add i64 %t100, 1
-  %t102 = call i8* @malloc(i64 %t101)
-  %t103 = call i8* @strcpy(i8* %t102, i8* %t91)
-  %t104 = call i8* @strcat(i8* %t102, i8* %t96)
-  %t105 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
-  %t106 = call i32 (i8*, ...) @printf(i8* %t105, i8* %t102)
-  %t107 = load %struct.VitoApp*, %struct.VitoApp** %app.addr, align 8
-  %t108 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.133, i64 0, i64 0
-  %t109 = getelementptr inbounds [35 x i8], [35 x i8]* @.str.134, i64 0, i64 0
-  %t110 = call %struct.Response* @_VitoApp_inject(%struct.VitoApp* %t107, i8* %t108, i8* %t109)
-  %res3.addr = alloca %struct.Response*, align 8
-  %t111 = alloca %struct.Response, align 8
-  store %struct.Response* %t111, %struct.Response** %res3.addr, align 8
-  store %struct.Response* %t110, %struct.Response** %res3.addr, align 8
-  %t112 = getelementptr inbounds [60 x i8], [60 x i8]* @.str.135, i64 0, i64 0
-  %t113 = load %struct.Response*, %struct.Response** %res3.addr, align 8
-  %t114 = getelementptr inbounds %struct.Response, %struct.Response* %t113, i32 0, i32 0
-  %t115 = load double, double* %t114, align 8
-  %t117 = call i8* @malloc(i64 64)
-  %t118 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_num, i64 0, i64 0
-  call i32 (i8*, i8*, ...) @sprintf(i8* %t117, i8* %t118, double %t115)
-  %t119 = call i64 @strlen(i8* %t112)
-  %t120 = call i64 @strlen(i8* %t117)
-  %t121 = add i64 %t119, %t120
-  %t122 = add i64 %t121, 1
-  %t123 = call i8* @malloc(i64 %t122)
-  %t124 = call i8* @strcpy(i8* %t123, i8* %t112)
-  %t125 = call i8* @strcat(i8* %t123, i8* %t117)
-  %t126 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.136, i64 0, i64 0
-  %t128 = call i64 @strlen(i8* %t123)
-  %t129 = call i64 @strlen(i8* %t126)
-  %t130 = add i64 %t128, %t129
-  %t131 = add i64 %t130, 1
-  %t132 = call i8* @malloc(i64 %t131)
-  %t133 = call i8* @strcpy(i8* %t132, i8* %t123)
-  %t134 = call i8* @strcat(i8* %t132, i8* %t126)
-  %t135 = load %struct.Response*, %struct.Response** %res3.addr, align 8
-  %t136 = getelementptr inbounds %struct.Response, %struct.Response* %t135, i32 0, i32 6
-  %t137 = load i8*, i8** %t136, align 8
-  %t139 = call i64 @strlen(i8* %t132)
-  %t140 = call i64 @strlen(i8* %t137)
-  %t141 = add i64 %t139, %t140
-  %t142 = add i64 %t141, 1
-  %t143 = call i8* @malloc(i64 %t142)
-  %t144 = call i8* @strcpy(i8* %t143, i8* %t132)
-  %t145 = call i8* @strcat(i8* %t143, i8* %t137)
-  %t146 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
-  %t147 = call i32 (i8*, ...) @printf(i8* %t146, i8* %t143)
-  %t148 = load %struct.VitoApp*, %struct.VitoApp** %app.addr, align 8
-  %t149 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.137, i64 0, i64 0
-  %t150 = getelementptr inbounds [14 x i8], [14 x i8]* @.str.138, i64 0, i64 0
-  %t151 = call %struct.Response* @_VitoApp_inject(%struct.VitoApp* %t148, i8* %t149, i8* %t150)
-  %res4.addr = alloca %struct.Response*, align 8
-  %t152 = alloca %struct.Response, align 8
-  store %struct.Response* %t152, %struct.Response** %res4.addr, align 8
-  store %struct.Response* %t151, %struct.Response** %res4.addr, align 8
-  %t153 = getelementptr inbounds [39 x i8], [39 x i8]* @.str.139, i64 0, i64 0
-  %t154 = load %struct.Response*, %struct.Response** %res4.addr, align 8
-  %t155 = getelementptr inbounds %struct.Response, %struct.Response* %t154, i32 0, i32 0
-  %t156 = load double, double* %t155, align 8
-  %t158 = call i8* @malloc(i64 64)
-  %t159 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_num, i64 0, i64 0
-  call i32 (i8*, i8*, ...) @sprintf(i8* %t158, i8* %t159, double %t156)
-  %t160 = call i64 @strlen(i8* %t153)
-  %t161 = call i64 @strlen(i8* %t158)
-  %t162 = add i64 %t160, %t161
-  %t163 = add i64 %t162, 1
-  %t164 = call i8* @malloc(i64 %t163)
-  %t165 = call i8* @strcpy(i8* %t164, i8* %t153)
-  %t166 = call i8* @strcat(i8* %t164, i8* %t158)
-  %t167 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.140, i64 0, i64 0
-  %t169 = call i64 @strlen(i8* %t164)
-  %t170 = call i64 @strlen(i8* %t167)
-  %t171 = add i64 %t169, %t170
-  %t172 = add i64 %t171, 1
-  %t173 = call i8* @malloc(i64 %t172)
-  %t174 = call i8* @strcpy(i8* %t173, i8* %t164)
-  %t175 = call i8* @strcat(i8* %t173, i8* %t167)
-  %t176 = load %struct.Response*, %struct.Response** %res4.addr, align 8
-  %t177 = getelementptr inbounds %struct.Response, %struct.Response* %t176, i32 0, i32 6
-  %t178 = load i8*, i8** %t177, align 8
-  %t180 = call i64 @strlen(i8* %t173)
-  %t181 = call i64 @strlen(i8* %t178)
-  %t182 = add i64 %t180, %t181
-  %t183 = add i64 %t182, 1
-  %t184 = call i8* @malloc(i64 %t183)
-  %t185 = call i8* @strcpy(i8* %t184, i8* %t173)
-  %t186 = call i8* @strcat(i8* %t184, i8* %t178)
-  %t187 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
-  %t188 = call i32 (i8*, ...) @printf(i8* %t187, i8* %t184)
-  %t189 = getelementptr inbounds [56 x i8], [56 x i8]* @.str.141, i64 0, i64 0
-  %t190 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
-  %t191 = call i32 (i8*, ...) @printf(i8* %t190, i8* %t189)
-  %t192 = fptosi double 0.0 to i32
-  ret i32 %t192
+  %rawMultipartBody.addr = alloca i8*, align 8
+  store i8* %t61, i8** %rawMultipartBody.addr, align 8
+  %t64 = load i8*, i8** %rawMultipartBody.addr, align 8
+  %t65 = load i8*, i8** %boundary.addr, align 8
+  %t66 = call %struct.UploadedFile* @parseMultipartStream(i8* %t64, i8* %t65)
+  %uploadedFile.addr = alloca %struct.UploadedFile*, align 8
+  %t67 = alloca %struct.UploadedFile, align 8
+  store %struct.UploadedFile* %t67, %struct.UploadedFile** %uploadedFile.addr, align 8
+  store %struct.UploadedFile* %t66, %struct.UploadedFile** %uploadedFile.addr, align 8
+  %t68 = getelementptr inbounds [27 x i8], [27 x i8]* @.str.143, i64 0, i64 0
+  %t69 = load %struct.UploadedFile*, %struct.UploadedFile** %uploadedFile.addr, align 8
+  %t70 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t69, i32 0, i32 0
+  %t71 = load i8*, i8** %t70, align 8
+  %t73 = call i64 @strlen(i8* %t68)
+  %t74 = call i64 @strlen(i8* %t71)
+  %t75 = add i64 %t73, %t74
+  %t76 = add i64 %t75, 1
+  %t77 = call i8* @malloc(i64 %t76)
+  %t78 = call i8* @strcpy(i8* %t77, i8* %t68)
+  %t79 = call i8* @strcat(i8* %t77, i8* %t71)
+  %t80 = getelementptr inbounds [11 x i8], [11 x i8]* @.str.144, i64 0, i64 0
+  %t82 = call i64 @strlen(i8* %t77)
+  %t83 = call i64 @strlen(i8* %t80)
+  %t84 = add i64 %t82, %t83
+  %t85 = add i64 %t84, 1
+  %t86 = call i8* @malloc(i64 %t85)
+  %t87 = call i8* @strcpy(i8* %t86, i8* %t77)
+  %t88 = call i8* @strcat(i8* %t86, i8* %t80)
+  %t89 = load %struct.UploadedFile*, %struct.UploadedFile** %uploadedFile.addr, align 8
+  %t90 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t89, i32 0, i32 1
+  %t91 = load i8*, i8** %t90, align 8
+  %t93 = call i64 @strlen(i8* %t86)
+  %t94 = call i64 @strlen(i8* %t91)
+  %t95 = add i64 %t93, %t94
+  %t96 = add i64 %t95, 1
+  %t97 = call i8* @malloc(i64 %t96)
+  %t98 = call i8* @strcpy(i8* %t97, i8* %t86)
+  %t99 = call i8* @strcat(i8* %t97, i8* %t91)
+  %t100 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.145, i64 0, i64 0
+  %t102 = call i64 @strlen(i8* %t97)
+  %t103 = call i64 @strlen(i8* %t100)
+  %t104 = add i64 %t102, %t103
+  %t105 = add i64 %t104, 1
+  %t106 = call i8* @malloc(i64 %t105)
+  %t107 = call i8* @strcpy(i8* %t106, i8* %t97)
+  %t108 = call i8* @strcat(i8* %t106, i8* %t100)
+  %t109 = load %struct.UploadedFile*, %struct.UploadedFile** %uploadedFile.addr, align 8
+  %t110 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t109, i32 0, i32 2
+  %t111 = load i8*, i8** %t110, align 8
+  %t113 = call i64 @strlen(i8* %t106)
+  %t114 = call i64 @strlen(i8* %t111)
+  %t115 = add i64 %t113, %t114
+  %t116 = add i64 %t115, 1
+  %t117 = call i8* @malloc(i64 %t116)
+  %t118 = call i8* @strcpy(i8* %t117, i8* %t106)
+  %t119 = call i8* @strcat(i8* %t117, i8* %t111)
+  %t120 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.146, i64 0, i64 0
+  %t122 = call i64 @strlen(i8* %t117)
+  %t123 = call i64 @strlen(i8* %t120)
+  %t124 = add i64 %t122, %t123
+  %t125 = add i64 %t124, 1
+  %t126 = call i8* @malloc(i64 %t125)
+  %t127 = call i8* @strcpy(i8* %t126, i8* %t117)
+  %t128 = call i8* @strcat(i8* %t126, i8* %t120)
+  %t129 = load %struct.UploadedFile*, %struct.UploadedFile** %uploadedFile.addr, align 8
+  %t130 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t129, i32 0, i32 3
+  %t131 = load double, double* %t130, align 8
+  %t133 = call i8* @malloc(i64 64)
+  %t134 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_num, i64 0, i64 0
+  call i32 (i8*, i8*, ...) @sprintf(i8* %t133, i8* %t134, double %t131)
+  %t135 = call i64 @strlen(i8* %t126)
+  %t136 = call i64 @strlen(i8* %t133)
+  %t137 = add i64 %t135, %t136
+  %t138 = add i64 %t137, 1
+  %t139 = call i8* @malloc(i64 %t138)
+  %t140 = call i8* @strcpy(i8* %t139, i8* %t126)
+  %t141 = call i8* @strcat(i8* %t139, i8* %t133)
+  %t142 = getelementptr inbounds [7 x i8], [7 x i8]* @.str.147, i64 0, i64 0
+  %t144 = call i64 @strlen(i8* %t139)
+  %t145 = call i64 @strlen(i8* %t142)
+  %t146 = add i64 %t144, %t145
+  %t147 = add i64 %t146, 1
+  %t148 = call i8* @malloc(i64 %t147)
+  %t149 = call i8* @strcpy(i8* %t148, i8* %t139)
+  %t150 = call i8* @strcat(i8* %t148, i8* %t142)
+  %t151 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
+  %t152 = call i32 (i8*, ...) @printf(i8* %t151, i8* %t148)
+  %t153 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.148, i64 0, i64 0
+  %t154 = getelementptr inbounds [21 x i8], [21 x i8]* @.str.149, i64 0, i64 0
+  %t155 = call %struct.FileValidationEngine* @createFileValidator(double 10240.0, i8* %t153, i8* %t154)
+  %validator.addr = alloca %struct.FileValidationEngine*, align 8
+  %t156 = alloca %struct.FileValidationEngine, align 8
+  store %struct.FileValidationEngine* %t156, %struct.FileValidationEngine** %validator.addr, align 8
+  store %struct.FileValidationEngine* %t155, %struct.FileValidationEngine** %validator.addr, align 8
+  %t157 = load %struct.FileValidationEngine*, %struct.FileValidationEngine** %validator.addr, align 8
+  %t158 = load %struct.UploadedFile*, %struct.UploadedFile** %uploadedFile.addr, align 8
+  %t159 = call i1 @_FileValidationEngine_validate(%struct.FileValidationEngine* %t157, %struct.UploadedFile* %t158)
+  %isValid.addr = alloca i1, align 8
+  store i1 %t159, i1* %isValid.addr, align 8
+  %t160 = getelementptr inbounds [6 x i8], [6 x i8]* @.str.150, i64 0, i64 0
+  %validStr.addr = alloca i8*, align 8
+  store i8* %t160, i8** %validStr.addr, align 8
+  %t161 = load i1, i1* %isValid.addr, align 8
+  br i1 %t161, label %then.480, label %merge.482
+then.480:
+  %t162 = getelementptr inbounds [5 x i8], [5 x i8]* @.str.151, i64 0, i64 0
+  store i8* %t162, i8** %validStr.addr, align 8
+  br label %merge.482
+merge.482:
+  %t163 = getelementptr inbounds [36 x i8], [36 x i8]* @.str.152, i64 0, i64 0
+  %t164 = load i8*, i8** %validStr.addr, align 8
+  %t166 = call i64 @strlen(i8* %t163)
+  %t167 = call i64 @strlen(i8* %t164)
+  %t168 = add i64 %t166, %t167
+  %t169 = add i64 %t168, 1
+  %t170 = call i8* @malloc(i64 %t169)
+  %t171 = call i8* @strcpy(i8* %t170, i8* %t163)
+  %t172 = call i8* @strcat(i8* %t170, i8* %t164)
+  %t173 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
+  %t174 = call i32 (i8*, ...) @printf(i8* %t173, i8* %t170)
+  %t175 = load %struct.UploadedFile*, %struct.UploadedFile** %uploadedFile.addr, align 8
+  %t176 = getelementptr inbounds [21 x i8], [21 x i8]* @.str.153, i64 0, i64 0
+  %t177 = call i1 @saveUploadedFile(%struct.UploadedFile* %t175, i8* %t176)
+  %saved.addr = alloca i1, align 8
+  store i1 %t177, i1* %saved.addr, align 8
+  %t178 = getelementptr inbounds [6 x i8], [6 x i8]* @.str.154, i64 0, i64 0
+  %saveStr.addr = alloca i8*, align 8
+  store i8* %t178, i8** %saveStr.addr, align 8
+  %t179 = load i1, i1* %saved.addr, align 8
+  br i1 %t179, label %then.483, label %merge.485
+then.483:
+  %t180 = getelementptr inbounds [5 x i8], [5 x i8]* @.str.155, i64 0, i64 0
+  store i8* %t180, i8** %saveStr.addr, align 8
+  br label %merge.485
+merge.485:
+  %t181 = getelementptr inbounds [36 x i8], [36 x i8]* @.str.156, i64 0, i64 0
+  %t182 = load i8*, i8** %saveStr.addr, align 8
+  %t184 = call i64 @strlen(i8* %t181)
+  %t185 = call i64 @strlen(i8* %t182)
+  %t186 = add i64 %t184, %t185
+  %t187 = add i64 %t186, 1
+  %t188 = call i8* @malloc(i64 %t187)
+  %t189 = call i8* @strcpy(i8* %t188, i8* %t181)
+  %t190 = call i8* @strcat(i8* %t188, i8* %t182)
+  %t191 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
+  %t192 = call i32 (i8*, ...) @printf(i8* %t191, i8* %t188)
+  %t193 = getelementptr inbounds [65 x i8], [65 x i8]* @.str.157, i64 0, i64 0
+  %t194 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
+  %t195 = call i32 (i8*, ...) @printf(i8* %t194, i8* %t193)
+  %t196 = getelementptr inbounds [32 x i8], [32 x i8]* @.str.158, i64 0, i64 0
+  %secret.addr = alloca i8*, align 8
+  store i8* %t196, i8** %secret.addr, align 8
+  %t197 = call %struct.CookieOptions* @createDefaultCookieOptions()
+  %cookieOpts.addr = alloca %struct.CookieOptions*, align 8
+  %t198 = alloca %struct.CookieOptions, align 8
+  store %struct.CookieOptions* %t198, %struct.CookieOptions** %cookieOpts.addr, align 8
+  store %struct.CookieOptions* %t197, %struct.CookieOptions** %cookieOpts.addr, align 8
+  %t199 = getelementptr inbounds [9 x i8], [9 x i8]* @.str.159, i64 0, i64 0
+  %t200 = getelementptr inbounds [15 x i8], [15 x i8]* @.str.160, i64 0, i64 0
+  %t201 = load i8*, i8** %secret.addr, align 8
+  %t202 = load %struct.CookieOptions*, %struct.CookieOptions** %cookieOpts.addr, align 8
+  %t203 = call i8* @formatCookie(i8* %t199, i8* %t200, i8* %t201, %struct.CookieOptions* %t202)
+  %rawCookieHeader.addr = alloca i8*, align 8
+  store i8* %t203, i8** %rawCookieHeader.addr, align 8
+  %t204 = getelementptr inbounds [41 x i8], [41 x i8]* @.str.161, i64 0, i64 0
+  %t205 = load i8*, i8** %rawCookieHeader.addr, align 8
+  %t207 = call i64 @strlen(i8* %t204)
+  %t208 = call i64 @strlen(i8* %t205)
+  %t209 = add i64 %t207, %t208
+  %t210 = add i64 %t209, 1
+  %t211 = call i8* @malloc(i64 %t210)
+  %t212 = call i8* @strcpy(i8* %t211, i8* %t204)
+  %t213 = call i8* @strcat(i8* %t211, i8* %t205)
+  %t214 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
+  %t215 = call i32 (i8*, ...) @printf(i8* %t214, i8* %t211)
+  %t216 = getelementptr inbounds [15 x i8], [15 x i8]* @.str.162, i64 0, i64 0
+  %t217 = load i8*, i8** %secret.addr, align 8
+  %t218 = call i8* @signCookieValue(i8* %t216, i8* %t217)
+  %signedVal.addr = alloca i8*, align 8
+  store i8* %t218, i8** %signedVal.addr, align 8
+  %t219 = getelementptr inbounds [37 x i8], [37 x i8]* @.str.163, i64 0, i64 0
+  %t220 = load i8*, i8** %signedVal.addr, align 8
+  %t222 = call i64 @strlen(i8* %t219)
+  %t223 = call i64 @strlen(i8* %t220)
+  %t224 = add i64 %t222, %t223
+  %t225 = add i64 %t224, 1
+  %t226 = call i8* @malloc(i64 %t225)
+  %t227 = call i8* @strcpy(i8* %t226, i8* %t219)
+  %t228 = call i8* @strcat(i8* %t226, i8* %t220)
+  %t229 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
+  %t230 = call i32 (i8*, ...) @printf(i8* %t229, i8* %t226)
+  %t231 = load i8*, i8** %signedVal.addr, align 8
+  %t232 = load i8*, i8** %secret.addr, align 8
+  %t233 = call i8* @verifySignedCookieValue(i8* %t231, i8* %t232)
+  %verifiedVal.addr = alloca i8*, align 8
+  store i8* %t233, i8** %verifiedVal.addr, align 8
+  %t234 = getelementptr inbounds [37 x i8], [37 x i8]* @.str.164, i64 0, i64 0
+  %t235 = load i8*, i8** %verifiedVal.addr, align 8
+  %t237 = call i64 @strlen(i8* %t234)
+  %t238 = call i64 @strlen(i8* %t235)
+  %t239 = add i64 %t237, %t238
+  %t240 = add i64 %t239, 1
+  %t241 = call i8* @malloc(i64 %t240)
+  %t242 = call i8* @strcpy(i8* %t241, i8* %t234)
+  %t243 = call i8* @strcat(i8* %t241, i8* %t235)
+  %t244 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
+  %t245 = call i32 (i8*, ...) @printf(i8* %t244, i8* %t241)
+  %t246 = load i8*, i8** %signedVal.addr, align 8
+  %t247 = getelementptr inbounds [8 x i8], [8 x i8]* @.str.165, i64 0, i64 0
+  %t249 = call i64 @strlen(i8* %t246)
+  %t250 = call i64 @strlen(i8* %t247)
+  %t251 = add i64 %t249, %t250
+  %t252 = add i64 %t251, 1
+  %t253 = call i8* @malloc(i64 %t252)
+  %t254 = call i8* @strcpy(i8* %t253, i8* %t246)
+  %t255 = call i8* @strcat(i8* %t253, i8* %t247)
+  %tamperedVal.addr = alloca i8*, align 8
+  store i8* %t253, i8** %tamperedVal.addr, align 8
+  %t256 = load i8*, i8** %tamperedVal.addr, align 8
+  %t257 = load i8*, i8** %secret.addr, align 8
+  %t258 = call i8* @verifySignedCookieValue(i8* %t256, i8* %t257)
+  %verifiedTampered.addr = alloca i8*, align 8
+  store i8* %t258, i8** %verifiedTampered.addr, align 8
+  %t259 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.166, i64 0, i64 0
+  %tamperDetected.addr = alloca i8*, align 8
+  store i8* %t259, i8** %tamperDetected.addr, align 8
+  %t260 = load i8*, i8** %verifiedTampered.addr, align 8
+  %t261 = call i64 @strlen(i8* %t260)
+  %t262 = uitofp i64 %t261 to double
+  %t263 = fcmp ogt double %t262, 0.0
+  br i1 %t263, label %then.486, label %merge.488
+then.486:
+  %t264 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.167, i64 0, i64 0
+  store i8* %t264, i8** %tamperDetected.addr, align 8
+  br label %merge.488
+merge.488:
+  %t265 = getelementptr inbounds [53 x i8], [53 x i8]* @.str.168, i64 0, i64 0
+  %t266 = load i8*, i8** %tamperDetected.addr, align 8
+  %t268 = call i64 @strlen(i8* %t265)
+  %t269 = call i64 @strlen(i8* %t266)
+  %t270 = add i64 %t268, %t269
+  %t271 = add i64 %t270, 1
+  %t272 = call i8* @malloc(i64 %t271)
+  %t273 = call i8* @strcpy(i8* %t272, i8* %t265)
+  %t274 = call i8* @strcat(i8* %t272, i8* %t266)
+  %t275 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
+  %t276 = call i32 (i8*, ...) @printf(i8* %t275, i8* %t272)
+  %t277 = call %struct.SessionStore* @createSessionStore()
+  %store.addr = alloca %struct.SessionStore*, align 8
+  %t278 = alloca %struct.SessionStore, align 8
+  store %struct.SessionStore* %t278, %struct.SessionStore** %store.addr, align 8
+  store %struct.SessionStore* %t277, %struct.SessionStore** %store.addr, align 8
+  %t279 = load %struct.SessionStore*, %struct.SessionStore** %store.addr, align 8
+  %t280 = getelementptr inbounds [15 x i8], [15 x i8]* @.str.169, i64 0, i64 0
+  %t281 = getelementptr inbounds [29 x i8], [29 x i8]* @.str.170, i64 0, i64 0
+  call void @_SessionStore_createSession(%struct.SessionStore* %t279, i8* %t280, i8* %t281)
+  %t282 = load %struct.SessionStore*, %struct.SessionStore** %store.addr, align 8
+  %t283 = getelementptr inbounds [15 x i8], [15 x i8]* @.str.171, i64 0, i64 0
+  %t284 = call i8* @_SessionStore_getSession(%struct.SessionStore* %t282, i8* %t283)
+  %sessData.addr = alloca i8*, align 8
+  store i8* %t284, i8** %sessData.addr, align 8
+  %t285 = getelementptr inbounds [31 x i8], [31 x i8]* @.str.172, i64 0, i64 0
+  %t286 = load i8*, i8** %sessData.addr, align 8
+  %t288 = call i64 @strlen(i8* %t285)
+  %t289 = call i64 @strlen(i8* %t286)
+  %t290 = add i64 %t288, %t289
+  %t291 = add i64 %t290, 1
+  %t292 = call i8* @malloc(i64 %t291)
+  %t293 = call i8* @strcpy(i8* %t292, i8* %t285)
+  %t294 = call i8* @strcat(i8* %t292, i8* %t286)
+  %t295 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
+  %t296 = call i32 (i8*, ...) @printf(i8* %t295, i8* %t292)
+  %t297 = getelementptr inbounds [61 x i8], [61 x i8]* @.str.173, i64 0, i64 0
+  %t298 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
+  %t299 = call i32 (i8*, ...) @printf(i8* %t298, i8* %t297)
+  %t300 = call %struct.VitoApp* @createApp()
+  %app.addr = alloca %struct.VitoApp*, align 8
+  %t301 = alloca %struct.VitoApp, align 8
+  store %struct.VitoApp* %t301, %struct.VitoApp** %app.addr, align 8
+  store %struct.VitoApp* %t300, %struct.VitoApp** %app.addr, align 8
+  %t302 = call %struct.HealthEngine* @createHealthEngine()
+  %health.addr = alloca %struct.HealthEngine*, align 8
+  %t303 = alloca %struct.HealthEngine, align 8
+  store %struct.HealthEngine* %t303, %struct.HealthEngine** %health.addr, align 8
+  store %struct.HealthEngine* %t302, %struct.HealthEngine** %health.addr, align 8
+  %t304 = load %struct.VitoApp*, %struct.VitoApp** %app.addr, align 8
+  %t305 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.174, i64 0, i64 0
+  %t306 = bitcast void (%struct.Request*, %struct.Response*)* @__lambda_0 to i8*
+  call void @_VitoApp_get(%struct.VitoApp* %t304, i8* %t305, i8* %t306)
+  %t307 = load %struct.HealthEngine*, %struct.HealthEngine** %health.addr, align 8
+  call void @_HealthEngine_increment(%struct.HealthEngine* %t307)
+  %t308 = getelementptr inbounds [42 x i8], [42 x i8]* @.str.176, i64 0, i64 0
+  %t309 = load %struct.HealthEngine*, %struct.HealthEngine** %health.addr, align 8
+  %t310 = getelementptr inbounds %struct.HealthEngine, %struct.HealthEngine* %t309, i32 0, i32 0
+  %t311 = load double, double* %t310, align 8
+  %t313 = call i8* @malloc(i64 64)
+  %t314 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_num, i64 0, i64 0
+  call i32 (i8*, i8*, ...) @sprintf(i8* %t313, i8* %t314, double %t311)
+  %t315 = call i64 @strlen(i8* %t308)
+  %t316 = call i64 @strlen(i8* %t313)
+  %t317 = add i64 %t315, %t316
+  %t318 = add i64 %t317, 1
+  %t319 = call i8* @malloc(i64 %t318)
+  %t320 = call i8* @strcpy(i8* %t319, i8* %t308)
+  %t321 = call i8* @strcat(i8* %t319, i8* %t313)
+  %t322 = getelementptr inbounds [11 x i8], [11 x i8]* @.str.177, i64 0, i64 0
+  %t324 = call i64 @strlen(i8* %t319)
+  %t325 = call i64 @strlen(i8* %t322)
+  %t326 = add i64 %t324, %t325
+  %t327 = add i64 %t326, 1
+  %t328 = call i8* @malloc(i64 %t327)
+  %t329 = call i8* @strcpy(i8* %t328, i8* %t319)
+  %t330 = call i8* @strcat(i8* %t328, i8* %t322)
+  %t331 = load %struct.HealthEngine*, %struct.HealthEngine** %health.addr, align 8
+  %t332 = getelementptr inbounds %struct.HealthEngine, %struct.HealthEngine* %t331, i32 0, i32 1
+  %t333 = load double, double* %t332, align 8
+  %t335 = call i8* @malloc(i64 64)
+  %t336 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_num, i64 0, i64 0
+  call i32 (i8*, i8*, ...) @sprintf(i8* %t335, i8* %t336, double %t333)
+  %t337 = call i64 @strlen(i8* %t328)
+  %t338 = call i64 @strlen(i8* %t335)
+  %t339 = add i64 %t337, %t338
+  %t340 = add i64 %t339, 1
+  %t341 = call i8* @malloc(i64 %t340)
+  %t342 = call i8* @strcpy(i8* %t341, i8* %t328)
+  %t343 = call i8* @strcat(i8* %t341, i8* %t335)
+  %t344 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
+  %t345 = call i32 (i8*, ...) @printf(i8* %t344, i8* %t341)
+  %t346 = load %struct.VitoApp*, %struct.VitoApp** %app.addr, align 8
+  %t347 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.178, i64 0, i64 0
+  %t348 = getelementptr inbounds [9 x i8], [9 x i8]* @.str.179, i64 0, i64 0
+  %t349 = call %struct.Response* @_VitoApp_inject(%struct.VitoApp* %t346, i8* %t347, i8* %t348)
+  %resHealth.addr = alloca %struct.Response*, align 8
+  %t350 = alloca %struct.Response, align 8
+  store %struct.Response* %t350, %struct.Response** %resHealth.addr, align 8
+  store %struct.Response* %t349, %struct.Response** %resHealth.addr, align 8
+  %t351 = load %struct.HealthEngine*, %struct.HealthEngine** %health.addr, align 8
+  %t352 = getelementptr inbounds [26 x i8], [26 x i8]* @.str.180, i64 0, i64 0
+  %t353 = call %struct.Request* @parseHttpRequest(i8* %t352)
+  %t354 = load %struct.Response*, %struct.Response** %resHealth.addr, align 8
+  %t355 = call i1 @_HealthEngine_handleRequest(%struct.HealthEngine* %t351, %struct.Request* %t353, %struct.Response* %t354)
+  %t356 = getelementptr inbounds [26 x i8], [26 x i8]* @.str.181, i64 0, i64 0
+  %t357 = load %struct.Response*, %struct.Response** %resHealth.addr, align 8
+  %t358 = getelementptr inbounds %struct.Response, %struct.Response* %t357, i32 0, i32 0
+  %t359 = load double, double* %t358, align 8
+  %t361 = call i8* @malloc(i64 64)
+  %t362 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_num, i64 0, i64 0
+  call i32 (i8*, i8*, ...) @sprintf(i8* %t361, i8* %t362, double %t359)
+  %t363 = call i64 @strlen(i8* %t356)
+  %t364 = call i64 @strlen(i8* %t361)
+  %t365 = add i64 %t363, %t364
+  %t366 = add i64 %t365, 1
+  %t367 = call i8* @malloc(i64 %t366)
+  %t368 = call i8* @strcpy(i8* %t367, i8* %t356)
+  %t369 = call i8* @strcat(i8* %t367, i8* %t361)
+  %t370 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.182, i64 0, i64 0
+  %t372 = call i64 @strlen(i8* %t367)
+  %t373 = call i64 @strlen(i8* %t370)
+  %t374 = add i64 %t372, %t373
+  %t375 = add i64 %t374, 1
+  %t376 = call i8* @malloc(i64 %t375)
+  %t377 = call i8* @strcpy(i8* %t376, i8* %t367)
+  %t378 = call i8* @strcat(i8* %t376, i8* %t370)
+  %t379 = load %struct.Response*, %struct.Response** %resHealth.addr, align 8
+  %t380 = getelementptr inbounds %struct.Response, %struct.Response* %t379, i32 0, i32 6
+  %t381 = load i8*, i8** %t380, align 8
+  %t383 = call i64 @strlen(i8* %t376)
+  %t384 = call i64 @strlen(i8* %t381)
+  %t385 = add i64 %t383, %t384
+  %t386 = add i64 %t385, 1
+  %t387 = call i8* @malloc(i64 %t386)
+  %t388 = call i8* @strcpy(i8* %t387, i8* %t376)
+  %t389 = call i8* @strcat(i8* %t387, i8* %t381)
+  %t390 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
+  %t391 = call i32 (i8*, ...) @printf(i8* %t390, i8* %t387)
+  %t392 = load %struct.VitoApp*, %struct.VitoApp** %app.addr, align 8
+  %t393 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.183, i64 0, i64 0
+  %t394 = getelementptr inbounds [8 x i8], [8 x i8]* @.str.184, i64 0, i64 0
+  %t395 = call %struct.Response* @_VitoApp_inject(%struct.VitoApp* %t392, i8* %t393, i8* %t394)
+  %resReady1.addr = alloca %struct.Response*, align 8
+  %t396 = alloca %struct.Response, align 8
+  store %struct.Response* %t396, %struct.Response** %resReady1.addr, align 8
+  store %struct.Response* %t395, %struct.Response** %resReady1.addr, align 8
+  %t397 = load %struct.HealthEngine*, %struct.HealthEngine** %health.addr, align 8
+  %t398 = getelementptr inbounds [25 x i8], [25 x i8]* @.str.185, i64 0, i64 0
+  %t399 = call %struct.Request* @parseHttpRequest(i8* %t398)
+  %t400 = load %struct.Response*, %struct.Response** %resReady1.addr, align 8
+  %t401 = call i1 @_HealthEngine_handleRequest(%struct.HealthEngine* %t397, %struct.Request* %t399, %struct.Response* %t400)
+  %t402 = getelementptr inbounds [34 x i8], [34 x i8]* @.str.186, i64 0, i64 0
+  %t403 = load %struct.Response*, %struct.Response** %resReady1.addr, align 8
+  %t404 = getelementptr inbounds %struct.Response, %struct.Response* %t403, i32 0, i32 0
+  %t405 = load double, double* %t404, align 8
+  %t407 = call i8* @malloc(i64 64)
+  %t408 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_num, i64 0, i64 0
+  call i32 (i8*, i8*, ...) @sprintf(i8* %t407, i8* %t408, double %t405)
+  %t409 = call i64 @strlen(i8* %t402)
+  %t410 = call i64 @strlen(i8* %t407)
+  %t411 = add i64 %t409, %t410
+  %t412 = add i64 %t411, 1
+  %t413 = call i8* @malloc(i64 %t412)
+  %t414 = call i8* @strcpy(i8* %t413, i8* %t402)
+  %t415 = call i8* @strcat(i8* %t413, i8* %t407)
+  %t416 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.187, i64 0, i64 0
+  %t418 = call i64 @strlen(i8* %t413)
+  %t419 = call i64 @strlen(i8* %t416)
+  %t420 = add i64 %t418, %t419
+  %t421 = add i64 %t420, 1
+  %t422 = call i8* @malloc(i64 %t421)
+  %t423 = call i8* @strcpy(i8* %t422, i8* %t413)
+  %t424 = call i8* @strcat(i8* %t422, i8* %t416)
+  %t425 = load %struct.Response*, %struct.Response** %resReady1.addr, align 8
+  %t426 = getelementptr inbounds %struct.Response, %struct.Response* %t425, i32 0, i32 6
+  %t427 = load i8*, i8** %t426, align 8
+  %t429 = call i64 @strlen(i8* %t422)
+  %t430 = call i64 @strlen(i8* %t427)
+  %t431 = add i64 %t429, %t430
+  %t432 = add i64 %t431, 1
+  %t433 = call i8* @malloc(i64 %t432)
+  %t434 = call i8* @strcpy(i8* %t433, i8* %t422)
+  %t435 = call i8* @strcat(i8* %t433, i8* %t427)
+  %t436 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
+  %t437 = call i32 (i8*, ...) @printf(i8* %t436, i8* %t433)
+  %t438 = getelementptr inbounds [58 x i8], [58 x i8]* @.str.188, i64 0, i64 0
+  %t439 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
+  %t440 = call i32 (i8*, ...) @printf(i8* %t439, i8* %t438)
+  %t441 = load %struct.HealthEngine*, %struct.HealthEngine** %health.addr, align 8
+  call void @_HealthEngine_triggerShutdown(%struct.HealthEngine* %t441)
+  %t442 = load %struct.VitoApp*, %struct.VitoApp** %app.addr, align 8
+  %t443 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.189, i64 0, i64 0
+  %t444 = getelementptr inbounds [8 x i8], [8 x i8]* @.str.190, i64 0, i64 0
+  %t445 = call %struct.Response* @_VitoApp_inject(%struct.VitoApp* %t442, i8* %t443, i8* %t444)
+  %resReady2.addr = alloca %struct.Response*, align 8
+  %t446 = alloca %struct.Response, align 8
+  store %struct.Response* %t446, %struct.Response** %resReady2.addr, align 8
+  store %struct.Response* %t445, %struct.Response** %resReady2.addr, align 8
+  %t447 = load %struct.HealthEngine*, %struct.HealthEngine** %health.addr, align 8
+  %t448 = getelementptr inbounds [25 x i8], [25 x i8]* @.str.191, i64 0, i64 0
+  %t449 = call %struct.Request* @parseHttpRequest(i8* %t448)
+  %t450 = load %struct.Response*, %struct.Response** %resReady2.addr, align 8
+  %t451 = call i1 @_HealthEngine_handleRequest(%struct.HealthEngine* %t447, %struct.Request* %t449, %struct.Response* %t450)
+  %t452 = getelementptr inbounds [36 x i8], [36 x i8]* @.str.192, i64 0, i64 0
+  %t453 = load %struct.Response*, %struct.Response** %resReady2.addr, align 8
+  %t454 = getelementptr inbounds %struct.Response, %struct.Response* %t453, i32 0, i32 0
+  %t455 = load double, double* %t454, align 8
+  %t457 = call i8* @malloc(i64 64)
+  %t458 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_num, i64 0, i64 0
+  call i32 (i8*, i8*, ...) @sprintf(i8* %t457, i8* %t458, double %t455)
+  %t459 = call i64 @strlen(i8* %t452)
+  %t460 = call i64 @strlen(i8* %t457)
+  %t461 = add i64 %t459, %t460
+  %t462 = add i64 %t461, 1
+  %t463 = call i8* @malloc(i64 %t462)
+  %t464 = call i8* @strcpy(i8* %t463, i8* %t452)
+  %t465 = call i8* @strcat(i8* %t463, i8* %t457)
+  %t466 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.193, i64 0, i64 0
+  %t468 = call i64 @strlen(i8* %t463)
+  %t469 = call i64 @strlen(i8* %t466)
+  %t470 = add i64 %t468, %t469
+  %t471 = add i64 %t470, 1
+  %t472 = call i8* @malloc(i64 %t471)
+  %t473 = call i8* @strcpy(i8* %t472, i8* %t463)
+  %t474 = call i8* @strcat(i8* %t472, i8* %t466)
+  %t475 = load %struct.Response*, %struct.Response** %resReady2.addr, align 8
+  %t476 = getelementptr inbounds %struct.Response, %struct.Response* %t475, i32 0, i32 6
+  %t477 = load i8*, i8** %t476, align 8
+  %t479 = call i64 @strlen(i8* %t472)
+  %t480 = call i64 @strlen(i8* %t477)
+  %t481 = add i64 %t479, %t480
+  %t482 = add i64 %t481, 1
+  %t483 = call i8* @malloc(i64 %t482)
+  %t484 = call i8* @strcpy(i8* %t483, i8* %t472)
+  %t485 = call i8* @strcat(i8* %t483, i8* %t477)
+  %t486 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
+  %t487 = call i32 (i8*, ...) @printf(i8* %t486, i8* %t483)
+  %t488 = load %struct.VitoApp*, %struct.VitoApp** %app.addr, align 8
+  %t489 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.194, i64 0, i64 0
+  %t490 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.195, i64 0, i64 0
+  %t491 = call %struct.Response* @_VitoApp_inject(%struct.VitoApp* %t488, i8* %t489, i8* %t490)
+  %resAppShutting.addr = alloca %struct.Response*, align 8
+  %t492 = alloca %struct.Response, align 8
+  store %struct.Response* %t492, %struct.Response** %resAppShutting.addr, align 8
+  store %struct.Response* %t491, %struct.Response** %resAppShutting.addr, align 8
+  %t493 = load %struct.HealthEngine*, %struct.HealthEngine** %health.addr, align 8
+  %t494 = getelementptr inbounds [27 x i8], [27 x i8]* @.str.196, i64 0, i64 0
+  %t495 = call %struct.Request* @parseHttpRequest(i8* %t494)
+  %t496 = load %struct.Response*, %struct.Response** %resAppShutting.addr, align 8
+  %t497 = call i1 @_HealthEngine_handleRequest(%struct.HealthEngine* %t493, %struct.Request* %t495, %struct.Response* %t496)
+  %t498 = getelementptr inbounds [36 x i8], [36 x i8]* @.str.197, i64 0, i64 0
+  %t499 = load %struct.Response*, %struct.Response** %resAppShutting.addr, align 8
+  %t500 = getelementptr inbounds %struct.Response, %struct.Response* %t499, i32 0, i32 0
+  %t501 = load double, double* %t500, align 8
+  %t503 = call i8* @malloc(i64 64)
+  %t504 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_num, i64 0, i64 0
+  call i32 (i8*, i8*, ...) @sprintf(i8* %t503, i8* %t504, double %t501)
+  %t505 = call i64 @strlen(i8* %t498)
+  %t506 = call i64 @strlen(i8* %t503)
+  %t507 = add i64 %t505, %t506
+  %t508 = add i64 %t507, 1
+  %t509 = call i8* @malloc(i64 %t508)
+  %t510 = call i8* @strcpy(i8* %t509, i8* %t498)
+  %t511 = call i8* @strcat(i8* %t509, i8* %t503)
+  %t512 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.198, i64 0, i64 0
+  %t514 = call i64 @strlen(i8* %t509)
+  %t515 = call i64 @strlen(i8* %t512)
+  %t516 = add i64 %t514, %t515
+  %t517 = add i64 %t516, 1
+  %t518 = call i8* @malloc(i64 %t517)
+  %t519 = call i8* @strcpy(i8* %t518, i8* %t509)
+  %t520 = call i8* @strcat(i8* %t518, i8* %t512)
+  %t521 = load %struct.Response*, %struct.Response** %resAppShutting.addr, align 8
+  %t522 = getelementptr inbounds %struct.Response, %struct.Response* %t521, i32 0, i32 6
+  %t523 = load i8*, i8** %t522, align 8
+  %t525 = call i64 @strlen(i8* %t518)
+  %t526 = call i64 @strlen(i8* %t523)
+  %t527 = add i64 %t525, %t526
+  %t528 = add i64 %t527, 1
+  %t529 = call i8* @malloc(i64 %t528)
+  %t530 = call i8* @strcpy(i8* %t529, i8* %t518)
+  %t531 = call i8* @strcat(i8* %t529, i8* %t523)
+  %t532 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
+  %t533 = call i32 (i8*, ...) @printf(i8* %t532, i8* %t529)
+  %t534 = load %struct.HealthEngine*, %struct.HealthEngine** %health.addr, align 8
+  call void @_HealthEngine_decrement(%struct.HealthEngine* %t534)
+  %t535 = getelementptr inbounds [56 x i8], [56 x i8]* @.str.199, i64 0, i64 0
+  %t536 = load %struct.HealthEngine*, %struct.HealthEngine** %health.addr, align 8
+  %t537 = getelementptr inbounds %struct.HealthEngine, %struct.HealthEngine* %t536, i32 0, i32 0
+  %t538 = load double, double* %t537, align 8
+  %t540 = call i8* @malloc(i64 64)
+  %t541 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_num, i64 0, i64 0
+  call i32 (i8*, i8*, ...) @sprintf(i8* %t540, i8* %t541, double %t538)
+  %t542 = call i64 @strlen(i8* %t535)
+  %t543 = call i64 @strlen(i8* %t540)
+  %t544 = add i64 %t542, %t543
+  %t545 = add i64 %t544, 1
+  %t546 = call i8* @malloc(i64 %t545)
+  %t547 = call i8* @strcpy(i8* %t546, i8* %t535)
+  %t548 = call i8* @strcat(i8* %t546, i8* %t540)
+  %t549 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
+  %t550 = call i32 (i8*, ...) @printf(i8* %t549, i8* %t546)
+  %t551 = getelementptr inbounds [67 x i8], [67 x i8]* @.str.200, i64 0, i64 0
+  %t552 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
+  %t553 = call i32 (i8*, ...) @printf(i8* %t552, i8* %t551)
+  %t554 = getelementptr inbounds [59 x i8], [59 x i8]* @.str.201, i64 0, i64 0
+  %t555 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
+  %t556 = call i32 (i8*, ...) @printf(i8* %t555, i8* %t554)
+  %t557 = getelementptr inbounds [66 x i8], [66 x i8]* @.str.202, i64 0, i64 0
+  %t558 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_str, i64 0, i64 0
+  %t559 = call i32 (i8*, ...) @printf(i8* %t558, i8* %t557)
+  %t560 = fptosi double 0.0 to i32
+  ret i32 %t560
 }
 
 define i8* @getPathSegment(i8* %path, double %segIndex) {
@@ -4253,57 +5360,57 @@ entry:
   store double 0.0, double* %i.addr, align 8
   %currentSeg.addr = alloca double, align 8
   store double 0.0, double* %currentSeg.addr, align 8
-  %t3 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.142, i64 0, i64 0
+  %t3 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.203, i64 0, i64 0
   %result.addr = alloca i8*, align 8
   store i8* %t3, i8** %result.addr, align 8
-  br label %while.cond.408
-while.cond.408:
+  br label %while.cond.489
+while.cond.489:
   %t4 = load double, double* %i.addr, align 8
   %t5 = load double, double* %len.addr, align 8
   %t6 = fcmp olt double %t4, %t5
-  br i1 %t6, label %while.body.409, label %while.end.410
-while.body.409:
+  br i1 %t6, label %while.body.490, label %while.end.491
+while.body.490:
   %t7 = load i8*, i8** %path.addr, align 8
   %t8 = load double, double* %i.addr, align 8
   %t9 = call i8* @charAt(i8* %t7, double %t8)
   %ch.addr = alloca i8*, align 8
   store i8* %t9, i8** %ch.addr, align 8
   %t10 = load i8*, i8** %ch.addr, align 8
-  %t11 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.143, i64 0, i64 0
+  %t11 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.204, i64 0, i64 0
   %t13 = call i32 @strcmp(i8* %t10, i8* %t11)
   %t12 = icmp eq i32 %t13, 0
-  br i1 %t12, label %then.411, label %else.412
-then.411:
+  br i1 %t12, label %then.492, label %else.493
+then.492:
   %t14 = load i8*, i8** %result.addr, align 8
   %t15 = call i64 @strlen(i8* %t14)
   %t16 = uitofp i64 %t15 to double
   %t17 = fcmp ogt double %t16, 0.0
-  br i1 %t17, label %log.merge.415, label %log.rhs.414
-log.rhs.414:
+  br i1 %t17, label %log.merge.496, label %log.rhs.495
+log.rhs.495:
   %t19 = load double, double* %i.addr, align 8
   %t20 = fcmp ogt double %t19, 0.0
-  br label %log.merge.415
-log.merge.415:
-  %t18 = phi i1 [ true, %then.411 ], [ %t20, %log.rhs.414 ]
-  br i1 %t18, label %then.416, label %merge.418
-then.416:
+  br label %log.merge.496
+log.merge.496:
+  %t18 = phi i1 [ true, %then.492 ], [ %t20, %log.rhs.495 ]
+  br i1 %t18, label %then.497, label %merge.499
+then.497:
   %t21 = load double, double* %currentSeg.addr, align 8
   %t22 = load double, double* %segIndex.addr, align 8
   %t23 = fcmp oeq double %t21, %t22
-  br i1 %t23, label %then.419, label %merge.421
-then.419:
+  br i1 %t23, label %then.500, label %merge.502
+then.500:
   %t24 = load i8*, i8** %result.addr, align 8
   ret i8* %t24
-merge.421:
+merge.502:
   %t25 = load double, double* %currentSeg.addr, align 8
   %t26 = fadd double %t25, 1.0
   store double %t26, double* %currentSeg.addr, align 8
-  %t27 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.144, i64 0, i64 0
+  %t27 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.205, i64 0, i64 0
   store i8* %t27, i8** %result.addr, align 8
-  br label %merge.418
-merge.418:
-  br label %merge.413
-else.412:
+  br label %merge.499
+merge.499:
+  br label %merge.494
+else.493:
   %t28 = load i8*, i8** %result.addr, align 8
   %t29 = load i8*, i8** %ch.addr, align 8
   %t31 = call i64 @strlen(i8* %t28)
@@ -4314,22 +5421,22 @@ else.412:
   %t36 = call i8* @strcpy(i8* %t35, i8* %t28)
   %t37 = call i8* @strcat(i8* %t35, i8* %t29)
   store i8* %t35, i8** %result.addr, align 8
-  br label %merge.413
-merge.413:
+  br label %merge.494
+merge.494:
   %t38 = load double, double* %i.addr, align 8
   %t39 = fadd double %t38, 1.0
   store double %t39, double* %i.addr, align 8
-  br label %while.cond.408
-while.end.410:
+  br label %while.cond.489
+while.end.491:
   %t40 = load double, double* %currentSeg.addr, align 8
   %t41 = load double, double* %segIndex.addr, align 8
   %t42 = fcmp oeq double %t40, %t41
-  br i1 %t42, label %then.422, label %merge.424
-then.422:
+  br i1 %t42, label %then.503, label %merge.505
+then.503:
   %t43 = load i8*, i8** %result.addr, align 8
   ret i8* %t43
-merge.424:
-  %t44 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.145, i64 0, i64 0
+merge.505:
+  %t44 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.206, i64 0, i64 0
   ret i8* %t44
 }
 
@@ -4348,51 +5455,51 @@ entry:
   store double 0.0, double* %count.addr, align 8
   %hasChar.addr = alloca i1, align 8
   store i1 false, i1* %hasChar.addr, align 8
-  br label %while.cond.425
-while.cond.425:
+  br label %while.cond.506
+while.cond.506:
   %t3 = load double, double* %i.addr, align 8
   %t4 = load double, double* %len.addr, align 8
   %t5 = fcmp olt double %t3, %t4
-  br i1 %t5, label %while.body.426, label %while.end.427
-while.body.426:
+  br i1 %t5, label %while.body.507, label %while.end.508
+while.body.507:
   %t6 = load i8*, i8** %path.addr, align 8
   %t7 = load double, double* %i.addr, align 8
   %t8 = call i8* @charAt(i8* %t6, double %t7)
   %ch.addr = alloca i8*, align 8
   store i8* %t8, i8** %ch.addr, align 8
   %t9 = load i8*, i8** %ch.addr, align 8
-  %t10 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.146, i64 0, i64 0
+  %t10 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.207, i64 0, i64 0
   %t12 = call i32 @strcmp(i8* %t9, i8* %t10)
   %t11 = icmp eq i32 %t12, 0
-  br i1 %t11, label %then.428, label %else.429
-then.428:
+  br i1 %t11, label %then.509, label %else.510
+then.509:
   %t13 = load i1, i1* %hasChar.addr, align 8
-  br i1 %t13, label %then.431, label %merge.433
-then.431:
+  br i1 %t13, label %then.512, label %merge.514
+then.512:
   %t14 = load double, double* %count.addr, align 8
   %t15 = fadd double %t14, 1.0
   store double %t15, double* %count.addr, align 8
   store i1 false, i1* %hasChar.addr, align 8
-  br label %merge.433
-merge.433:
-  br label %merge.430
-else.429:
+  br label %merge.514
+merge.514:
+  br label %merge.511
+else.510:
   store i1 true, i1* %hasChar.addr, align 8
-  br label %merge.430
-merge.430:
+  br label %merge.511
+merge.511:
   %t16 = load double, double* %i.addr, align 8
   %t17 = fadd double %t16, 1.0
   store double %t17, double* %i.addr, align 8
-  br label %while.cond.425
-while.end.427:
+  br label %while.cond.506
+while.end.508:
   %t18 = load i1, i1* %hasChar.addr, align 8
-  br i1 %t18, label %then.434, label %merge.436
-then.434:
+  br i1 %t18, label %then.515, label %merge.517
+then.515:
   %t19 = load double, double* %count.addr, align 8
   %t20 = fadd double %t19, 1.0
   store double %t20, double* %count.addr, align 8
-  br label %merge.436
-merge.436:
+  br label %merge.517
+merge.517:
   %t21 = load double, double* %count.addr, align 8
   ret double %t21
 }
@@ -4407,20 +5514,20 @@ entry:
   %t1 = call i64 @strlen(i8* %t0)
   %t2 = uitofp i64 %t1 to double
   %t3 = fcmp oeq double %t2, 0.0
-  br i1 %t3, label %log.merge.438, label %log.rhs.437
-log.rhs.437:
+  br i1 %t3, label %log.merge.519, label %log.rhs.518
+log.rhs.518:
   %t5 = load i8*, i8** %targetKey.addr, align 8
   %t6 = call i64 @strlen(i8* %t5)
   %t7 = uitofp i64 %t6 to double
   %t8 = fcmp oeq double %t7, 0.0
-  br label %log.merge.438
-log.merge.438:
-  %t4 = phi i1 [ true, %entry ], [ %t8, %log.rhs.437 ]
-  br i1 %t4, label %then.439, label %merge.441
-then.439:
-  %t9 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.147, i64 0, i64 0
+  br label %log.merge.519
+log.merge.519:
+  %t4 = phi i1 [ true, %entry ], [ %t8, %log.rhs.518 ]
+  br i1 %t4, label %then.520, label %merge.522
+then.520:
+  %t9 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.208, i64 0, i64 0
   ret i8* %t9
-merge.441:
+merge.522:
   %t10 = load i8*, i8** %queryString.addr, align 8
   %t11 = call i64 @strlen(i8* %t10)
   %t12 = uitofp i64 %t11 to double
@@ -4428,50 +5535,50 @@ merge.441:
   store double %t12, double* %len.addr, align 8
   %i.addr = alloca double, align 8
   store double 0.0, double* %i.addr, align 8
-  %t13 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.148, i64 0, i64 0
+  %t13 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.209, i64 0, i64 0
   %currentKey.addr = alloca i8*, align 8
   store i8* %t13, i8** %currentKey.addr, align 8
-  %t14 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.149, i64 0, i64 0
+  %t14 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.210, i64 0, i64 0
   %currentValue.addr = alloca i8*, align 8
   store i8* %t14, i8** %currentValue.addr, align 8
   %isParsingValue.addr = alloca i1, align 8
   store i1 false, i1* %isParsingValue.addr, align 8
-  br label %while.cond.442
-while.cond.442:
+  br label %while.cond.523
+while.cond.523:
   %t15 = load double, double* %i.addr, align 8
   %t16 = load double, double* %len.addr, align 8
   %t17 = fcmp olt double %t15, %t16
-  br i1 %t17, label %while.body.443, label %while.end.444
-while.body.443:
+  br i1 %t17, label %while.body.524, label %while.end.525
+while.body.524:
   %t18 = load i8*, i8** %queryString.addr, align 8
   %t19 = load double, double* %i.addr, align 8
   %t20 = call i8* @charAt(i8* %t18, double %t19)
   %ch.addr = alloca i8*, align 8
   store i8* %t20, i8** %ch.addr, align 8
   %t21 = load i8*, i8** %ch.addr, align 8
-  %t22 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.150, i64 0, i64 0
+  %t22 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.211, i64 0, i64 0
   %t24 = call i32 @strcmp(i8* %t21, i8* %t22)
   %t23 = icmp eq i32 %t24, 0
-  br i1 %t23, label %log.merge.446, label %log.rhs.445
-log.rhs.445:
+  br i1 %t23, label %log.merge.527, label %log.rhs.526
+log.rhs.526:
   %t26 = load double, double* %i.addr, align 8
   %t27 = load double, double* %len.addr, align 8
   %t28 = fsub double %t27, 1.0
   %t29 = fcmp oeq double %t26, %t28
-  br label %log.merge.446
-log.merge.446:
-  %t25 = phi i1 [ true, %while.body.443 ], [ %t29, %log.rhs.445 ]
-  br i1 %t25, label %then.447, label %else.448
-then.447:
+  br label %log.merge.527
+log.merge.527:
+  %t25 = phi i1 [ true, %while.body.524 ], [ %t29, %log.rhs.526 ]
+  br i1 %t25, label %then.528, label %else.529
+then.528:
   %t30 = load i8*, i8** %ch.addr, align 8
-  %t31 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.151, i64 0, i64 0
+  %t31 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.212, i64 0, i64 0
   %t33 = call i32 @strcmp(i8* %t30, i8* %t31)
   %t32 = icmp ne i32 %t33, 0
-  br i1 %t32, label %then.450, label %merge.452
-then.450:
+  br i1 %t32, label %then.531, label %merge.533
+then.531:
   %t34 = load i1, i1* %isParsingValue.addr, align 8
-  br i1 %t34, label %then.453, label %else.454
-then.453:
+  br i1 %t34, label %then.534, label %else.535
+then.534:
   %t35 = load i8*, i8** %currentValue.addr, align 8
   %t36 = load i8*, i8** %ch.addr, align 8
   %t38 = call i64 @strlen(i8* %t35)
@@ -4482,8 +5589,8 @@ then.453:
   %t43 = call i8* @strcpy(i8* %t42, i8* %t35)
   %t44 = call i8* @strcat(i8* %t42, i8* %t36)
   store i8* %t42, i8** %currentValue.addr, align 8
-  br label %merge.455
-else.454:
+  br label %merge.536
+else.535:
   %t45 = load i8*, i8** %currentKey.addr, align 8
   %t46 = load i8*, i8** %ch.addr, align 8
   %t48 = call i64 @strlen(i8* %t45)
@@ -4494,38 +5601,38 @@ else.454:
   %t53 = call i8* @strcpy(i8* %t52, i8* %t45)
   %t54 = call i8* @strcat(i8* %t52, i8* %t46)
   store i8* %t52, i8** %currentKey.addr, align 8
-  br label %merge.455
-merge.455:
-  br label %merge.452
-merge.452:
+  br label %merge.536
+merge.536:
+  br label %merge.533
+merge.533:
   %t55 = load i8*, i8** %currentKey.addr, align 8
   %t56 = load i8*, i8** %targetKey.addr, align 8
   %t58 = call i32 @strcmp(i8* %t55, i8* %t56)
   %t57 = icmp eq i32 %t58, 0
-  br i1 %t57, label %then.456, label %merge.458
-then.456:
+  br i1 %t57, label %then.537, label %merge.539
+then.537:
   %t59 = load i8*, i8** %currentValue.addr, align 8
   ret i8* %t59
-merge.458:
-  %t60 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.152, i64 0, i64 0
+merge.539:
+  %t60 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.213, i64 0, i64 0
   store i8* %t60, i8** %currentKey.addr, align 8
-  %t61 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.153, i64 0, i64 0
+  %t61 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.214, i64 0, i64 0
   store i8* %t61, i8** %currentValue.addr, align 8
   store i1 false, i1* %isParsingValue.addr, align 8
-  br label %merge.449
-else.448:
+  br label %merge.530
+else.529:
   %t62 = load i8*, i8** %ch.addr, align 8
-  %t63 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.154, i64 0, i64 0
+  %t63 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.215, i64 0, i64 0
   %t65 = call i32 @strcmp(i8* %t62, i8* %t63)
   %t64 = icmp eq i32 %t65, 0
-  br i1 %t64, label %then.459, label %else.460
-then.459:
+  br i1 %t64, label %then.540, label %else.541
+then.540:
   store i1 true, i1* %isParsingValue.addr, align 8
-  br label %merge.461
-else.460:
+  br label %merge.542
+else.541:
   %t66 = load i1, i1* %isParsingValue.addr, align 8
-  br i1 %t66, label %then.462, label %else.463
-then.462:
+  br i1 %t66, label %then.543, label %else.544
+then.543:
   %t67 = load i8*, i8** %currentValue.addr, align 8
   %t68 = load i8*, i8** %ch.addr, align 8
   %t70 = call i64 @strlen(i8* %t67)
@@ -4536,8 +5643,8 @@ then.462:
   %t75 = call i8* @strcpy(i8* %t74, i8* %t67)
   %t76 = call i8* @strcat(i8* %t74, i8* %t68)
   store i8* %t74, i8** %currentValue.addr, align 8
-  br label %merge.464
-else.463:
+  br label %merge.545
+else.544:
   %t77 = load i8*, i8** %currentKey.addr, align 8
   %t78 = load i8*, i8** %ch.addr, align 8
   %t80 = call i64 @strlen(i8* %t77)
@@ -4548,18 +5655,18 @@ else.463:
   %t85 = call i8* @strcpy(i8* %t84, i8* %t77)
   %t86 = call i8* @strcat(i8* %t84, i8* %t78)
   store i8* %t84, i8** %currentKey.addr, align 8
-  br label %merge.464
-merge.464:
-  br label %merge.461
-merge.461:
-  br label %merge.449
-merge.449:
+  br label %merge.545
+merge.545:
+  br label %merge.542
+merge.542:
+  br label %merge.530
+merge.530:
   %t87 = load double, double* %i.addr, align 8
   %t88 = fadd double %t87, 1.0
   store double %t88, double* %i.addr, align 8
-  br label %while.cond.442
-while.end.444:
-  %t89 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.155, i64 0, i64 0
+  br label %while.cond.523
+while.end.525:
+  %t89 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.216, i64 0, i64 0
   ret i8* %t89
 }
 
@@ -4599,10 +5706,10 @@ entry:
   %t7 = load i8*, i8** %normReq.addr, align 8
   %t9 = call i32 @strcmp(i8* %t6, i8* %t7)
   %t8 = icmp eq i32 %t9, 0
-  br i1 %t8, label %then.465, label %merge.467
-then.465:
+  br i1 %t8, label %then.546, label %merge.548
+then.546:
   ret i1 true
-merge.467:
+merge.548:
   %t10 = load i8*, i8** %normRoute.addr, align 8
   %t11 = call double @getPathSegmentCount(i8* %t10)
   %routeSegCount.addr = alloca double, align 8
@@ -4614,41 +5721,41 @@ merge.467:
   %t14 = load double, double* %routeSegCount.addr, align 8
   %t15 = load double, double* %reqSegCount.addr, align 8
   %t16 = fcmp one double %t14, %t15
-  br i1 %t16, label %then.468, label %merge.470
-then.468:
+  br i1 %t16, label %then.549, label %merge.551
+then.549:
   ret i1 false
-merge.470:
+merge.551:
   %s.addr = alloca double, align 8
   store double 0.0, double* %s.addr, align 8
   %matched.addr = alloca i1, align 8
   store i1 true, i1* %matched.addr, align 8
-  %t17 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.156, i64 0, i64 0
+  %t17 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.217, i64 0, i64 0
   %tk0.addr = alloca i8*, align 8
   store i8* %t17, i8** %tk0.addr, align 8
-  %t18 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.157, i64 0, i64 0
+  %t18 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.218, i64 0, i64 0
   %tv0.addr = alloca i8*, align 8
   store i8* %t18, i8** %tv0.addr, align 8
-  %t19 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.158, i64 0, i64 0
+  %t19 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.219, i64 0, i64 0
   %tk1.addr = alloca i8*, align 8
   store i8* %t19, i8** %tk1.addr, align 8
-  %t20 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.159, i64 0, i64 0
+  %t20 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.220, i64 0, i64 0
   %tv1.addr = alloca i8*, align 8
   store i8* %t20, i8** %tv1.addr, align 8
-  %t21 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.160, i64 0, i64 0
+  %t21 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.221, i64 0, i64 0
   %tk2.addr = alloca i8*, align 8
   store i8* %t21, i8** %tk2.addr, align 8
-  %t22 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.161, i64 0, i64 0
+  %t22 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.222, i64 0, i64 0
   %tv2.addr = alloca i8*, align 8
   store i8* %t22, i8** %tv2.addr, align 8
   %tempCount.addr = alloca double, align 8
   store double 0.0, double* %tempCount.addr, align 8
-  br label %while.cond.471
-while.cond.471:
+  br label %while.cond.552
+while.cond.552:
   %t23 = load double, double* %s.addr, align 8
   %t24 = load double, double* %routeSegCount.addr, align 8
   %t25 = fcmp olt double %t23, %t24
-  br i1 %t25, label %while.body.472, label %while.end.473
-while.body.472:
+  br i1 %t25, label %while.body.553, label %while.end.554
+while.body.553:
   %t26 = load i8*, i8** %normRoute.addr, align 8
   %t27 = load double, double* %s.addr, align 8
   %t28 = call i8* @getPathSegment(i8* %t26, double %t27)
@@ -4663,32 +5770,32 @@ while.body.472:
   %t33 = call i64 @strlen(i8* %t32)
   %t34 = uitofp i64 %t33 to double
   %t35 = fcmp ogt double %t34, 0.0
-  br i1 %t35, label %log.rhs.474, label %log.merge.475
-log.rhs.474:
+  br i1 %t35, label %log.rhs.555, label %log.merge.556
+log.rhs.555:
   %t37 = load i8*, i8** %rSeg.addr, align 8
   %t38 = call i8* @charAt(i8* %t37, double 0.0)
-  %t39 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.162, i64 0, i64 0
+  %t39 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.223, i64 0, i64 0
   %t41 = call i32 @strcmp(i8* %t38, i8* %t39)
   %t40 = icmp eq i32 %t41, 0
-  br label %log.merge.475
-log.merge.475:
-  %t36 = phi i1 [ false, %while.body.472 ], [ %t40, %log.rhs.474 ]
-  br i1 %t36, label %then.476, label %else.477
-then.476:
-  %t42 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.163, i64 0, i64 0
+  br label %log.merge.556
+log.merge.556:
+  %t36 = phi i1 [ false, %while.body.553 ], [ %t40, %log.rhs.555 ]
+  br i1 %t36, label %then.557, label %else.558
+then.557:
+  %t42 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.224, i64 0, i64 0
   %paramKey.addr = alloca i8*, align 8
   store i8* %t42, i8** %paramKey.addr, align 8
   %kp.addr = alloca double, align 8
   store double 1.0, double* %kp.addr, align 8
-  br label %while.cond.479
-while.cond.479:
+  br label %while.cond.560
+while.cond.560:
   %t43 = load double, double* %kp.addr, align 8
   %t44 = load i8*, i8** %rSeg.addr, align 8
   %t45 = call i64 @strlen(i8* %t44)
   %t46 = uitofp i64 %t45 to double
   %t47 = fcmp olt double %t43, %t46
-  br i1 %t47, label %while.body.480, label %while.end.481
-while.body.480:
+  br i1 %t47, label %while.body.561, label %while.end.562
+while.body.561:
   %t48 = load i8*, i8** %paramKey.addr, align 8
   %t49 = load i8*, i8** %rSeg.addr, align 8
   %t50 = load double, double* %kp.addr, align 8
@@ -4704,73 +5811,73 @@ while.body.480:
   %t60 = load double, double* %kp.addr, align 8
   %t61 = fadd double %t60, 1.0
   store double %t61, double* %kp.addr, align 8
-  br label %while.cond.479
-while.end.481:
+  br label %while.cond.560
+while.end.562:
   %t62 = load double, double* %tempCount.addr, align 8
   %t63 = fcmp oeq double %t62, 0.0
-  br i1 %t63, label %then.482, label %merge.484
-then.482:
+  br i1 %t63, label %then.563, label %merge.565
+then.563:
   %t64 = load i8*, i8** %paramKey.addr, align 8
   store i8* %t64, i8** %tk0.addr, align 8
   %t65 = load i8*, i8** %pSeg.addr, align 8
   store i8* %t65, i8** %tv0.addr, align 8
-  br label %merge.484
-merge.484:
+  br label %merge.565
+merge.565:
   %t66 = load double, double* %tempCount.addr, align 8
   %t67 = fcmp oeq double %t66, 1.0
-  br i1 %t67, label %then.485, label %merge.487
-then.485:
+  br i1 %t67, label %then.566, label %merge.568
+then.566:
   %t68 = load i8*, i8** %paramKey.addr, align 8
   store i8* %t68, i8** %tk1.addr, align 8
   %t69 = load i8*, i8** %pSeg.addr, align 8
   store i8* %t69, i8** %tv1.addr, align 8
-  br label %merge.487
-merge.487:
+  br label %merge.568
+merge.568:
   %t70 = load double, double* %tempCount.addr, align 8
   %t71 = fcmp oeq double %t70, 2.0
-  br i1 %t71, label %then.488, label %merge.490
-then.488:
+  br i1 %t71, label %then.569, label %merge.571
+then.569:
   %t72 = load i8*, i8** %paramKey.addr, align 8
   store i8* %t72, i8** %tk2.addr, align 8
   %t73 = load i8*, i8** %pSeg.addr, align 8
   store i8* %t73, i8** %tv2.addr, align 8
-  br label %merge.490
-merge.490:
+  br label %merge.571
+merge.571:
   %t74 = load double, double* %tempCount.addr, align 8
   %t75 = fadd double %t74, 1.0
   store double %t75, double* %tempCount.addr, align 8
-  br label %merge.478
-else.477:
+  br label %merge.559
+else.558:
   %t76 = load i8*, i8** %rSeg.addr, align 8
   %t77 = call i64 @strlen(i8* %t76)
   %t78 = uitofp i64 %t77 to double
   %t79 = fcmp ogt double %t78, 0.0
-  br i1 %t79, label %log.rhs.491, label %log.merge.492
-log.rhs.491:
+  br i1 %t79, label %log.rhs.572, label %log.merge.573
+log.rhs.572:
   %t81 = load i8*, i8** %rSeg.addr, align 8
   %t82 = call i8* @charAt(i8* %t81, double 0.0)
-  %t83 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.164, i64 0, i64 0
+  %t83 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.225, i64 0, i64 0
   %t85 = call i32 @strcmp(i8* %t82, i8* %t83)
   %t84 = icmp eq i32 %t85, 0
-  br label %log.merge.492
-log.merge.492:
-  %t80 = phi i1 [ false, %else.477 ], [ %t84, %log.rhs.491 ]
-  br i1 %t80, label %then.493, label %else.494
-then.493:
-  %t86 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.165, i64 0, i64 0
+  br label %log.merge.573
+log.merge.573:
+  %t80 = phi i1 [ false, %else.558 ], [ %t84, %log.rhs.572 ]
+  br i1 %t80, label %then.574, label %else.575
+then.574:
+  %t86 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.226, i64 0, i64 0
   %wKey.addr = alloca i8*, align 8
   store i8* %t86, i8** %wKey.addr, align 8
   %kw.addr = alloca double, align 8
   store double 1.0, double* %kw.addr, align 8
-  br label %while.cond.496
-while.cond.496:
+  br label %while.cond.577
+while.cond.577:
   %t87 = load double, double* %kw.addr, align 8
   %t88 = load i8*, i8** %rSeg.addr, align 8
   %t89 = call i64 @strlen(i8* %t88)
   %t90 = uitofp i64 %t89 to double
   %t91 = fcmp olt double %t87, %t90
-  br i1 %t91, label %while.body.497, label %while.end.498
-while.body.497:
+  br i1 %t91, label %while.body.578, label %while.end.579
+while.body.578:
   %t92 = load i8*, i8** %wKey.addr, align 8
   %t93 = load i8*, i8** %rSeg.addr, align 8
   %t94 = load double, double* %kw.addr, align 8
@@ -4786,79 +5893,79 @@ while.body.497:
   %t104 = load double, double* %kw.addr, align 8
   %t105 = fadd double %t104, 1.0
   store double %t105, double* %kw.addr, align 8
-  br label %while.cond.496
-while.end.498:
+  br label %while.cond.577
+while.end.579:
   %t106 = load i8*, i8** %wKey.addr, align 8
-  %t107 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.166, i64 0, i64 0
+  %t107 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.227, i64 0, i64 0
   %t109 = call i32 @strcmp(i8* %t106, i8* %t107)
   %t108 = icmp eq i32 %t109, 0
-  br i1 %t108, label %then.499, label %merge.501
-then.499:
-  %t110 = getelementptr inbounds [9 x i8], [9 x i8]* @.str.167, i64 0, i64 0
+  br i1 %t108, label %then.580, label %merge.582
+then.580:
+  %t110 = getelementptr inbounds [9 x i8], [9 x i8]* @.str.228, i64 0, i64 0
   store i8* %t110, i8** %wKey.addr, align 8
-  br label %merge.501
-merge.501:
+  br label %merge.582
+merge.582:
   %t111 = load double, double* %tempCount.addr, align 8
   %t112 = fcmp oeq double %t111, 0.0
-  br i1 %t112, label %then.502, label %merge.504
-then.502:
+  br i1 %t112, label %then.583, label %merge.585
+then.583:
   %t113 = load i8*, i8** %wKey.addr, align 8
   store i8* %t113, i8** %tk0.addr, align 8
   %t114 = load i8*, i8** %pSeg.addr, align 8
   store i8* %t114, i8** %tv0.addr, align 8
-  br label %merge.504
-merge.504:
+  br label %merge.585
+merge.585:
   %t115 = load double, double* %tempCount.addr, align 8
   %t116 = fcmp oeq double %t115, 1.0
-  br i1 %t116, label %then.505, label %merge.507
-then.505:
+  br i1 %t116, label %then.586, label %merge.588
+then.586:
   %t117 = load i8*, i8** %wKey.addr, align 8
   store i8* %t117, i8** %tk1.addr, align 8
   %t118 = load i8*, i8** %pSeg.addr, align 8
   store i8* %t118, i8** %tv1.addr, align 8
-  br label %merge.507
-merge.507:
+  br label %merge.588
+merge.588:
   %t119 = load double, double* %tempCount.addr, align 8
   %t120 = fcmp oeq double %t119, 2.0
-  br i1 %t120, label %then.508, label %merge.510
-then.508:
+  br i1 %t120, label %then.589, label %merge.591
+then.589:
   %t121 = load i8*, i8** %wKey.addr, align 8
   store i8* %t121, i8** %tk2.addr, align 8
   %t122 = load i8*, i8** %pSeg.addr, align 8
   store i8* %t122, i8** %tv2.addr, align 8
-  br label %merge.510
-merge.510:
+  br label %merge.591
+merge.591:
   %t123 = load double, double* %tempCount.addr, align 8
   %t124 = fadd double %t123, 1.0
   store double %t124, double* %tempCount.addr, align 8
-  br label %merge.495
-else.494:
+  br label %merge.576
+else.575:
   %t125 = load i8*, i8** %rSeg.addr, align 8
   %t126 = load i8*, i8** %pSeg.addr, align 8
   %t128 = call i32 @strcmp(i8* %t125, i8* %t126)
   %t127 = icmp ne i32 %t128, 0
-  br i1 %t127, label %then.511, label %merge.513
-then.511:
+  br i1 %t127, label %then.592, label %merge.594
+then.592:
   store i1 false, i1* %matched.addr, align 8
-  br label %while.end.473
-  br label %merge.513
-merge.513:
-  br label %merge.495
-merge.495:
-  br label %merge.478
-merge.478:
+  br label %while.end.554
+  br label %merge.594
+merge.594:
+  br label %merge.576
+merge.576:
+  br label %merge.559
+merge.559:
   %t129 = load double, double* %s.addr, align 8
   %t130 = fadd double %t129, 1.0
   store double %t130, double* %s.addr, align 8
-  br label %while.cond.471
-while.end.473:
+  br label %while.cond.552
+while.end.554:
   %t131 = load i1, i1* %matched.addr, align 8
-  br i1 %t131, label %then.514, label %merge.516
-then.514:
+  br i1 %t131, label %then.595, label %merge.597
+then.595:
   %t132 = load double, double* %tempCount.addr, align 8
   %t133 = fcmp oge double %t132, 1.0
-  br i1 %t133, label %then.517, label %merge.519
-then.517:
+  br i1 %t133, label %then.598, label %merge.600
+then.598:
   %t134 = load %struct.Request*, %struct.Request** %req.addr, align 8
   %t135 = getelementptr inbounds %struct.Request, %struct.Request* %t134, i32 0, i32 5
   %t136 = load i8*, i8** %tk0.addr, align 8
@@ -4867,12 +5974,12 @@ then.517:
   %t138 = getelementptr inbounds %struct.Request, %struct.Request* %t137, i32 0, i32 6
   %t139 = load i8*, i8** %tv0.addr, align 8
   store i8* %t139, i8** %t138, align 8
-  br label %merge.519
-merge.519:
+  br label %merge.600
+merge.600:
   %t140 = load double, double* %tempCount.addr, align 8
   %t141 = fcmp oge double %t140, 2.0
-  br i1 %t141, label %then.520, label %merge.522
-then.520:
+  br i1 %t141, label %then.601, label %merge.603
+then.601:
   %t142 = load %struct.Request*, %struct.Request** %req.addr, align 8
   %t143 = getelementptr inbounds %struct.Request, %struct.Request* %t142, i32 0, i32 7
   %t144 = load i8*, i8** %tk1.addr, align 8
@@ -4881,12 +5988,12 @@ then.520:
   %t146 = getelementptr inbounds %struct.Request, %struct.Request* %t145, i32 0, i32 8
   %t147 = load i8*, i8** %tv1.addr, align 8
   store i8* %t147, i8** %t146, align 8
-  br label %merge.522
-merge.522:
+  br label %merge.603
+merge.603:
   %t148 = load double, double* %tempCount.addr, align 8
   %t149 = fcmp oge double %t148, 3.0
-  br i1 %t149, label %then.523, label %merge.525
-then.523:
+  br i1 %t149, label %then.604, label %merge.606
+then.604:
   %t150 = load %struct.Request*, %struct.Request** %req.addr, align 8
   %t151 = getelementptr inbounds %struct.Request, %struct.Request* %t150, i32 0, i32 9
   %t152 = load i8*, i8** %tk2.addr, align 8
@@ -4895,14 +6002,14 @@ then.523:
   %t154 = getelementptr inbounds %struct.Request, %struct.Request* %t153, i32 0, i32 10
   %t155 = load i8*, i8** %tv2.addr, align 8
   store i8* %t155, i8** %t154, align 8
-  br label %merge.525
-merge.525:
+  br label %merge.606
+merge.606:
   %t156 = load %struct.Request*, %struct.Request** %req.addr, align 8
   %t157 = getelementptr inbounds %struct.Request, %struct.Request* %t156, i32 0, i32 11
   %t158 = load double, double* %tempCount.addr, align 8
   store double %t158, double* %t157, align 8
   ret i1 true
-merge.516:
+merge.597:
   ret i1 false
 }
 
@@ -4921,7 +6028,7 @@ define i8* @parseHttpMethod(i8* %raw) {
 entry:
   %raw.addr = alloca i8*, align 8
   store i8* %raw, i8** %raw.addr, align 8
-  %t0 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.168, i64 0, i64 0
+  %t0 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.229, i64 0, i64 0
   %method.addr = alloca i8*, align 8
   store i8* %t0, i8** %method.addr, align 8
   %t1 = load i8*, i8** %raw.addr, align 8
@@ -4931,27 +6038,27 @@ entry:
   store double %t3, double* %len.addr, align 8
   %i.addr = alloca double, align 8
   store double 0.0, double* %i.addr, align 8
-  br label %while.cond.526
-while.cond.526:
+  br label %while.cond.607
+while.cond.607:
   %t4 = load double, double* %i.addr, align 8
   %t5 = load double, double* %len.addr, align 8
   %t6 = fcmp olt double %t4, %t5
-  br i1 %t6, label %while.body.527, label %while.end.528
-while.body.527:
+  br i1 %t6, label %while.body.608, label %while.end.609
+while.body.608:
   %t7 = load i8*, i8** %raw.addr, align 8
   %t8 = load double, double* %i.addr, align 8
   %t9 = call i8* @charAt(i8* %t7, double %t8)
   %ch.addr = alloca i8*, align 8
   store i8* %t9, i8** %ch.addr, align 8
   %t10 = load i8*, i8** %ch.addr, align 8
-  %t11 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.169, i64 0, i64 0
+  %t11 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.230, i64 0, i64 0
   %t13 = call i32 @strcmp(i8* %t10, i8* %t11)
   %t12 = icmp eq i32 %t13, 0
-  br i1 %t12, label %then.529, label %merge.531
-then.529:
-  br label %while.end.528
-  br label %merge.531
-merge.531:
+  br i1 %t12, label %then.610, label %merge.612
+then.610:
+  br label %while.end.609
+  br label %merge.612
+merge.612:
   %t14 = load i8*, i8** %method.addr, align 8
   %t15 = load i8*, i8** %ch.addr, align 8
   %t17 = call i64 @strlen(i8* %t14)
@@ -4965,17 +6072,17 @@ merge.531:
   %t24 = load double, double* %i.addr, align 8
   %t25 = fadd double %t24, 1.0
   store double %t25, double* %i.addr, align 8
-  br label %while.cond.526
-while.end.528:
+  br label %while.cond.607
+while.end.609:
   %t26 = load i8*, i8** %method.addr, align 8
-  %t27 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.170, i64 0, i64 0
+  %t27 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.231, i64 0, i64 0
   %t29 = call i32 @strcmp(i8* %t26, i8* %t27)
   %t28 = icmp eq i32 %t29, 0
-  br i1 %t28, label %then.532, label %merge.534
-then.532:
-  %t30 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.171, i64 0, i64 0
+  br i1 %t28, label %then.613, label %merge.615
+then.613:
+  %t30 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.232, i64 0, i64 0
   ret i8* %t30
-merge.534:
+merge.615:
   %t31 = load i8*, i8** %method.addr, align 8
   ret i8* %t31
 }
@@ -4991,103 +6098,103 @@ entry:
   store double %t2, double* %len.addr, align 8
   %i.addr = alloca double, align 8
   store double 0.0, double* %i.addr, align 8
-  br label %while.cond.535
-while.cond.535:
+  br label %while.cond.616
+while.cond.616:
   %t3 = load double, double* %i.addr, align 8
   %t4 = load double, double* %len.addr, align 8
   %t5 = fcmp olt double %t3, %t4
-  br i1 %t5, label %log.rhs.538, label %log.merge.539
-log.rhs.538:
+  br i1 %t5, label %log.rhs.619, label %log.merge.620
+log.rhs.619:
   %t7 = load i8*, i8** %raw.addr, align 8
   %t8 = load double, double* %i.addr, align 8
   %t9 = call i8* @charAt(i8* %t7, double %t8)
-  %t10 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.172, i64 0, i64 0
+  %t10 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.233, i64 0, i64 0
   %t12 = call i32 @strcmp(i8* %t9, i8* %t10)
   %t11 = icmp ne i32 %t12, 0
-  br label %log.merge.539
-log.merge.539:
-  %t6 = phi i1 [ false, %while.cond.535 ], [ %t11, %log.rhs.538 ]
-  br i1 %t6, label %while.body.536, label %while.end.537
-while.body.536:
+  br label %log.merge.620
+log.merge.620:
+  %t6 = phi i1 [ false, %while.cond.616 ], [ %t11, %log.rhs.619 ]
+  br i1 %t6, label %while.body.617, label %while.end.618
+while.body.617:
   %t13 = load double, double* %i.addr, align 8
   %t14 = fadd double %t13, 1.0
   store double %t14, double* %i.addr, align 8
-  br label %while.cond.535
-while.end.537:
-  br label %while.cond.540
-while.cond.540:
+  br label %while.cond.616
+while.end.618:
+  br label %while.cond.621
+while.cond.621:
   %t15 = load double, double* %i.addr, align 8
   %t16 = load double, double* %len.addr, align 8
   %t17 = fcmp olt double %t15, %t16
-  br i1 %t17, label %log.rhs.543, label %log.merge.544
-log.rhs.543:
+  br i1 %t17, label %log.rhs.624, label %log.merge.625
+log.rhs.624:
   %t19 = load i8*, i8** %raw.addr, align 8
   %t20 = load double, double* %i.addr, align 8
   %t21 = call i8* @charAt(i8* %t19, double %t20)
-  %t22 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.173, i64 0, i64 0
+  %t22 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.234, i64 0, i64 0
   %t24 = call i32 @strcmp(i8* %t21, i8* %t22)
   %t23 = icmp eq i32 %t24, 0
-  br label %log.merge.544
-log.merge.544:
-  %t18 = phi i1 [ false, %while.cond.540 ], [ %t23, %log.rhs.543 ]
-  br i1 %t18, label %while.body.541, label %while.end.542
-while.body.541:
+  br label %log.merge.625
+log.merge.625:
+  %t18 = phi i1 [ false, %while.cond.621 ], [ %t23, %log.rhs.624 ]
+  br i1 %t18, label %while.body.622, label %while.end.623
+while.body.622:
   %t25 = load double, double* %i.addr, align 8
   %t26 = fadd double %t25, 1.0
   store double %t26, double* %i.addr, align 8
-  br label %while.cond.540
-while.end.542:
-  %t27 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.174, i64 0, i64 0
+  br label %while.cond.621
+while.end.623:
+  %t27 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.235, i64 0, i64 0
   %path.addr = alloca i8*, align 8
   store i8* %t27, i8** %path.addr, align 8
-  br label %while.cond.545
-while.cond.545:
+  br label %while.cond.626
+while.cond.626:
   %t28 = load double, double* %i.addr, align 8
   %t29 = load double, double* %len.addr, align 8
   %t30 = fcmp olt double %t28, %t29
-  br i1 %t30, label %while.body.546, label %while.end.547
-while.body.546:
+  br i1 %t30, label %while.body.627, label %while.end.628
+while.body.627:
   %t31 = load i8*, i8** %raw.addr, align 8
   %t32 = load double, double* %i.addr, align 8
   %t33 = call i8* @charAt(i8* %t31, double %t32)
   %ch.addr = alloca i8*, align 8
   store i8* %t33, i8** %ch.addr, align 8
   %t34 = load i8*, i8** %ch.addr, align 8
-  %t35 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.175, i64 0, i64 0
+  %t35 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.236, i64 0, i64 0
   %t37 = call i32 @strcmp(i8* %t34, i8* %t35)
   %t36 = icmp eq i32 %t37, 0
-  br i1 %t36, label %log.merge.553, label %log.rhs.552
-log.rhs.552:
+  br i1 %t36, label %log.merge.634, label %log.rhs.633
+log.rhs.633:
   %t39 = load i8*, i8** %ch.addr, align 8
-  %t40 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.176, i64 0, i64 0
+  %t40 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.237, i64 0, i64 0
   %t42 = call i32 @strcmp(i8* %t39, i8* %t40)
   %t41 = icmp eq i32 %t42, 0
-  br label %log.merge.553
-log.merge.553:
-  %t38 = phi i1 [ true, %while.body.546 ], [ %t41, %log.rhs.552 ]
-  br i1 %t38, label %log.merge.551, label %log.rhs.550
-log.rhs.550:
+  br label %log.merge.634
+log.merge.634:
+  %t38 = phi i1 [ true, %while.body.627 ], [ %t41, %log.rhs.633 ]
+  br i1 %t38, label %log.merge.632, label %log.rhs.631
+log.rhs.631:
   %t44 = load i8*, i8** %ch.addr, align 8
-  %t45 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.177, i64 0, i64 0
+  %t45 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.238, i64 0, i64 0
   %t47 = call i32 @strcmp(i8* %t44, i8* %t45)
   %t46 = icmp eq i32 %t47, 0
-  br label %log.merge.551
-log.merge.551:
-  %t43 = phi i1 [ true, %log.merge.553 ], [ %t46, %log.rhs.550 ]
-  br i1 %t43, label %log.merge.549, label %log.rhs.548
-log.rhs.548:
+  br label %log.merge.632
+log.merge.632:
+  %t43 = phi i1 [ true, %log.merge.634 ], [ %t46, %log.rhs.631 ]
+  br i1 %t43, label %log.merge.630, label %log.rhs.629
+log.rhs.629:
   %t49 = load i8*, i8** %ch.addr, align 8
-  %t50 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.178, i64 0, i64 0
+  %t50 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.239, i64 0, i64 0
   %t52 = call i32 @strcmp(i8* %t49, i8* %t50)
   %t51 = icmp eq i32 %t52, 0
-  br label %log.merge.549
-log.merge.549:
-  %t48 = phi i1 [ true, %log.merge.551 ], [ %t51, %log.rhs.548 ]
-  br i1 %t48, label %then.554, label %merge.556
-then.554:
-  br label %while.end.547
-  br label %merge.556
-merge.556:
+  br label %log.merge.630
+log.merge.630:
+  %t48 = phi i1 [ true, %log.merge.632 ], [ %t51, %log.rhs.629 ]
+  br i1 %t48, label %then.635, label %merge.637
+then.635:
+  br label %while.end.628
+  br label %merge.637
+merge.637:
   %t53 = load i8*, i8** %path.addr, align 8
   %t54 = load i8*, i8** %ch.addr, align 8
   %t56 = call i64 @strlen(i8* %t53)
@@ -5101,17 +6208,17 @@ merge.556:
   %t63 = load double, double* %i.addr, align 8
   %t64 = fadd double %t63, 1.0
   store double %t64, double* %i.addr, align 8
-  br label %while.cond.545
-while.end.547:
+  br label %while.cond.626
+while.end.628:
   %t65 = load i8*, i8** %path.addr, align 8
-  %t66 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.179, i64 0, i64 0
+  %t66 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.240, i64 0, i64 0
   %t68 = call i32 @strcmp(i8* %t65, i8* %t66)
   %t67 = icmp eq i32 %t68, 0
-  br i1 %t67, label %then.557, label %merge.559
-then.557:
-  %t69 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.180, i64 0, i64 0
+  br i1 %t67, label %then.638, label %merge.640
+then.638:
+  %t69 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.241, i64 0, i64 0
   ret i8* %t69
-merge.559:
+merge.640:
   %t70 = load i8*, i8** %path.addr, align 8
   ret i8* %t70
 }
@@ -5127,147 +6234,147 @@ entry:
   store double %t2, double* %len.addr, align 8
   %i.addr = alloca double, align 8
   store double 0.0, double* %i.addr, align 8
-  br label %while.cond.560
-while.cond.560:
+  br label %while.cond.641
+while.cond.641:
   %t3 = load double, double* %i.addr, align 8
   %t4 = load double, double* %len.addr, align 8
   %t5 = fcmp olt double %t3, %t4
-  br i1 %t5, label %log.rhs.563, label %log.merge.564
-log.rhs.563:
+  br i1 %t5, label %log.rhs.644, label %log.merge.645
+log.rhs.644:
   %t7 = load i8*, i8** %raw.addr, align 8
   %t8 = load double, double* %i.addr, align 8
   %t9 = call i8* @charAt(i8* %t7, double %t8)
-  %t10 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.181, i64 0, i64 0
+  %t10 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.242, i64 0, i64 0
   %t12 = call i32 @strcmp(i8* %t9, i8* %t10)
   %t11 = icmp ne i32 %t12, 0
-  br label %log.merge.564
-log.merge.564:
-  %t6 = phi i1 [ false, %while.cond.560 ], [ %t11, %log.rhs.563 ]
-  br i1 %t6, label %while.body.561, label %while.end.562
-while.body.561:
+  br label %log.merge.645
+log.merge.645:
+  %t6 = phi i1 [ false, %while.cond.641 ], [ %t11, %log.rhs.644 ]
+  br i1 %t6, label %while.body.642, label %while.end.643
+while.body.642:
   %t13 = load double, double* %i.addr, align 8
   %t14 = fadd double %t13, 1.0
   store double %t14, double* %i.addr, align 8
-  br label %while.cond.560
-while.end.562:
-  br label %while.cond.565
-while.cond.565:
+  br label %while.cond.641
+while.end.643:
+  br label %while.cond.646
+while.cond.646:
   %t15 = load double, double* %i.addr, align 8
   %t16 = load double, double* %len.addr, align 8
   %t17 = fcmp olt double %t15, %t16
-  br i1 %t17, label %log.rhs.568, label %log.merge.569
-log.rhs.568:
+  br i1 %t17, label %log.rhs.649, label %log.merge.650
+log.rhs.649:
   %t19 = load i8*, i8** %raw.addr, align 8
   %t20 = load double, double* %i.addr, align 8
   %t21 = call i8* @charAt(i8* %t19, double %t20)
-  %t22 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.182, i64 0, i64 0
+  %t22 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.243, i64 0, i64 0
   %t24 = call i32 @strcmp(i8* %t21, i8* %t22)
   %t23 = icmp eq i32 %t24, 0
-  br label %log.merge.569
-log.merge.569:
-  %t18 = phi i1 [ false, %while.cond.565 ], [ %t23, %log.rhs.568 ]
-  br i1 %t18, label %while.body.566, label %while.end.567
-while.body.566:
+  br label %log.merge.650
+log.merge.650:
+  %t18 = phi i1 [ false, %while.cond.646 ], [ %t23, %log.rhs.649 ]
+  br i1 %t18, label %while.body.647, label %while.end.648
+while.body.647:
   %t25 = load double, double* %i.addr, align 8
   %t26 = fadd double %t25, 1.0
   store double %t26, double* %i.addr, align 8
-  br label %while.cond.565
-while.end.567:
-  br label %while.cond.570
-while.cond.570:
+  br label %while.cond.646
+while.end.648:
+  br label %while.cond.651
+while.cond.651:
   %t27 = load double, double* %i.addr, align 8
   %t28 = load double, double* %len.addr, align 8
   %t29 = fcmp olt double %t27, %t28
-  br i1 %t29, label %log.rhs.575, label %log.merge.576
-log.rhs.575:
+  br i1 %t29, label %log.rhs.656, label %log.merge.657
+log.rhs.656:
   %t31 = load i8*, i8** %raw.addr, align 8
   %t32 = load double, double* %i.addr, align 8
   %t33 = call i8* @charAt(i8* %t31, double %t32)
-  %t34 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.183, i64 0, i64 0
+  %t34 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.244, i64 0, i64 0
   %t36 = call i32 @strcmp(i8* %t33, i8* %t34)
   %t35 = icmp ne i32 %t36, 0
-  br label %log.merge.576
-log.merge.576:
-  %t30 = phi i1 [ false, %while.cond.570 ], [ %t35, %log.rhs.575 ]
-  br i1 %t30, label %log.rhs.573, label %log.merge.574
-log.rhs.573:
+  br label %log.merge.657
+log.merge.657:
+  %t30 = phi i1 [ false, %while.cond.651 ], [ %t35, %log.rhs.656 ]
+  br i1 %t30, label %log.rhs.654, label %log.merge.655
+log.rhs.654:
   %t38 = load i8*, i8** %raw.addr, align 8
   %t39 = load double, double* %i.addr, align 8
   %t40 = call i8* @charAt(i8* %t38, double %t39)
-  %t41 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.184, i64 0, i64 0
+  %t41 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.245, i64 0, i64 0
   %t43 = call i32 @strcmp(i8* %t40, i8* %t41)
   %t42 = icmp ne i32 %t43, 0
-  br label %log.merge.574
-log.merge.574:
-  %t37 = phi i1 [ false, %log.merge.576 ], [ %t42, %log.rhs.573 ]
-  br i1 %t37, label %while.body.571, label %while.end.572
-while.body.571:
+  br label %log.merge.655
+log.merge.655:
+  %t37 = phi i1 [ false, %log.merge.657 ], [ %t42, %log.rhs.654 ]
+  br i1 %t37, label %while.body.652, label %while.end.653
+while.body.652:
   %t44 = load double, double* %i.addr, align 8
   %t45 = fadd double %t44, 1.0
   store double %t45, double* %i.addr, align 8
-  br label %while.cond.570
-while.end.572:
+  br label %while.cond.651
+while.end.653:
   %t46 = load double, double* %i.addr, align 8
   %t47 = load double, double* %len.addr, align 8
   %t48 = fcmp olt double %t46, %t47
-  br i1 %t48, label %log.rhs.577, label %log.merge.578
-log.rhs.577:
+  br i1 %t48, label %log.rhs.658, label %log.merge.659
+log.rhs.658:
   %t50 = load i8*, i8** %raw.addr, align 8
   %t51 = load double, double* %i.addr, align 8
   %t52 = call i8* @charAt(i8* %t50, double %t51)
-  %t53 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.185, i64 0, i64 0
+  %t53 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.246, i64 0, i64 0
   %t55 = call i32 @strcmp(i8* %t52, i8* %t53)
   %t54 = icmp eq i32 %t55, 0
-  br label %log.merge.578
-log.merge.578:
-  %t49 = phi i1 [ false, %while.end.572 ], [ %t54, %log.rhs.577 ]
-  br i1 %t49, label %then.579, label %merge.581
-then.579:
+  br label %log.merge.659
+log.merge.659:
+  %t49 = phi i1 [ false, %while.end.653 ], [ %t54, %log.rhs.658 ]
+  br i1 %t49, label %then.660, label %merge.662
+then.660:
   %t56 = load double, double* %i.addr, align 8
   %t57 = fadd double %t56, 1.0
   store double %t57, double* %i.addr, align 8
-  %t58 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.186, i64 0, i64 0
+  %t58 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.247, i64 0, i64 0
   %query.addr = alloca i8*, align 8
   store i8* %t58, i8** %query.addr, align 8
-  br label %while.cond.582
-while.cond.582:
+  br label %while.cond.663
+while.cond.663:
   %t59 = load double, double* %i.addr, align 8
   %t60 = load double, double* %len.addr, align 8
   %t61 = fcmp olt double %t59, %t60
-  br i1 %t61, label %while.body.583, label %while.end.584
-while.body.583:
+  br i1 %t61, label %while.body.664, label %while.end.665
+while.body.664:
   %t62 = load i8*, i8** %raw.addr, align 8
   %t63 = load double, double* %i.addr, align 8
   %t64 = call i8* @charAt(i8* %t62, double %t63)
   %ch.addr = alloca i8*, align 8
   store i8* %t64, i8** %ch.addr, align 8
   %t65 = load i8*, i8** %ch.addr, align 8
-  %t66 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.187, i64 0, i64 0
+  %t66 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.248, i64 0, i64 0
   %t68 = call i32 @strcmp(i8* %t65, i8* %t66)
   %t67 = icmp eq i32 %t68, 0
-  br i1 %t67, label %log.merge.588, label %log.rhs.587
-log.rhs.587:
+  br i1 %t67, label %log.merge.669, label %log.rhs.668
+log.rhs.668:
   %t70 = load i8*, i8** %ch.addr, align 8
-  %t71 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.188, i64 0, i64 0
+  %t71 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.249, i64 0, i64 0
   %t73 = call i32 @strcmp(i8* %t70, i8* %t71)
   %t72 = icmp eq i32 %t73, 0
-  br label %log.merge.588
-log.merge.588:
-  %t69 = phi i1 [ true, %while.body.583 ], [ %t72, %log.rhs.587 ]
-  br i1 %t69, label %log.merge.586, label %log.rhs.585
-log.rhs.585:
+  br label %log.merge.669
+log.merge.669:
+  %t69 = phi i1 [ true, %while.body.664 ], [ %t72, %log.rhs.668 ]
+  br i1 %t69, label %log.merge.667, label %log.rhs.666
+log.rhs.666:
   %t75 = load i8*, i8** %ch.addr, align 8
-  %t76 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.189, i64 0, i64 0
+  %t76 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.250, i64 0, i64 0
   %t78 = call i32 @strcmp(i8* %t75, i8* %t76)
   %t77 = icmp eq i32 %t78, 0
-  br label %log.merge.586
-log.merge.586:
-  %t74 = phi i1 [ true, %log.merge.588 ], [ %t77, %log.rhs.585 ]
-  br i1 %t74, label %then.589, label %merge.591
-then.589:
-  br label %while.end.584
-  br label %merge.591
-merge.591:
+  br label %log.merge.667
+log.merge.667:
+  %t74 = phi i1 [ true, %log.merge.669 ], [ %t77, %log.rhs.666 ]
+  br i1 %t74, label %then.670, label %merge.672
+then.670:
+  br label %while.end.665
+  br label %merge.672
+merge.672:
   %t79 = load i8*, i8** %query.addr, align 8
   %t80 = load i8*, i8** %ch.addr, align 8
   %t82 = call i64 @strlen(i8* %t79)
@@ -5281,12 +6388,12 @@ merge.591:
   %t89 = load double, double* %i.addr, align 8
   %t90 = fadd double %t89, 1.0
   store double %t90, double* %i.addr, align 8
-  br label %while.cond.582
-while.end.584:
+  br label %while.cond.663
+while.end.665:
   %t91 = load i8*, i8** %query.addr, align 8
   ret i8* %t91
-merge.581:
-  %t92 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.190, i64 0, i64 0
+merge.662:
+  %t92 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.251, i64 0, i64 0
   ret i8* %t92
 }
 
@@ -5301,71 +6408,71 @@ entry:
   store double %t2, double* %len.addr, align 8
   %i.addr = alloca double, align 8
   store double 0.0, double* %i.addr, align 8
-  br label %while.cond.592
-while.cond.592:
+  br label %while.cond.673
+while.cond.673:
   %t3 = load double, double* %i.addr, align 8
   %t4 = fadd double %t3, 3.0
   %t5 = load double, double* %len.addr, align 8
   %t6 = fcmp olt double %t4, %t5
-  br i1 %t6, label %while.body.593, label %while.end.594
-while.body.593:
+  br i1 %t6, label %while.body.674, label %while.end.675
+while.body.674:
   %t7 = load i8*, i8** %raw.addr, align 8
   %t8 = load double, double* %i.addr, align 8
   %t9 = call i8* @charAt(i8* %t7, double %t8)
-  %t10 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.191, i64 0, i64 0
+  %t10 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.252, i64 0, i64 0
   %t12 = call i32 @strcmp(i8* %t9, i8* %t10)
   %t11 = icmp eq i32 %t12, 0
-  br i1 %t11, label %log.rhs.599, label %log.merge.600
-log.rhs.599:
+  br i1 %t11, label %log.rhs.680, label %log.merge.681
+log.rhs.680:
   %t14 = load i8*, i8** %raw.addr, align 8
   %t15 = load double, double* %i.addr, align 8
   %t16 = fadd double %t15, 1.0
   %t17 = call i8* @charAt(i8* %t14, double %t16)
-  %t18 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.192, i64 0, i64 0
+  %t18 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.253, i64 0, i64 0
   %t20 = call i32 @strcmp(i8* %t17, i8* %t18)
   %t19 = icmp eq i32 %t20, 0
-  br label %log.merge.600
-log.merge.600:
-  %t13 = phi i1 [ false, %while.body.593 ], [ %t19, %log.rhs.599 ]
-  br i1 %t13, label %log.rhs.597, label %log.merge.598
-log.rhs.597:
+  br label %log.merge.681
+log.merge.681:
+  %t13 = phi i1 [ false, %while.body.674 ], [ %t19, %log.rhs.680 ]
+  br i1 %t13, label %log.rhs.678, label %log.merge.679
+log.rhs.678:
   %t22 = load i8*, i8** %raw.addr, align 8
   %t23 = load double, double* %i.addr, align 8
   %t24 = fadd double %t23, 2.0
   %t25 = call i8* @charAt(i8* %t22, double %t24)
-  %t26 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.193, i64 0, i64 0
+  %t26 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.254, i64 0, i64 0
   %t28 = call i32 @strcmp(i8* %t25, i8* %t26)
   %t27 = icmp eq i32 %t28, 0
-  br label %log.merge.598
-log.merge.598:
-  %t21 = phi i1 [ false, %log.merge.600 ], [ %t27, %log.rhs.597 ]
-  br i1 %t21, label %log.rhs.595, label %log.merge.596
-log.rhs.595:
+  br label %log.merge.679
+log.merge.679:
+  %t21 = phi i1 [ false, %log.merge.681 ], [ %t27, %log.rhs.678 ]
+  br i1 %t21, label %log.rhs.676, label %log.merge.677
+log.rhs.676:
   %t30 = load i8*, i8** %raw.addr, align 8
   %t31 = load double, double* %i.addr, align 8
   %t32 = fadd double %t31, 3.0
   %t33 = call i8* @charAt(i8* %t30, double %t32)
-  %t34 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.194, i64 0, i64 0
+  %t34 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.255, i64 0, i64 0
   %t36 = call i32 @strcmp(i8* %t33, i8* %t34)
   %t35 = icmp eq i32 %t36, 0
-  br label %log.merge.596
-log.merge.596:
-  %t29 = phi i1 [ false, %log.merge.598 ], [ %t35, %log.rhs.595 ]
-  br i1 %t29, label %then.601, label %merge.603
-then.601:
+  br label %log.merge.677
+log.merge.677:
+  %t29 = phi i1 [ false, %log.merge.679 ], [ %t35, %log.rhs.676 ]
+  br i1 %t29, label %then.682, label %merge.684
+then.682:
   %t37 = load double, double* %i.addr, align 8
   %t38 = fadd double %t37, 4.0
   store double %t38, double* %i.addr, align 8
-  %t39 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.195, i64 0, i64 0
+  %t39 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.256, i64 0, i64 0
   %body.addr = alloca i8*, align 8
   store i8* %t39, i8** %body.addr, align 8
-  br label %while.cond.604
-while.cond.604:
+  br label %while.cond.685
+while.cond.685:
   %t40 = load double, double* %i.addr, align 8
   %t41 = load double, double* %len.addr, align 8
   %t42 = fcmp olt double %t40, %t41
-  br i1 %t42, label %while.body.605, label %while.end.606
-while.body.605:
+  br i1 %t42, label %while.body.686, label %while.end.687
+while.body.686:
   %t43 = load i8*, i8** %body.addr, align 8
   %t44 = load i8*, i8** %raw.addr, align 8
   %t45 = load double, double* %i.addr, align 8
@@ -5381,17 +6488,17 @@ while.body.605:
   %t55 = load double, double* %i.addr, align 8
   %t56 = fadd double %t55, 1.0
   store double %t56, double* %i.addr, align 8
-  br label %while.cond.604
-while.end.606:
+  br label %while.cond.685
+while.end.687:
   %t57 = load i8*, i8** %body.addr, align 8
   ret i8* %t57
-merge.603:
+merge.684:
   %t58 = load double, double* %i.addr, align 8
   %t59 = fadd double %t58, 1.0
   store double %t59, double* %i.addr, align 8
-  br label %while.cond.592
-while.end.594:
-  %t60 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.196, i64 0, i64 0
+  br label %while.cond.673
+while.end.675:
+  %t60 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.257, i64 0, i64 0
   ret i8* %t60
 }
 
@@ -5428,27 +6535,27 @@ entry:
   store i8* %t19, i8** %t17, align 8
   %t20 = load %struct.Request*, %struct.Request** %req.addr, align 8
   %t21 = getelementptr inbounds %struct.Request, %struct.Request* %t20, i32 0, i32 5
-  %t22 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.197, i64 0, i64 0
+  %t22 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.258, i64 0, i64 0
   store i8* %t22, i8** %t21, align 8
   %t23 = load %struct.Request*, %struct.Request** %req.addr, align 8
   %t24 = getelementptr inbounds %struct.Request, %struct.Request* %t23, i32 0, i32 6
-  %t25 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.198, i64 0, i64 0
+  %t25 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.259, i64 0, i64 0
   store i8* %t25, i8** %t24, align 8
   %t26 = load %struct.Request*, %struct.Request** %req.addr, align 8
   %t27 = getelementptr inbounds %struct.Request, %struct.Request* %t26, i32 0, i32 7
-  %t28 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.199, i64 0, i64 0
+  %t28 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.260, i64 0, i64 0
   store i8* %t28, i8** %t27, align 8
   %t29 = load %struct.Request*, %struct.Request** %req.addr, align 8
   %t30 = getelementptr inbounds %struct.Request, %struct.Request* %t29, i32 0, i32 8
-  %t31 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.200, i64 0, i64 0
+  %t31 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.261, i64 0, i64 0
   store i8* %t31, i8** %t30, align 8
   %t32 = load %struct.Request*, %struct.Request** %req.addr, align 8
   %t33 = getelementptr inbounds %struct.Request, %struct.Request* %t32, i32 0, i32 9
-  %t34 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.201, i64 0, i64 0
+  %t34 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.262, i64 0, i64 0
   store i8* %t34, i8** %t33, align 8
   %t35 = load %struct.Request*, %struct.Request** %req.addr, align 8
   %t36 = getelementptr inbounds %struct.Request, %struct.Request* %t35, i32 0, i32 10
-  %t37 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.202, i64 0, i64 0
+  %t37 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.263, i64 0, i64 0
   store i8* %t37, i8** %t36, align 8
   %t38 = load %struct.Request*, %struct.Request** %req.addr, align 8
   %t39 = getelementptr inbounds %struct.Request, %struct.Request* %t38, i32 0, i32 11
@@ -5478,8 +6585,8 @@ entry:
   store %struct.VitoApp* %t1, %struct.VitoApp** %app.addr, align 8
   store %struct.VitoApp* %t0, %struct.VitoApp** %app.addr, align 8
   %t2 = load %struct.VitoApp*, %struct.VitoApp** %app.addr, align 8
-  %t3 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.203, i64 0, i64 0
-  %t4 = bitcast void (%struct.Request*, %struct.Response*)* @__lambda_4 to i8*
+  %t3 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.264, i64 0, i64 0
+  %t4 = bitcast void (%struct.Request*, %struct.Response*)* @__lambda_1 to i8*
   call void @_VitoApp_get(%struct.VitoApp* %t2, i8* %t3, i8* %t4)
   %t5 = load %struct.VitoApp*, %struct.VitoApp** %app.addr, align 8
   %t6 = load double, double* %port.addr, align 8
@@ -5588,20 +6695,20 @@ entry:
   %t1 = call i64 @strlen(i8* %t0)
   %t2 = uitofp i64 %t1 to double
   %t3 = fcmp oeq double %t2, 0.0
-  br i1 %t3, label %log.merge.608, label %log.rhs.607
-log.rhs.607:
+  br i1 %t3, label %log.merge.689, label %log.rhs.688
+log.rhs.688:
   %t5 = load i8*, i8** %targetHeader.addr, align 8
   %t6 = call i64 @strlen(i8* %t5)
   %t7 = uitofp i64 %t6 to double
   %t8 = fcmp oeq double %t7, 0.0
-  br label %log.merge.608
-log.merge.608:
-  %t4 = phi i1 [ true, %entry ], [ %t8, %log.rhs.607 ]
-  br i1 %t4, label %then.609, label %merge.611
-then.609:
-  %t9 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.205, i64 0, i64 0
+  br label %log.merge.689
+log.merge.689:
+  %t4 = phi i1 [ true, %entry ], [ %t8, %log.rhs.688 ]
+  br i1 %t4, label %then.690, label %merge.692
+then.690:
+  %t9 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.266, i64 0, i64 0
   ret i8* %t9
-merge.611:
+merge.692:
   %t10 = load i8*, i8** %raw.addr, align 8
   %t11 = call i64 @strlen(i8* %t10)
   %t12 = uitofp i64 %t11 to double
@@ -5609,29 +6716,29 @@ merge.611:
   store double %t12, double* %len.addr, align 8
   %i.addr = alloca double, align 8
   store double 0.0, double* %i.addr, align 8
-  br label %while.cond.612
-while.cond.612:
+  br label %while.cond.693
+while.cond.693:
   %t13 = load double, double* %i.addr, align 8
   %t14 = load double, double* %len.addr, align 8
   %t15 = fcmp olt double %t13, %t14
-  br i1 %t15, label %log.rhs.615, label %log.merge.616
-log.rhs.615:
+  br i1 %t15, label %log.rhs.696, label %log.merge.697
+log.rhs.696:
   %t17 = load i8*, i8** %raw.addr, align 8
   %t18 = load double, double* %i.addr, align 8
   %t19 = call i8* @charAt(i8* %t17, double %t18)
-  %t20 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.206, i64 0, i64 0
+  %t20 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.267, i64 0, i64 0
   %t22 = call i32 @strcmp(i8* %t19, i8* %t20)
   %t21 = icmp ne i32 %t22, 0
-  br label %log.merge.616
-log.merge.616:
-  %t16 = phi i1 [ false, %while.cond.612 ], [ %t21, %log.rhs.615 ]
-  br i1 %t16, label %while.body.613, label %while.end.614
-while.body.613:
+  br label %log.merge.697
+log.merge.697:
+  %t16 = phi i1 [ false, %while.cond.693 ], [ %t21, %log.rhs.696 ]
+  br i1 %t16, label %while.body.694, label %while.end.695
+while.body.694:
   %t23 = load double, double* %i.addr, align 8
   %t24 = fadd double %t23, 1.0
   store double %t24, double* %i.addr, align 8
-  br label %while.cond.612
-while.end.614:
+  br label %while.cond.693
+while.end.695:
   %t25 = load double, double* %i.addr, align 8
   %t26 = fadd double %t25, 1.0
   store double %t26, double* %i.addr, align 8
@@ -5640,34 +6747,34 @@ while.end.614:
   %t29 = uitofp i64 %t28 to double
   %matchTargetLen.addr = alloca double, align 8
   store double %t29, double* %matchTargetLen.addr, align 8
-  br label %while.cond.617
-while.cond.617:
+  br label %while.cond.698
+while.cond.698:
   %t30 = load double, double* %i.addr, align 8
   %t31 = load double, double* %len.addr, align 8
   %t32 = fcmp olt double %t30, %t31
-  br i1 %t32, label %while.body.618, label %while.end.619
-while.body.618:
+  br i1 %t32, label %while.body.699, label %while.end.700
+while.body.699:
   %isMatch.addr = alloca i1, align 8
   store i1 true, i1* %isMatch.addr, align 8
   %k.addr = alloca double, align 8
   store double 0.0, double* %k.addr, align 8
-  br label %while.cond.620
-while.cond.620:
+  br label %while.cond.701
+while.cond.701:
   %t33 = load double, double* %k.addr, align 8
   %t34 = load double, double* %matchTargetLen.addr, align 8
   %t35 = fcmp olt double %t33, %t34
-  br i1 %t35, label %log.rhs.623, label %log.merge.624
-log.rhs.623:
+  br i1 %t35, label %log.rhs.704, label %log.merge.705
+log.rhs.704:
   %t37 = load double, double* %i.addr, align 8
   %t38 = load double, double* %k.addr, align 8
   %t39 = fadd double %t37, %t38
   %t40 = load double, double* %len.addr, align 8
   %t41 = fcmp olt double %t39, %t40
-  br label %log.merge.624
-log.merge.624:
-  %t36 = phi i1 [ false, %while.cond.620 ], [ %t41, %log.rhs.623 ]
-  br i1 %t36, label %while.body.621, label %while.end.622
-while.body.621:
+  br label %log.merge.705
+log.merge.705:
+  %t36 = phi i1 [ false, %while.cond.701 ], [ %t41, %log.rhs.704 ]
+  br i1 %t36, label %while.body.702, label %while.end.703
+while.body.702:
   %t42 = load i8*, i8** %raw.addr, align 8
   %t43 = load double, double* %i.addr, align 8
   %t44 = load double, double* %k.addr, align 8
@@ -5684,122 +6791,122 @@ while.body.621:
   %t51 = load i8*, i8** %c2.addr, align 8
   %t53 = call i32 @strcmp(i8* %t50, i8* %t51)
   %t52 = icmp ne i32 %t53, 0
-  br i1 %t52, label %then.625, label %merge.627
-then.625:
+  br i1 %t52, label %then.706, label %merge.708
+then.706:
   store i1 false, i1* %isMatch.addr, align 8
-  br label %while.end.622
-  br label %merge.627
-merge.627:
+  br label %while.end.703
+  br label %merge.708
+merge.708:
   %t54 = load double, double* %k.addr, align 8
   %t55 = fadd double %t54, 1.0
   store double %t55, double* %k.addr, align 8
-  br label %while.cond.620
-while.end.622:
+  br label %while.cond.701
+while.end.703:
   %t56 = load i1, i1* %isMatch.addr, align 8
-  br i1 %t56, label %log.rhs.630, label %log.merge.631
-log.rhs.630:
+  br i1 %t56, label %log.rhs.711, label %log.merge.712
+log.rhs.711:
   %t58 = load double, double* %i.addr, align 8
   %t59 = load double, double* %matchTargetLen.addr, align 8
   %t60 = fadd double %t58, %t59
   %t61 = load double, double* %len.addr, align 8
   %t62 = fcmp olt double %t60, %t61
-  br label %log.merge.631
-log.merge.631:
-  %t57 = phi i1 [ false, %while.end.622 ], [ %t62, %log.rhs.630 ]
-  br i1 %t57, label %log.rhs.628, label %log.merge.629
-log.rhs.628:
+  br label %log.merge.712
+log.merge.712:
+  %t57 = phi i1 [ false, %while.end.703 ], [ %t62, %log.rhs.711 ]
+  br i1 %t57, label %log.rhs.709, label %log.merge.710
+log.rhs.709:
   %t64 = load i8*, i8** %raw.addr, align 8
   %t65 = load double, double* %i.addr, align 8
   %t66 = load double, double* %matchTargetLen.addr, align 8
   %t67 = fadd double %t65, %t66
   %t68 = call i8* @charAt(i8* %t64, double %t67)
-  %t69 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.207, i64 0, i64 0
+  %t69 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.268, i64 0, i64 0
   %t71 = call i32 @strcmp(i8* %t68, i8* %t69)
   %t70 = icmp eq i32 %t71, 0
-  br label %log.merge.629
-log.merge.629:
-  %t63 = phi i1 [ false, %log.merge.631 ], [ %t70, %log.rhs.628 ]
-  br i1 %t63, label %then.632, label %merge.634
-then.632:
+  br label %log.merge.710
+log.merge.710:
+  %t63 = phi i1 [ false, %log.merge.712 ], [ %t70, %log.rhs.709 ]
+  br i1 %t63, label %then.713, label %merge.715
+then.713:
   %t72 = load double, double* %i.addr, align 8
   %t73 = load double, double* %matchTargetLen.addr, align 8
   %t74 = fadd double %t72, %t73
   %t75 = fadd double %t74, 1.0
   %valStart.addr = alloca double, align 8
   store double %t75, double* %valStart.addr, align 8
-  br label %while.cond.635
-while.cond.635:
+  br label %while.cond.716
+while.cond.716:
   %t76 = load double, double* %valStart.addr, align 8
   %t77 = load double, double* %len.addr, align 8
   %t78 = fcmp olt double %t76, %t77
-  br i1 %t78, label %log.rhs.638, label %log.merge.639
-log.rhs.638:
+  br i1 %t78, label %log.rhs.719, label %log.merge.720
+log.rhs.719:
   %t80 = load i8*, i8** %raw.addr, align 8
   %t81 = load double, double* %valStart.addr, align 8
   %t82 = call i8* @charAt(i8* %t80, double %t81)
-  %t83 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.208, i64 0, i64 0
+  %t83 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.269, i64 0, i64 0
   %t85 = call i32 @strcmp(i8* %t82, i8* %t83)
   %t84 = icmp eq i32 %t85, 0
-  br label %log.merge.639
-log.merge.639:
-  %t79 = phi i1 [ false, %while.cond.635 ], [ %t84, %log.rhs.638 ]
-  br i1 %t79, label %while.body.636, label %while.end.637
-while.body.636:
+  br label %log.merge.720
+log.merge.720:
+  %t79 = phi i1 [ false, %while.cond.716 ], [ %t84, %log.rhs.719 ]
+  br i1 %t79, label %while.body.717, label %while.end.718
+while.body.717:
   %t86 = load double, double* %valStart.addr, align 8
   %t87 = fadd double %t86, 1.0
   store double %t87, double* %valStart.addr, align 8
-  br label %while.cond.635
-while.end.637:
+  br label %while.cond.716
+while.end.718:
   %t88 = load double, double* %valStart.addr, align 8
   %valEnd.addr = alloca double, align 8
   store double %t88, double* %valEnd.addr, align 8
-  br label %while.cond.640
-while.cond.640:
+  br label %while.cond.721
+while.cond.721:
   %t89 = load double, double* %valEnd.addr, align 8
   %t90 = load double, double* %len.addr, align 8
   %t91 = fcmp olt double %t89, %t90
-  br i1 %t91, label %log.rhs.645, label %log.merge.646
-log.rhs.645:
+  br i1 %t91, label %log.rhs.726, label %log.merge.727
+log.rhs.726:
   %t93 = load i8*, i8** %raw.addr, align 8
   %t94 = load double, double* %valEnd.addr, align 8
   %t95 = call i8* @charAt(i8* %t93, double %t94)
-  %t96 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.209, i64 0, i64 0
+  %t96 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.270, i64 0, i64 0
   %t98 = call i32 @strcmp(i8* %t95, i8* %t96)
   %t97 = icmp ne i32 %t98, 0
-  br label %log.merge.646
-log.merge.646:
-  %t92 = phi i1 [ false, %while.cond.640 ], [ %t97, %log.rhs.645 ]
-  br i1 %t92, label %log.rhs.643, label %log.merge.644
-log.rhs.643:
+  br label %log.merge.727
+log.merge.727:
+  %t92 = phi i1 [ false, %while.cond.721 ], [ %t97, %log.rhs.726 ]
+  br i1 %t92, label %log.rhs.724, label %log.merge.725
+log.rhs.724:
   %t100 = load i8*, i8** %raw.addr, align 8
   %t101 = load double, double* %valEnd.addr, align 8
   %t102 = call i8* @charAt(i8* %t100, double %t101)
-  %t103 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.210, i64 0, i64 0
+  %t103 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.271, i64 0, i64 0
   %t105 = call i32 @strcmp(i8* %t102, i8* %t103)
   %t104 = icmp ne i32 %t105, 0
-  br label %log.merge.644
-log.merge.644:
-  %t99 = phi i1 [ false, %log.merge.646 ], [ %t104, %log.rhs.643 ]
-  br i1 %t99, label %while.body.641, label %while.end.642
-while.body.641:
+  br label %log.merge.725
+log.merge.725:
+  %t99 = phi i1 [ false, %log.merge.727 ], [ %t104, %log.rhs.724 ]
+  br i1 %t99, label %while.body.722, label %while.end.723
+while.body.722:
   %t106 = load double, double* %valEnd.addr, align 8
   %t107 = fadd double %t106, 1.0
   store double %t107, double* %valEnd.addr, align 8
-  br label %while.cond.640
-while.end.642:
-  %t108 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.211, i64 0, i64 0
+  br label %while.cond.721
+while.end.723:
+  %t108 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.272, i64 0, i64 0
   %res.addr = alloca i8*, align 8
   store i8* %t108, i8** %res.addr, align 8
   %t109 = load double, double* %valStart.addr, align 8
   %p.addr = alloca double, align 8
   store double %t109, double* %p.addr, align 8
-  br label %while.cond.647
-while.cond.647:
+  br label %while.cond.728
+while.cond.728:
   %t110 = load double, double* %p.addr, align 8
   %t111 = load double, double* %valEnd.addr, align 8
   %t112 = fcmp olt double %t110, %t111
-  br i1 %t112, label %while.body.648, label %while.end.649
-while.body.648:
+  br i1 %t112, label %while.body.729, label %while.end.730
+while.body.729:
   %t113 = load i8*, i8** %res.addr, align 8
   %t114 = load i8*, i8** %raw.addr, align 8
   %t115 = load double, double* %p.addr, align 8
@@ -5815,40 +6922,40 @@ while.body.648:
   %t125 = load double, double* %p.addr, align 8
   %t126 = fadd double %t125, 1.0
   store double %t126, double* %p.addr, align 8
-  br label %while.cond.647
-while.end.649:
+  br label %while.cond.728
+while.end.730:
   %t127 = load i8*, i8** %res.addr, align 8
   ret i8* %t127
-merge.634:
-  br label %while.cond.650
-while.cond.650:
+merge.715:
+  br label %while.cond.731
+while.cond.731:
   %t128 = load double, double* %i.addr, align 8
   %t129 = load double, double* %len.addr, align 8
   %t130 = fcmp olt double %t128, %t129
-  br i1 %t130, label %log.rhs.653, label %log.merge.654
-log.rhs.653:
+  br i1 %t130, label %log.rhs.734, label %log.merge.735
+log.rhs.734:
   %t132 = load i8*, i8** %raw.addr, align 8
   %t133 = load double, double* %i.addr, align 8
   %t134 = call i8* @charAt(i8* %t132, double %t133)
-  %t135 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.212, i64 0, i64 0
+  %t135 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.273, i64 0, i64 0
   %t137 = call i32 @strcmp(i8* %t134, i8* %t135)
   %t136 = icmp ne i32 %t137, 0
-  br label %log.merge.654
-log.merge.654:
-  %t131 = phi i1 [ false, %while.cond.650 ], [ %t136, %log.rhs.653 ]
-  br i1 %t131, label %while.body.651, label %while.end.652
-while.body.651:
+  br label %log.merge.735
+log.merge.735:
+  %t131 = phi i1 [ false, %while.cond.731 ], [ %t136, %log.rhs.734 ]
+  br i1 %t131, label %while.body.732, label %while.end.733
+while.body.732:
   %t138 = load double, double* %i.addr, align 8
   %t139 = fadd double %t138, 1.0
   store double %t139, double* %i.addr, align 8
-  br label %while.cond.650
-while.end.652:
+  br label %while.cond.731
+while.end.733:
   %t140 = load double, double* %i.addr, align 8
   %t141 = fadd double %t140, 1.0
   store double %t141, double* %i.addr, align 8
-  br label %while.cond.617
-while.end.619:
-  %t142 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.213, i64 0, i64 0
+  br label %while.cond.698
+while.end.700:
+  %t142 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.274, i64 0, i64 0
   ret i8* %t142
 }
 
@@ -5884,17 +6991,17 @@ entry:
   %t1 = call i64 @strlen(i8* %t0)
   %t2 = uitofp i64 %t1 to double
   %t3 = fcmp ole double %t2, 1.0
-  br i1 %t3, label %then.655, label %merge.657
-then.655:
+  br i1 %t3, label %then.736, label %merge.738
+then.736:
   %t4 = load i8*, i8** %rawPath.addr, align 8
   ret i8* %t4
-merge.657:
+merge.738:
   %t5 = load i1, i1* %isStrict.addr, align 8
-  br i1 %t5, label %then.658, label %merge.660
-then.658:
+  br i1 %t5, label %then.739, label %merge.741
+then.739:
   %t6 = load i8*, i8** %rawPath.addr, align 8
   ret i8* %t6
-merge.660:
+merge.741:
   %t7 = load i8*, i8** %rawPath.addr, align 8
   %t8 = call i64 @strlen(i8* %t7)
   %t9 = uitofp i64 %t8 to double
@@ -5904,24 +7011,24 @@ merge.660:
   %t11 = load double, double* %len.addr, align 8
   %t12 = fsub double %t11, 1.0
   %t13 = call i8* @charAt(i8* %t10, double %t12)
-  %t14 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.214, i64 0, i64 0
+  %t14 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.275, i64 0, i64 0
   %t16 = call i32 @strcmp(i8* %t13, i8* %t14)
   %t15 = icmp eq i32 %t16, 0
-  br i1 %t15, label %then.661, label %merge.663
-then.661:
-  %t17 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.215, i64 0, i64 0
+  br i1 %t15, label %then.742, label %merge.744
+then.742:
+  %t17 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.276, i64 0, i64 0
   %normalized.addr = alloca i8*, align 8
   store i8* %t17, i8** %normalized.addr, align 8
   %i.addr = alloca double, align 8
   store double 0.0, double* %i.addr, align 8
-  br label %while.cond.664
-while.cond.664:
+  br label %while.cond.745
+while.cond.745:
   %t18 = load double, double* %i.addr, align 8
   %t19 = load double, double* %len.addr, align 8
   %t20 = fsub double %t19, 1.0
   %t21 = fcmp olt double %t18, %t20
-  br i1 %t21, label %while.body.665, label %while.end.666
-while.body.665:
+  br i1 %t21, label %while.body.746, label %while.end.747
+while.body.746:
   %t22 = load i8*, i8** %normalized.addr, align 8
   %t23 = load i8*, i8** %rawPath.addr, align 8
   %t24 = load double, double* %i.addr, align 8
@@ -5937,11 +7044,11 @@ while.body.665:
   %t34 = load double, double* %i.addr, align 8
   %t35 = fadd double %t34, 1.0
   store double %t35, double* %i.addr, align 8
-  br label %while.cond.664
-while.end.666:
+  br label %while.cond.745
+while.end.747:
   %t36 = load i8*, i8** %normalized.addr, align 8
   ret i8* %t36
-merge.663:
+merge.744:
   %t37 = load i8*, i8** %rawPath.addr, align 8
   ret i8* %t37
 }
@@ -5958,5 +7065,1641 @@ entry:
   call void @_RadixRouter_init(%struct.RadixRouter* %t1, i1 %t2)
   %t3 = load %struct.RadixRouter*, %struct.RadixRouter** %router.addr, align 8
   ret %struct.RadixRouter* %t3
+}
+
+define double @uploadStringIndexOf(i8* %str, i8* %target) {
+entry:
+  %str.addr = alloca i8*, align 8
+  store i8* %str, i8** %str.addr, align 8
+  %target.addr = alloca i8*, align 8
+  store i8* %target, i8** %target.addr, align 8
+  %t0 = load i8*, i8** %str.addr, align 8
+  %t1 = call i64 @strlen(i8* %t0)
+  %t2 = uitofp i64 %t1 to double
+  %strLen.addr = alloca double, align 8
+  store double %t2, double* %strLen.addr, align 8
+  %t3 = load i8*, i8** %target.addr, align 8
+  %t4 = call i64 @strlen(i8* %t3)
+  %t5 = uitofp i64 %t4 to double
+  %targetLen.addr = alloca double, align 8
+  store double %t5, double* %targetLen.addr, align 8
+  %t6 = load double, double* %targetLen.addr, align 8
+  %t7 = fcmp oeq double %t6, 0.0
+  br i1 %t7, label %log.merge.749, label %log.rhs.748
+log.rhs.748:
+  %t9 = load double, double* %targetLen.addr, align 8
+  %t10 = load double, double* %strLen.addr, align 8
+  %t11 = fcmp ogt double %t9, %t10
+  br label %log.merge.749
+log.merge.749:
+  %t8 = phi i1 [ true, %entry ], [ %t11, %log.rhs.748 ]
+  br i1 %t8, label %then.750, label %merge.752
+then.750:
+  %t12 = fneg double 1.0
+  ret double %t12
+merge.752:
+  %i.addr = alloca double, align 8
+  store double 0.0, double* %i.addr, align 8
+  %t13 = load double, double* %strLen.addr, align 8
+  %t14 = load double, double* %targetLen.addr, align 8
+  %t15 = fsub double %t13, %t14
+  %max.addr = alloca double, align 8
+  store double %t15, double* %max.addr, align 8
+  br label %while.cond.753
+while.cond.753:
+  %t16 = load double, double* %i.addr, align 8
+  %t17 = load double, double* %max.addr, align 8
+  %t18 = fcmp ole double %t16, %t17
+  br i1 %t18, label %while.body.754, label %while.end.755
+while.body.754:
+  %isMatch.addr = alloca i1, align 8
+  store i1 true, i1* %isMatch.addr, align 8
+  %j.addr = alloca double, align 8
+  store double 0.0, double* %j.addr, align 8
+  br label %while.cond.756
+while.cond.756:
+  %t19 = load double, double* %j.addr, align 8
+  %t20 = load double, double* %targetLen.addr, align 8
+  %t21 = fcmp olt double %t19, %t20
+  br i1 %t21, label %while.body.757, label %while.end.758
+while.body.757:
+  %t22 = load i8*, i8** %str.addr, align 8
+  %t23 = load double, double* %i.addr, align 8
+  %t24 = load double, double* %j.addr, align 8
+  %t25 = fadd double %t23, %t24
+  %t26 = call i8* @charAt(i8* %t22, double %t25)
+  %t27 = load i8*, i8** %target.addr, align 8
+  %t28 = load double, double* %j.addr, align 8
+  %t29 = call i8* @charAt(i8* %t27, double %t28)
+  %t31 = call i32 @strcmp(i8* %t26, i8* %t29)
+  %t30 = icmp ne i32 %t31, 0
+  br i1 %t30, label %then.759, label %merge.761
+then.759:
+  store i1 false, i1* %isMatch.addr, align 8
+  br label %while.end.758
+  br label %merge.761
+merge.761:
+  %t32 = load double, double* %j.addr, align 8
+  %t33 = fadd double %t32, 1.0
+  store double %t33, double* %j.addr, align 8
+  br label %while.cond.756
+while.end.758:
+  %t34 = load i1, i1* %isMatch.addr, align 8
+  br i1 %t34, label %then.762, label %merge.764
+then.762:
+  %t35 = load double, double* %i.addr, align 8
+  ret double %t35
+merge.764:
+  %t36 = load double, double* %i.addr, align 8
+  %t37 = fadd double %t36, 1.0
+  store double %t37, double* %i.addr, align 8
+  br label %while.cond.753
+while.end.755:
+  %t38 = fneg double 1.0
+  ret double %t38
+}
+
+define i8* @extractBoundary(i8* %contentTypeHeader) {
+entry:
+  %contentTypeHeader.addr = alloca i8*, align 8
+  store i8* %contentTypeHeader, i8** %contentTypeHeader.addr, align 8
+  %t0 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.277, i64 0, i64 0
+  %target.addr = alloca i8*, align 8
+  store i8* %t0, i8** %target.addr, align 8
+  %t1 = load i8*, i8** %contentTypeHeader.addr, align 8
+  %t2 = load i8*, i8** %target.addr, align 8
+  %t3 = call double @uploadStringIndexOf(i8* %t1, i8* %t2)
+  %pos.addr = alloca double, align 8
+  store double %t3, double* %pos.addr, align 8
+  %t4 = load double, double* %pos.addr, align 8
+  %t5 = fcmp olt double %t4, 0.0
+  br i1 %t5, label %then.765, label %merge.767
+then.765:
+  %t6 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.278, i64 0, i64 0
+  ret i8* %t6
+merge.767:
+  %t7 = load double, double* %pos.addr, align 8
+  %t8 = load i8*, i8** %target.addr, align 8
+  %t9 = call i64 @strlen(i8* %t8)
+  %t10 = uitofp i64 %t9 to double
+  %t11 = fadd double %t7, %t10
+  %start.addr = alloca double, align 8
+  store double %t11, double* %start.addr, align 8
+  %t12 = load i8*, i8** %contentTypeHeader.addr, align 8
+  %t13 = call i64 @strlen(i8* %t12)
+  %t14 = uitofp i64 %t13 to double
+  %len.addr = alloca double, align 8
+  store double %t14, double* %len.addr, align 8
+  %t15 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.279, i64 0, i64 0
+  %b.addr = alloca i8*, align 8
+  store i8* %t15, i8** %b.addr, align 8
+  %t16 = load double, double* %start.addr, align 8
+  %i.addr = alloca double, align 8
+  store double %t16, double* %i.addr, align 8
+  br label %while.cond.768
+while.cond.768:
+  %t17 = load double, double* %i.addr, align 8
+  %t18 = load double, double* %len.addr, align 8
+  %t19 = fcmp olt double %t17, %t18
+  br i1 %t19, label %while.body.769, label %while.end.770
+while.body.769:
+  %t20 = load i8*, i8** %contentTypeHeader.addr, align 8
+  %t21 = load double, double* %i.addr, align 8
+  %t22 = call i8* @charAt(i8* %t20, double %t21)
+  %bch.addr = alloca i8*, align 8
+  store i8* %t22, i8** %bch.addr, align 8
+  %t23 = load i8*, i8** %bch.addr, align 8
+  %t24 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.280, i64 0, i64 0
+  %t26 = call i32 @strcmp(i8* %t23, i8* %t24)
+  %t25 = icmp eq i32 %t26, 0
+  br i1 %t25, label %log.merge.776, label %log.rhs.775
+log.rhs.775:
+  %t28 = load i8*, i8** %bch.addr, align 8
+  %t29 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.281, i64 0, i64 0
+  %t31 = call i32 @strcmp(i8* %t28, i8* %t29)
+  %t30 = icmp eq i32 %t31, 0
+  br label %log.merge.776
+log.merge.776:
+  %t27 = phi i1 [ true, %while.body.769 ], [ %t30, %log.rhs.775 ]
+  br i1 %t27, label %log.merge.774, label %log.rhs.773
+log.rhs.773:
+  %t33 = load i8*, i8** %bch.addr, align 8
+  %t34 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.282, i64 0, i64 0
+  %t36 = call i32 @strcmp(i8* %t33, i8* %t34)
+  %t35 = icmp eq i32 %t36, 0
+  br label %log.merge.774
+log.merge.774:
+  %t32 = phi i1 [ true, %log.merge.776 ], [ %t35, %log.rhs.773 ]
+  br i1 %t32, label %log.merge.772, label %log.rhs.771
+log.rhs.771:
+  %t38 = load i8*, i8** %bch.addr, align 8
+  %t39 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.283, i64 0, i64 0
+  %t41 = call i32 @strcmp(i8* %t38, i8* %t39)
+  %t40 = icmp eq i32 %t41, 0
+  br label %log.merge.772
+log.merge.772:
+  %t37 = phi i1 [ true, %log.merge.774 ], [ %t40, %log.rhs.771 ]
+  br i1 %t37, label %then.777, label %merge.779
+then.777:
+  br label %while.end.770
+  br label %merge.779
+merge.779:
+  %t42 = load i8*, i8** %b.addr, align 8
+  %t43 = load i8*, i8** %bch.addr, align 8
+  %t45 = call i64 @strlen(i8* %t42)
+  %t46 = call i64 @strlen(i8* %t43)
+  %t47 = add i64 %t45, %t46
+  %t48 = add i64 %t47, 1
+  %t49 = call i8* @malloc(i64 %t48)
+  %t50 = call i8* @strcpy(i8* %t49, i8* %t42)
+  %t51 = call i8* @strcat(i8* %t49, i8* %t43)
+  store i8* %t49, i8** %b.addr, align 8
+  %t52 = load double, double* %i.addr, align 8
+  %t53 = fadd double %t52, 1.0
+  store double %t53, double* %i.addr, align 8
+  br label %while.cond.768
+while.end.770:
+  %t54 = load i8*, i8** %b.addr, align 8
+  ret i8* %t54
+}
+
+define %struct.UploadedFile* @parseMultipartStream(i8* %rawBody, i8* %boundary) {
+entry:
+  %rawBody.addr = alloca i8*, align 8
+  store i8* %rawBody, i8** %rawBody.addr, align 8
+  %boundary.addr = alloca i8*, align 8
+  store i8* %boundary, i8** %boundary.addr, align 8
+  %file.addr = alloca %struct.UploadedFile*, align 8
+  %t0 = alloca %struct.UploadedFile, align 8
+  store %struct.UploadedFile* %t0, %struct.UploadedFile** %file.addr, align 8
+  %t1 = load %struct.UploadedFile*, %struct.UploadedFile** %file.addr, align 8
+  %t2 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t1, i32 0, i32 0
+  %t3 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.284, i64 0, i64 0
+  store i8* %t3, i8** %t2, align 8
+  %t4 = load %struct.UploadedFile*, %struct.UploadedFile** %file.addr, align 8
+  %t5 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t4, i32 0, i32 1
+  %t6 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.285, i64 0, i64 0
+  store i8* %t6, i8** %t5, align 8
+  %t7 = load %struct.UploadedFile*, %struct.UploadedFile** %file.addr, align 8
+  %t8 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t7, i32 0, i32 2
+  %t9 = getelementptr inbounds [25 x i8], [25 x i8]* @.str.286, i64 0, i64 0
+  store i8* %t9, i8** %t8, align 8
+  %t10 = load %struct.UploadedFile*, %struct.UploadedFile** %file.addr, align 8
+  %t11 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t10, i32 0, i32 3
+  store double 0.0, double* %t11, align 8
+  %t12 = load %struct.UploadedFile*, %struct.UploadedFile** %file.addr, align 8
+  %t13 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t12, i32 0, i32 4
+  %t14 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.287, i64 0, i64 0
+  store i8* %t14, i8** %t13, align 8
+  %t15 = load %struct.UploadedFile*, %struct.UploadedFile** %file.addr, align 8
+  %t16 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t15, i32 0, i32 5
+  store i1 false, i1* %t16, align 8
+  %t17 = load %struct.UploadedFile*, %struct.UploadedFile** %file.addr, align 8
+  %t18 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t17, i32 0, i32 6
+  %t19 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.288, i64 0, i64 0
+  store i8* %t19, i8** %t18, align 8
+  %t20 = load i8*, i8** %boundary.addr, align 8
+  %t21 = call i64 @strlen(i8* %t20)
+  %t22 = uitofp i64 %t21 to double
+  %t23 = fcmp oeq double %t22, 0.0
+  br i1 %t23, label %log.merge.781, label %log.rhs.780
+log.rhs.780:
+  %t25 = load i8*, i8** %rawBody.addr, align 8
+  %t26 = call i64 @strlen(i8* %t25)
+  %t27 = uitofp i64 %t26 to double
+  %t28 = fcmp oeq double %t27, 0.0
+  br label %log.merge.781
+log.merge.781:
+  %t24 = phi i1 [ true, %entry ], [ %t28, %log.rhs.780 ]
+  br i1 %t24, label %then.782, label %merge.784
+then.782:
+  %t29 = load %struct.UploadedFile*, %struct.UploadedFile** %file.addr, align 8
+  %t30 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t29, i32 0, i32 6
+  %t31 = getelementptr inbounds [33 x i8], [33 x i8]* @.str.289, i64 0, i64 0
+  store i8* %t31, i8** %t30, align 8
+  %t32 = load %struct.UploadedFile*, %struct.UploadedFile** %file.addr, align 8
+  ret %struct.UploadedFile* %t32
+merge.784:
+  %t33 = getelementptr inbounds [11 x i8], [11 x i8]* @.str.290, i64 0, i64 0
+  %fnKey.addr = alloca i8*, align 8
+  store i8* %t33, i8** %fnKey.addr, align 8
+  %t34 = load i8*, i8** %rawBody.addr, align 8
+  %t35 = load i8*, i8** %fnKey.addr, align 8
+  %t36 = call double @uploadStringIndexOf(i8* %t34, i8* %t35)
+  %fnPos.addr = alloca double, align 8
+  store double %t36, double* %fnPos.addr, align 8
+  %t37 = load double, double* %fnPos.addr, align 8
+  %t38 = fcmp oge double %t37, 0.0
+  br i1 %t38, label %then.785, label %else.786
+then.785:
+  %t39 = load double, double* %fnPos.addr, align 8
+  %t40 = load i8*, i8** %fnKey.addr, align 8
+  %t41 = call i64 @strlen(i8* %t40)
+  %t42 = uitofp i64 %t41 to double
+  %t43 = fadd double %t39, %t42
+  %fnStart.addr = alloca double, align 8
+  store double %t43, double* %fnStart.addr, align 8
+  %t44 = load i8*, i8** %rawBody.addr, align 8
+  %t45 = call i64 @strlen(i8* %t44)
+  %t46 = uitofp i64 %t45 to double
+  %fnLen.addr = alloca double, align 8
+  store double %t46, double* %fnLen.addr, align 8
+  %t47 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.291, i64 0, i64 0
+  %fname.addr = alloca i8*, align 8
+  store i8* %t47, i8** %fname.addr, align 8
+  %t48 = load double, double* %fnStart.addr, align 8
+  %i.addr = alloca double, align 8
+  store double %t48, double* %i.addr, align 8
+  br label %while.cond.788
+while.cond.788:
+  %t49 = load double, double* %i.addr, align 8
+  %t50 = load double, double* %fnLen.addr, align 8
+  %t51 = fcmp olt double %t49, %t50
+  br i1 %t51, label %while.body.789, label %while.end.790
+while.body.789:
+  %t52 = load i8*, i8** %rawBody.addr, align 8
+  %t53 = load double, double* %i.addr, align 8
+  %t54 = call i8* @charAt(i8* %t52, double %t53)
+  %fnCh.addr = alloca i8*, align 8
+  store i8* %t54, i8** %fnCh.addr, align 8
+  %t55 = load i8*, i8** %fnCh.addr, align 8
+  %t56 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.292, i64 0, i64 0
+  %t58 = call i32 @strcmp(i8* %t55, i8* %t56)
+  %t57 = icmp eq i32 %t58, 0
+  br i1 %t57, label %then.791, label %merge.793
+then.791:
+  br label %while.end.790
+  br label %merge.793
+merge.793:
+  %t59 = load i8*, i8** %fname.addr, align 8
+  %t60 = load i8*, i8** %fnCh.addr, align 8
+  %t62 = call i64 @strlen(i8* %t59)
+  %t63 = call i64 @strlen(i8* %t60)
+  %t64 = add i64 %t62, %t63
+  %t65 = add i64 %t64, 1
+  %t66 = call i8* @malloc(i64 %t65)
+  %t67 = call i8* @strcpy(i8* %t66, i8* %t59)
+  %t68 = call i8* @strcat(i8* %t66, i8* %t60)
+  store i8* %t66, i8** %fname.addr, align 8
+  %t69 = load double, double* %i.addr, align 8
+  %t70 = fadd double %t69, 1.0
+  store double %t70, double* %i.addr, align 8
+  br label %while.cond.788
+while.end.790:
+  %t71 = load %struct.UploadedFile*, %struct.UploadedFile** %file.addr, align 8
+  %t72 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t71, i32 0, i32 0
+  %t73 = load i8*, i8** %fname.addr, align 8
+  store i8* %t73, i8** %t72, align 8
+  br label %merge.787
+else.786:
+  %t74 = load %struct.UploadedFile*, %struct.UploadedFile** %file.addr, align 8
+  %t75 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t74, i32 0, i32 0
+  %t76 = getelementptr inbounds [18 x i8], [18 x i8]* @.str.293, i64 0, i64 0
+  store i8* %t76, i8** %t75, align 8
+  br label %merge.787
+merge.787:
+  %t77 = getelementptr inbounds [7 x i8], [7 x i8]* @.str.294, i64 0, i64 0
+  %nameKey.addr = alloca i8*, align 8
+  store i8* %t77, i8** %nameKey.addr, align 8
+  %t78 = load i8*, i8** %rawBody.addr, align 8
+  %t79 = load i8*, i8** %nameKey.addr, align 8
+  %t80 = call double @uploadStringIndexOf(i8* %t78, i8* %t79)
+  %namePos.addr = alloca double, align 8
+  store double %t80, double* %namePos.addr, align 8
+  %t81 = load double, double* %namePos.addr, align 8
+  %t82 = fcmp oge double %t81, 0.0
+  br i1 %t82, label %then.794, label %else.795
+then.794:
+  %t83 = load double, double* %namePos.addr, align 8
+  %t84 = load i8*, i8** %nameKey.addr, align 8
+  %t85 = call i64 @strlen(i8* %t84)
+  %t86 = uitofp i64 %t85 to double
+  %t87 = fadd double %t83, %t86
+  %nStart.addr = alloca double, align 8
+  store double %t87, double* %nStart.addr, align 8
+  %t88 = load i8*, i8** %rawBody.addr, align 8
+  %t89 = call i64 @strlen(i8* %t88)
+  %t90 = uitofp i64 %t89 to double
+  %nLen.addr = alloca double, align 8
+  store double %t90, double* %nLen.addr, align 8
+  %t91 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.295, i64 0, i64 0
+  %name.addr = alloca i8*, align 8
+  store i8* %t91, i8** %name.addr, align 8
+  %t92 = load double, double* %nStart.addr, align 8
+  %j.addr = alloca double, align 8
+  store double %t92, double* %j.addr, align 8
+  br label %while.cond.797
+while.cond.797:
+  %t93 = load double, double* %j.addr, align 8
+  %t94 = load double, double* %nLen.addr, align 8
+  %t95 = fcmp olt double %t93, %t94
+  br i1 %t95, label %while.body.798, label %while.end.799
+while.body.798:
+  %t96 = load i8*, i8** %rawBody.addr, align 8
+  %t97 = load double, double* %j.addr, align 8
+  %t98 = call i8* @charAt(i8* %t96, double %t97)
+  %nmCh.addr = alloca i8*, align 8
+  store i8* %t98, i8** %nmCh.addr, align 8
+  %t99 = load i8*, i8** %nmCh.addr, align 8
+  %t100 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.296, i64 0, i64 0
+  %t102 = call i32 @strcmp(i8* %t99, i8* %t100)
+  %t101 = icmp eq i32 %t102, 0
+  br i1 %t101, label %then.800, label %merge.802
+then.800:
+  br label %while.end.799
+  br label %merge.802
+merge.802:
+  %t103 = load i8*, i8** %name.addr, align 8
+  %t104 = load i8*, i8** %nmCh.addr, align 8
+  %t106 = call i64 @strlen(i8* %t103)
+  %t107 = call i64 @strlen(i8* %t104)
+  %t108 = add i64 %t106, %t107
+  %t109 = add i64 %t108, 1
+  %t110 = call i8* @malloc(i64 %t109)
+  %t111 = call i8* @strcpy(i8* %t110, i8* %t103)
+  %t112 = call i8* @strcat(i8* %t110, i8* %t104)
+  store i8* %t110, i8** %name.addr, align 8
+  %t113 = load double, double* %j.addr, align 8
+  %t114 = fadd double %t113, 1.0
+  store double %t114, double* %j.addr, align 8
+  br label %while.cond.797
+while.end.799:
+  %t115 = load %struct.UploadedFile*, %struct.UploadedFile** %file.addr, align 8
+  %t116 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t115, i32 0, i32 1
+  %t117 = load i8*, i8** %name.addr, align 8
+  store i8* %t117, i8** %t116, align 8
+  br label %merge.796
+else.795:
+  %t118 = load %struct.UploadedFile*, %struct.UploadedFile** %file.addr, align 8
+  %t119 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t118, i32 0, i32 1
+  %t120 = getelementptr inbounds [5 x i8], [5 x i8]* @.str.297, i64 0, i64 0
+  store i8* %t120, i8** %t119, align 8
+  br label %merge.796
+merge.796:
+  %t121 = getelementptr inbounds [15 x i8], [15 x i8]* @.str.298, i64 0, i64 0
+  %ctKey.addr = alloca i8*, align 8
+  store i8* %t121, i8** %ctKey.addr, align 8
+  %t122 = load i8*, i8** %rawBody.addr, align 8
+  %t123 = load i8*, i8** %ctKey.addr, align 8
+  %t124 = call double @uploadStringIndexOf(i8* %t122, i8* %t123)
+  %ctPos.addr = alloca double, align 8
+  store double %t124, double* %ctPos.addr, align 8
+  %t125 = load double, double* %ctPos.addr, align 8
+  %t126 = fcmp oge double %t125, 0.0
+  br i1 %t126, label %then.803, label %merge.805
+then.803:
+  %t127 = load double, double* %ctPos.addr, align 8
+  %t128 = load i8*, i8** %ctKey.addr, align 8
+  %t129 = call i64 @strlen(i8* %t128)
+  %t130 = uitofp i64 %t129 to double
+  %t131 = fadd double %t127, %t130
+  %ctStart.addr = alloca double, align 8
+  store double %t131, double* %ctStart.addr, align 8
+  %t132 = load i8*, i8** %rawBody.addr, align 8
+  %t133 = call i64 @strlen(i8* %t132)
+  %t134 = uitofp i64 %t133 to double
+  %ctLen.addr = alloca double, align 8
+  store double %t134, double* %ctLen.addr, align 8
+  %t135 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.299, i64 0, i64 0
+  %ctype.addr = alloca i8*, align 8
+  store i8* %t135, i8** %ctype.addr, align 8
+  %t136 = load double, double* %ctStart.addr, align 8
+  %k.addr = alloca double, align 8
+  store double %t136, double* %k.addr, align 8
+  br label %while.cond.806
+while.cond.806:
+  %t137 = load double, double* %k.addr, align 8
+  %t138 = load double, double* %ctLen.addr, align 8
+  %t139 = fcmp olt double %t137, %t138
+  br i1 %t139, label %while.body.807, label %while.end.808
+while.body.807:
+  %t140 = load i8*, i8** %rawBody.addr, align 8
+  %t141 = load double, double* %k.addr, align 8
+  %t142 = call i8* @charAt(i8* %t140, double %t141)
+  %ctCh.addr = alloca i8*, align 8
+  store i8* %t142, i8** %ctCh.addr, align 8
+  %t143 = load i8*, i8** %ctCh.addr, align 8
+  %t144 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.300, i64 0, i64 0
+  %t146 = call i32 @strcmp(i8* %t143, i8* %t144)
+  %t145 = icmp eq i32 %t146, 0
+  br i1 %t145, label %log.merge.810, label %log.rhs.809
+log.rhs.809:
+  %t148 = load i8*, i8** %ctCh.addr, align 8
+  %t149 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.301, i64 0, i64 0
+  %t151 = call i32 @strcmp(i8* %t148, i8* %t149)
+  %t150 = icmp eq i32 %t151, 0
+  br label %log.merge.810
+log.merge.810:
+  %t147 = phi i1 [ true, %while.body.807 ], [ %t150, %log.rhs.809 ]
+  br i1 %t147, label %then.811, label %merge.813
+then.811:
+  br label %while.end.808
+  br label %merge.813
+merge.813:
+  %t152 = load i8*, i8** %ctype.addr, align 8
+  %t153 = load i8*, i8** %ctCh.addr, align 8
+  %t155 = call i64 @strlen(i8* %t152)
+  %t156 = call i64 @strlen(i8* %t153)
+  %t157 = add i64 %t155, %t156
+  %t158 = add i64 %t157, 1
+  %t159 = call i8* @malloc(i64 %t158)
+  %t160 = call i8* @strcpy(i8* %t159, i8* %t152)
+  %t161 = call i8* @strcat(i8* %t159, i8* %t153)
+  store i8* %t159, i8** %ctype.addr, align 8
+  %t162 = load double, double* %k.addr, align 8
+  %t163 = fadd double %t162, 1.0
+  store double %t163, double* %k.addr, align 8
+  br label %while.cond.806
+while.end.808:
+  %t164 = load %struct.UploadedFile*, %struct.UploadedFile** %file.addr, align 8
+  %t165 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t164, i32 0, i32 2
+  %t166 = load i8*, i8** %ctype.addr, align 8
+  store i8* %t166, i8** %t165, align 8
+  br label %merge.805
+merge.805:
+  %t167 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.302, i64 0, i64 0
+  %fileData.addr = alloca i8*, align 8
+  store i8* %t167, i8** %fileData.addr, align 8
+  %p.addr = alloca double, align 8
+  store double 0.0, double* %p.addr, align 8
+  %t168 = load i8*, i8** %rawBody.addr, align 8
+  %t169 = getelementptr inbounds [5 x i8], [5 x i8]* @.str.303, i64 0, i64 0
+  %t170 = call double @uploadStringIndexOf(i8* %t168, i8* %t169)
+  %payloadStart.addr = alloca double, align 8
+  store double %t170, double* %payloadStart.addr, align 8
+  %t171 = load double, double* %payloadStart.addr, align 8
+  %t172 = fcmp oge double %t171, 0.0
+  br i1 %t172, label %then.814, label %else.815
+then.814:
+  %t173 = load double, double* %payloadStart.addr, align 8
+  %t174 = fadd double %t173, 4.0
+  %contentStart.addr = alloca double, align 8
+  store double %t174, double* %contentStart.addr, align 8
+  %t175 = load i8*, i8** %rawBody.addr, align 8
+  %t176 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.304, i64 0, i64 0
+  %t177 = load i8*, i8** %boundary.addr, align 8
+  %t179 = call i64 @strlen(i8* %t176)
+  %t180 = call i64 @strlen(i8* %t177)
+  %t181 = add i64 %t179, %t180
+  %t182 = add i64 %t181, 1
+  %t183 = call i8* @malloc(i64 %t182)
+  %t184 = call i8* @strcpy(i8* %t183, i8* %t176)
+  %t185 = call i8* @strcat(i8* %t183, i8* %t177)
+  %t186 = call double @uploadStringIndexOf(i8* %t175, i8* %t183)
+  %contentEnd.addr = alloca double, align 8
+  store double %t186, double* %contentEnd.addr, align 8
+  %t187 = load double, double* %contentEnd.addr, align 8
+  %t188 = load double, double* %contentStart.addr, align 8
+  %t189 = fcmp ogt double %t187, %t188
+  br i1 %t189, label %then.817, label %else.818
+then.817:
+  %t190 = load double, double* %contentEnd.addr, align 8
+  %t191 = load double, double* %contentStart.addr, align 8
+  %t192 = fsub double %t190, %t191
+  %dataLen.addr = alloca double, align 8
+  store double %t192, double* %dataLen.addr, align 8
+  %t193 = load double, double* %dataLen.addr, align 8
+  %t194 = fcmp oge double %t193, 2.0
+  br i1 %t194, label %log.rhs.822, label %log.merge.823
+log.rhs.822:
+  %t196 = load i8*, i8** %rawBody.addr, align 8
+  %t197 = load double, double* %contentEnd.addr, align 8
+  %t198 = fsub double %t197, 2.0
+  %t199 = call i8* @charAt(i8* %t196, double %t198)
+  %t200 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.305, i64 0, i64 0
+  %t202 = call i32 @strcmp(i8* %t199, i8* %t200)
+  %t201 = icmp eq i32 %t202, 0
+  br label %log.merge.823
+log.merge.823:
+  %t195 = phi i1 [ false, %then.817 ], [ %t201, %log.rhs.822 ]
+  br i1 %t195, label %log.rhs.820, label %log.merge.821
+log.rhs.820:
+  %t204 = load i8*, i8** %rawBody.addr, align 8
+  %t205 = load double, double* %contentEnd.addr, align 8
+  %t206 = fsub double %t205, 1.0
+  %t207 = call i8* @charAt(i8* %t204, double %t206)
+  %t208 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.306, i64 0, i64 0
+  %t210 = call i32 @strcmp(i8* %t207, i8* %t208)
+  %t209 = icmp eq i32 %t210, 0
+  br label %log.merge.821
+log.merge.821:
+  %t203 = phi i1 [ false, %log.merge.823 ], [ %t209, %log.rhs.820 ]
+  br i1 %t203, label %then.824, label %merge.826
+then.824:
+  %t211 = load double, double* %contentEnd.addr, align 8
+  %t212 = fsub double %t211, 2.0
+  store double %t212, double* %contentEnd.addr, align 8
+  br label %merge.826
+merge.826:
+  %t213 = load double, double* %contentStart.addr, align 8
+  store double %t213, double* %p.addr, align 8
+  br label %while.cond.827
+while.cond.827:
+  %t214 = load double, double* %p.addr, align 8
+  %t215 = load double, double* %contentEnd.addr, align 8
+  %t216 = fcmp olt double %t214, %t215
+  br i1 %t216, label %while.body.828, label %while.end.829
+while.body.828:
+  %t217 = load i8*, i8** %fileData.addr, align 8
+  %t218 = load i8*, i8** %rawBody.addr, align 8
+  %t219 = load double, double* %p.addr, align 8
+  %t220 = call i8* @charAt(i8* %t218, double %t219)
+  %t222 = call i64 @strlen(i8* %t217)
+  %t223 = call i64 @strlen(i8* %t220)
+  %t224 = add i64 %t222, %t223
+  %t225 = add i64 %t224, 1
+  %t226 = call i8* @malloc(i64 %t225)
+  %t227 = call i8* @strcpy(i8* %t226, i8* %t217)
+  %t228 = call i8* @strcat(i8* %t226, i8* %t220)
+  store i8* %t226, i8** %fileData.addr, align 8
+  %t229 = load double, double* %p.addr, align 8
+  %t230 = fadd double %t229, 1.0
+  store double %t230, double* %p.addr, align 8
+  br label %while.cond.827
+while.end.829:
+  %t231 = load %struct.UploadedFile*, %struct.UploadedFile** %file.addr, align 8
+  %t232 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t231, i32 0, i32 4
+  %t233 = load i8*, i8** %fileData.addr, align 8
+  store i8* %t233, i8** %t232, align 8
+  %t234 = load %struct.UploadedFile*, %struct.UploadedFile** %file.addr, align 8
+  %t235 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t234, i32 0, i32 3
+  %t236 = load i8*, i8** %fileData.addr, align 8
+  %t237 = call i64 @strlen(i8* %t236)
+  %t238 = uitofp i64 %t237 to double
+  store double %t238, double* %t235, align 8
+  %t239 = load %struct.UploadedFile*, %struct.UploadedFile** %file.addr, align 8
+  %t240 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t239, i32 0, i32 5
+  store i1 true, i1* %t240, align 8
+  br label %merge.819
+else.818:
+  %t241 = load double, double* %contentStart.addr, align 8
+  store double %t241, double* %p.addr, align 8
+  %t242 = load i8*, i8** %rawBody.addr, align 8
+  %t243 = call i64 @strlen(i8* %t242)
+  %t244 = uitofp i64 %t243 to double
+  %bLen.addr = alloca double, align 8
+  store double %t244, double* %bLen.addr, align 8
+  br label %while.cond.830
+while.cond.830:
+  %t245 = load double, double* %p.addr, align 8
+  %t246 = load double, double* %bLen.addr, align 8
+  %t247 = fcmp olt double %t245, %t246
+  br i1 %t247, label %while.body.831, label %while.end.832
+while.body.831:
+  %t248 = load i8*, i8** %fileData.addr, align 8
+  %t249 = load i8*, i8** %rawBody.addr, align 8
+  %t250 = load double, double* %p.addr, align 8
+  %t251 = call i8* @charAt(i8* %t249, double %t250)
+  %t253 = call i64 @strlen(i8* %t248)
+  %t254 = call i64 @strlen(i8* %t251)
+  %t255 = add i64 %t253, %t254
+  %t256 = add i64 %t255, 1
+  %t257 = call i8* @malloc(i64 %t256)
+  %t258 = call i8* @strcpy(i8* %t257, i8* %t248)
+  %t259 = call i8* @strcat(i8* %t257, i8* %t251)
+  store i8* %t257, i8** %fileData.addr, align 8
+  %t260 = load double, double* %p.addr, align 8
+  %t261 = fadd double %t260, 1.0
+  store double %t261, double* %p.addr, align 8
+  br label %while.cond.830
+while.end.832:
+  %t262 = load %struct.UploadedFile*, %struct.UploadedFile** %file.addr, align 8
+  %t263 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t262, i32 0, i32 4
+  %t264 = load i8*, i8** %fileData.addr, align 8
+  store i8* %t264, i8** %t263, align 8
+  %t265 = load %struct.UploadedFile*, %struct.UploadedFile** %file.addr, align 8
+  %t266 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t265, i32 0, i32 3
+  %t267 = load i8*, i8** %fileData.addr, align 8
+  %t268 = call i64 @strlen(i8* %t267)
+  %t269 = uitofp i64 %t268 to double
+  store double %t269, double* %t266, align 8
+  %t270 = load %struct.UploadedFile*, %struct.UploadedFile** %file.addr, align 8
+  %t271 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t270, i32 0, i32 5
+  store i1 true, i1* %t271, align 8
+  br label %merge.819
+merge.819:
+  br label %merge.816
+else.815:
+  %t272 = load %struct.UploadedFile*, %struct.UploadedFile** %file.addr, align 8
+  %t273 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t272, i32 0, i32 6
+  %t274 = getelementptr inbounds [33 x i8], [33 x i8]* @.str.307, i64 0, i64 0
+  store i8* %t274, i8** %t273, align 8
+  br label %merge.816
+merge.816:
+  %t275 = load %struct.UploadedFile*, %struct.UploadedFile** %file.addr, align 8
+  ret %struct.UploadedFile* %t275
+}
+
+define %struct.FileValidationEngine* @createFileValidator(double %maxSize, i8* %exts, i8* %mimes) {
+entry:
+  %maxSize.addr = alloca double, align 8
+  store double %maxSize, double* %maxSize.addr, align 8
+  %exts.addr = alloca i8*, align 8
+  store i8* %exts, i8** %exts.addr, align 8
+  %mimes.addr = alloca i8*, align 8
+  store i8* %mimes, i8** %mimes.addr, align 8
+  %validator.addr = alloca %struct.FileValidationEngine*, align 8
+  %t0 = alloca %struct.FileValidationEngine, align 8
+  store %struct.FileValidationEngine* %t0, %struct.FileValidationEngine** %validator.addr, align 8
+  %t1 = load %struct.FileValidationEngine*, %struct.FileValidationEngine** %validator.addr, align 8
+  %t2 = load double, double* %maxSize.addr, align 8
+  %t3 = load i8*, i8** %exts.addr, align 8
+  %t4 = load i8*, i8** %mimes.addr, align 8
+  %t5 = call %struct.FileValidationEngine* @_FileValidationEngine_init(%struct.FileValidationEngine* %t1, double %t2, i8* %t3, i8* %t4)
+  %t6 = load %struct.FileValidationEngine*, %struct.FileValidationEngine** %validator.addr, align 8
+  ret %struct.FileValidationEngine* %t6
+}
+
+define i1 @saveUploadedFile(%struct.UploadedFile* %file, i8* %destPath) {
+entry:
+  %file.addr = alloca %struct.UploadedFile*, align 8
+  store %struct.UploadedFile* %file, %struct.UploadedFile** %file.addr, align 8
+  %destPath.addr = alloca i8*, align 8
+  store i8* %destPath, i8** %destPath.addr, align 8
+  %t0 = load %struct.UploadedFile*, %struct.UploadedFile** %file.addr, align 8
+  %t1 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t0, i32 0, i32 5
+  %t2 = load i1, i1* %t1, align 8
+  %t3 = xor i1 %t2, true
+  br i1 %t3, label %then.833, label %merge.835
+then.833:
+  ret i1 false
+merge.835:
+  %t4 = load i8*, i8** %destPath.addr, align 8
+  %t5 = load %struct.UploadedFile*, %struct.UploadedFile** %file.addr, align 8
+  %t6 = getelementptr inbounds %struct.UploadedFile, %struct.UploadedFile* %t5, i32 0, i32 4
+  %t7 = load i8*, i8** %t6, align 8
+  %t8 = call i1 @writeFile(i8* %t4, i8* %t7)
+  ret i1 %t8
+}
+
+declare i8* @fopen(i8*, i8*)
+
+declare double @fclose(i8*)
+
+declare double @puts(i8*)
+
+define i8* @readFile(i8* %path) {
+entry:
+  %path.addr = alloca i8*, align 8
+  store i8* %path, i8** %path.addr, align 8
+  %t0 = load i8*, i8** %path.addr, align 8
+  %t1 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.308, i64 0, i64 0
+  %t2 = call i8* @fopen(i8* %t0, i8* %t1)
+  %file.addr = alloca i8*, align 8
+  store i8* %t2, i8** %file.addr, align 8
+  %t3 = load i8*, i8** %file.addr, align 8
+  %t4 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.309, i64 0, i64 0
+  %t6 = call i32 @strcmp(i8* %t3, i8* %t4)
+  %t5 = icmp ne i32 %t6, 0
+  br i1 %t5, label %then.836, label %merge.838
+then.836:
+  %t7 = load i8*, i8** %file.addr, align 8
+  %t8 = call double @fclose(i8* %t7)
+  %t9 = getelementptr inbounds [31 x i8], [31 x i8]* @.str.310, i64 0, i64 0
+  ret i8* %t9
+merge.838:
+  %t10 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.311, i64 0, i64 0
+  ret i8* %t10
+}
+
+define i1 @writeFile(i8* %path, i8* %content) {
+entry:
+  %path.addr = alloca i8*, align 8
+  store i8* %path, i8** %path.addr, align 8
+  %content.addr = alloca i8*, align 8
+  store i8* %content, i8** %content.addr, align 8
+  %t0 = load i8*, i8** %path.addr, align 8
+  %t1 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.312, i64 0, i64 0
+  %t2 = call i8* @fopen(i8* %t0, i8* %t1)
+  %file.addr = alloca i8*, align 8
+  store i8* %t2, i8** %file.addr, align 8
+  %t3 = load i8*, i8** %file.addr, align 8
+  %t4 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.313, i64 0, i64 0
+  %t6 = call i32 @strcmp(i8* %t3, i8* %t4)
+  %t5 = icmp ne i32 %t6, 0
+  br i1 %t5, label %then.839, label %merge.841
+then.839:
+  %t7 = load i8*, i8** %content.addr, align 8
+  %t8 = call double @puts(i8* %t7)
+  %t9 = load i8*, i8** %file.addr, align 8
+  %t10 = call double @fclose(i8* %t9)
+  ret i1 true
+merge.841:
+  ret i1 false
+}
+
+define %struct.CookieOptions* @createDefaultCookieOptions() {
+entry:
+  %opts.addr = alloca %struct.CookieOptions*, align 8
+  %t0 = alloca %struct.CookieOptions, align 8
+  store %struct.CookieOptions* %t0, %struct.CookieOptions** %opts.addr, align 8
+  %t1 = load %struct.CookieOptions*, %struct.CookieOptions** %opts.addr, align 8
+  %t2 = getelementptr inbounds %struct.CookieOptions, %struct.CookieOptions* %t1, i32 0, i32 0
+  store i1 true, i1* %t2, align 8
+  %t3 = load %struct.CookieOptions*, %struct.CookieOptions** %opts.addr, align 8
+  %t4 = getelementptr inbounds %struct.CookieOptions, %struct.CookieOptions* %t3, i32 0, i32 1
+  store i1 false, i1* %t4, align 8
+  %t5 = load %struct.CookieOptions*, %struct.CookieOptions** %opts.addr, align 8
+  %t6 = getelementptr inbounds %struct.CookieOptions, %struct.CookieOptions* %t5, i32 0, i32 2
+  %t7 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.314, i64 0, i64 0
+  store i8* %t7, i8** %t6, align 8
+  %t8 = load %struct.CookieOptions*, %struct.CookieOptions** %opts.addr, align 8
+  %t9 = getelementptr inbounds %struct.CookieOptions, %struct.CookieOptions* %t8, i32 0, i32 3
+  store double 86400.0, double* %t9, align 8
+  %t10 = load %struct.CookieOptions*, %struct.CookieOptions** %opts.addr, align 8
+  %t11 = getelementptr inbounds %struct.CookieOptions, %struct.CookieOptions* %t10, i32 0, i32 4
+  %t12 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.315, i64 0, i64 0
+  store i8* %t12, i8** %t11, align 8
+  %t13 = load %struct.CookieOptions*, %struct.CookieOptions** %opts.addr, align 8
+  %t14 = getelementptr inbounds %struct.CookieOptions, %struct.CookieOptions* %t13, i32 0, i32 5
+  %t15 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.316, i64 0, i64 0
+  store i8* %t15, i8** %t14, align 8
+  %t16 = load %struct.CookieOptions*, %struct.CookieOptions** %opts.addr, align 8
+  %t17 = getelementptr inbounds %struct.CookieOptions, %struct.CookieOptions* %t16, i32 0, i32 6
+  store i1 true, i1* %t17, align 8
+  %t18 = load %struct.CookieOptions*, %struct.CookieOptions** %opts.addr, align 8
+  ret %struct.CookieOptions* %t18
+}
+
+define double @sessionStringIndexOf(i8* %str, i8* %target) {
+entry:
+  %str.addr = alloca i8*, align 8
+  store i8* %str, i8** %str.addr, align 8
+  %target.addr = alloca i8*, align 8
+  store i8* %target, i8** %target.addr, align 8
+  %t0 = load i8*, i8** %str.addr, align 8
+  %t1 = call i64 @strlen(i8* %t0)
+  %t2 = uitofp i64 %t1 to double
+  %strLen.addr = alloca double, align 8
+  store double %t2, double* %strLen.addr, align 8
+  %t3 = load i8*, i8** %target.addr, align 8
+  %t4 = call i64 @strlen(i8* %t3)
+  %t5 = uitofp i64 %t4 to double
+  %targetLen.addr = alloca double, align 8
+  store double %t5, double* %targetLen.addr, align 8
+  %t6 = load double, double* %targetLen.addr, align 8
+  %t7 = fcmp oeq double %t6, 0.0
+  br i1 %t7, label %log.merge.843, label %log.rhs.842
+log.rhs.842:
+  %t9 = load double, double* %targetLen.addr, align 8
+  %t10 = load double, double* %strLen.addr, align 8
+  %t11 = fcmp ogt double %t9, %t10
+  br label %log.merge.843
+log.merge.843:
+  %t8 = phi i1 [ true, %entry ], [ %t11, %log.rhs.842 ]
+  br i1 %t8, label %then.844, label %merge.846
+then.844:
+  %t12 = fneg double 1.0
+  ret double %t12
+merge.846:
+  %i.addr = alloca double, align 8
+  store double 0.0, double* %i.addr, align 8
+  %t13 = load double, double* %strLen.addr, align 8
+  %t14 = load double, double* %targetLen.addr, align 8
+  %t15 = fsub double %t13, %t14
+  %max.addr = alloca double, align 8
+  store double %t15, double* %max.addr, align 8
+  br label %while.cond.847
+while.cond.847:
+  %t16 = load double, double* %i.addr, align 8
+  %t17 = load double, double* %max.addr, align 8
+  %t18 = fcmp ole double %t16, %t17
+  br i1 %t18, label %while.body.848, label %while.end.849
+while.body.848:
+  %isMatch.addr = alloca i1, align 8
+  store i1 true, i1* %isMatch.addr, align 8
+  %j.addr = alloca double, align 8
+  store double 0.0, double* %j.addr, align 8
+  br label %while.cond.850
+while.cond.850:
+  %t19 = load double, double* %j.addr, align 8
+  %t20 = load double, double* %targetLen.addr, align 8
+  %t21 = fcmp olt double %t19, %t20
+  br i1 %t21, label %while.body.851, label %while.end.852
+while.body.851:
+  %t22 = load i8*, i8** %str.addr, align 8
+  %t23 = load double, double* %i.addr, align 8
+  %t24 = load double, double* %j.addr, align 8
+  %t25 = fadd double %t23, %t24
+  %t26 = call i8* @charAt(i8* %t22, double %t25)
+  %t27 = load i8*, i8** %target.addr, align 8
+  %t28 = load double, double* %j.addr, align 8
+  %t29 = call i8* @charAt(i8* %t27, double %t28)
+  %t31 = call i32 @strcmp(i8* %t26, i8* %t29)
+  %t30 = icmp ne i32 %t31, 0
+  br i1 %t30, label %then.853, label %merge.855
+then.853:
+  store i1 false, i1* %isMatch.addr, align 8
+  br label %while.end.852
+  br label %merge.855
+merge.855:
+  %t32 = load double, double* %j.addr, align 8
+  %t33 = fadd double %t32, 1.0
+  store double %t33, double* %j.addr, align 8
+  br label %while.cond.850
+while.end.852:
+  %t34 = load i1, i1* %isMatch.addr, align 8
+  br i1 %t34, label %then.856, label %merge.858
+then.856:
+  %t35 = load double, double* %i.addr, align 8
+  ret double %t35
+merge.858:
+  %t36 = load double, double* %i.addr, align 8
+  %t37 = fadd double %t36, 1.0
+  store double %t37, double* %i.addr, align 8
+  br label %while.cond.847
+while.end.849:
+  %t38 = fneg double 1.0
+  ret double %t38
+}
+
+define i8* @calculateCookieSignature(i8* %val, i8* %secret) {
+entry:
+  %val.addr = alloca i8*, align 8
+  store i8* %val, i8** %val.addr, align 8
+  %secret.addr = alloca i8*, align 8
+  store i8* %secret, i8** %secret.addr, align 8
+  %hash.addr = alloca double, align 8
+  store double 5381.0, double* %hash.addr, align 8
+  %t0 = load i8*, i8** %val.addr, align 8
+  %t1 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.317, i64 0, i64 0
+  %t3 = call i64 @strlen(i8* %t0)
+  %t4 = call i64 @strlen(i8* %t1)
+  %t5 = add i64 %t3, %t4
+  %t6 = add i64 %t5, 1
+  %t7 = call i8* @malloc(i64 %t6)
+  %t8 = call i8* @strcpy(i8* %t7, i8* %t0)
+  %t9 = call i8* @strcat(i8* %t7, i8* %t1)
+  %t10 = load i8*, i8** %secret.addr, align 8
+  %t12 = call i64 @strlen(i8* %t7)
+  %t13 = call i64 @strlen(i8* %t10)
+  %t14 = add i64 %t12, %t13
+  %t15 = add i64 %t14, 1
+  %t16 = call i8* @malloc(i64 %t15)
+  %t17 = call i8* @strcpy(i8* %t16, i8* %t7)
+  %t18 = call i8* @strcat(i8* %t16, i8* %t10)
+  %combined.addr = alloca i8*, align 8
+  store i8* %t16, i8** %combined.addr, align 8
+  %t19 = load i8*, i8** %combined.addr, align 8
+  %t20 = call i64 @strlen(i8* %t19)
+  %t21 = uitofp i64 %t20 to double
+  %len.addr = alloca double, align 8
+  store double %t21, double* %len.addr, align 8
+  %i.addr = alloca double, align 8
+  store double 0.0, double* %i.addr, align 8
+  br label %while.cond.859
+while.cond.859:
+  %t22 = load double, double* %i.addr, align 8
+  %t23 = load double, double* %len.addr, align 8
+  %t24 = fcmp olt double %t22, %t23
+  br i1 %t24, label %while.body.860, label %while.end.861
+while.body.860:
+  %t25 = load i8*, i8** %combined.addr, align 8
+  %t26 = load double, double* %i.addr, align 8
+  %t27 = call i8* @charAt(i8* %t25, double %t26)
+  %code.addr = alloca i8*, align 8
+  store i8* %t27, i8** %code.addr, align 8
+  %t28 = load i8*, i8** %code.addr, align 8
+  %t29 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.318, i64 0, i64 0
+  %t31 = call i32 @strcmp(i8* %t28, i8* %t29)
+  %t30 = icmp eq i32 %t31, 0
+  br i1 %t30, label %then.862, label %else.863
+then.862:
+  %t32 = load double, double* %hash.addr, align 8
+  %t33 = fmul double %t32, 33.0
+  %t34 = fadd double %t33, 97.0
+  store double %t34, double* %hash.addr, align 8
+  br label %merge.864
+else.863:
+  %t35 = load i8*, i8** %code.addr, align 8
+  %t36 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.319, i64 0, i64 0
+  %t38 = call i32 @strcmp(i8* %t35, i8* %t36)
+  %t37 = icmp eq i32 %t38, 0
+  br i1 %t37, label %then.865, label %else.866
+then.865:
+  %t39 = load double, double* %hash.addr, align 8
+  %t40 = fmul double %t39, 33.0
+  %t41 = fadd double %t40, 98.0
+  store double %t41, double* %hash.addr, align 8
+  br label %merge.867
+else.866:
+  %t42 = load i8*, i8** %code.addr, align 8
+  %t43 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.320, i64 0, i64 0
+  %t45 = call i32 @strcmp(i8* %t42, i8* %t43)
+  %t44 = icmp eq i32 %t45, 0
+  br i1 %t44, label %then.868, label %else.869
+then.868:
+  %t46 = load double, double* %hash.addr, align 8
+  %t47 = fmul double %t46, 33.0
+  %t48 = fadd double %t47, 99.0
+  store double %t48, double* %hash.addr, align 8
+  br label %merge.870
+else.869:
+  %t49 = load i8*, i8** %code.addr, align 8
+  %t50 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.321, i64 0, i64 0
+  %t52 = call i32 @strcmp(i8* %t49, i8* %t50)
+  %t51 = icmp eq i32 %t52, 0
+  br i1 %t51, label %then.871, label %else.872
+then.871:
+  %t53 = load double, double* %hash.addr, align 8
+  %t54 = fmul double %t53, 33.0
+  %t55 = fadd double %t54, 115.0
+  store double %t55, double* %hash.addr, align 8
+  br label %merge.873
+else.872:
+  %t56 = load double, double* %hash.addr, align 8
+  %t57 = fmul double %t56, 33.0
+  %t58 = fadd double %t57, 100.0
+  store double %t58, double* %hash.addr, align 8
+  br label %merge.873
+merge.873:
+  br label %merge.870
+merge.870:
+  br label %merge.867
+merge.867:
+  br label %merge.864
+merge.864:
+  %t59 = load double, double* %i.addr, align 8
+  %t60 = fadd double %t59, 1.0
+  store double %t60, double* %i.addr, align 8
+  br label %while.cond.859
+while.end.861:
+  %t61 = load double, double* %hash.addr, align 8
+  %t62 = fcmp olt double %t61, 0.0
+  br i1 %t62, label %then.874, label %merge.876
+then.874:
+  %t63 = load double, double* %hash.addr, align 8
+  %t64 = fsub double 0.0, %t63
+  store double %t64, double* %hash.addr, align 8
+  br label %merge.876
+merge.876:
+  %t65 = getelementptr inbounds [5 x i8], [5 x i8]* @.str.322, i64 0, i64 0
+  %t66 = load double, double* %hash.addr, align 8
+  %t68 = call i8* @malloc(i64 64)
+  %t69 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_num, i64 0, i64 0
+  call i32 (i8*, i8*, ...) @sprintf(i8* %t68, i8* %t69, double %t66)
+  %t70 = call i64 @strlen(i8* %t65)
+  %t71 = call i64 @strlen(i8* %t68)
+  %t72 = add i64 %t70, %t71
+  %t73 = add i64 %t72, 1
+  %t74 = call i8* @malloc(i64 %t73)
+  %t75 = call i8* @strcpy(i8* %t74, i8* %t65)
+  %t76 = call i8* @strcat(i8* %t74, i8* %t68)
+  ret i8* %t74
+}
+
+define i8* @signCookieValue(i8* %val, i8* %secret) {
+entry:
+  %val.addr = alloca i8*, align 8
+  store i8* %val, i8** %val.addr, align 8
+  %secret.addr = alloca i8*, align 8
+  store i8* %secret, i8** %secret.addr, align 8
+  %t0 = load i8*, i8** %val.addr, align 8
+  %t1 = load i8*, i8** %secret.addr, align 8
+  %t2 = call i8* @calculateCookieSignature(i8* %t0, i8* %t1)
+  %sig.addr = alloca i8*, align 8
+  store i8* %t2, i8** %sig.addr, align 8
+  %t3 = load i8*, i8** %val.addr, align 8
+  %t4 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.323, i64 0, i64 0
+  %t6 = call i64 @strlen(i8* %t3)
+  %t7 = call i64 @strlen(i8* %t4)
+  %t8 = add i64 %t6, %t7
+  %t9 = add i64 %t8, 1
+  %t10 = call i8* @malloc(i64 %t9)
+  %t11 = call i8* @strcpy(i8* %t10, i8* %t3)
+  %t12 = call i8* @strcat(i8* %t10, i8* %t4)
+  %t13 = load i8*, i8** %sig.addr, align 8
+  %t15 = call i64 @strlen(i8* %t10)
+  %t16 = call i64 @strlen(i8* %t13)
+  %t17 = add i64 %t15, %t16
+  %t18 = add i64 %t17, 1
+  %t19 = call i8* @malloc(i64 %t18)
+  %t20 = call i8* @strcpy(i8* %t19, i8* %t10)
+  %t21 = call i8* @strcat(i8* %t19, i8* %t13)
+  ret i8* %t19
+}
+
+define i8* @verifySignedCookieValue(i8* %signedVal, i8* %secret) {
+entry:
+  %signedVal.addr = alloca i8*, align 8
+  store i8* %signedVal, i8** %signedVal.addr, align 8
+  %secret.addr = alloca i8*, align 8
+  store i8* %secret, i8** %secret.addr, align 8
+  %t0 = load i8*, i8** %signedVal.addr, align 8
+  %t1 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.324, i64 0, i64 0
+  %t2 = call double @sessionStringIndexOf(i8* %t0, i8* %t1)
+  %dotPos.addr = alloca double, align 8
+  store double %t2, double* %dotPos.addr, align 8
+  %t3 = load double, double* %dotPos.addr, align 8
+  %t4 = fcmp olt double %t3, 0.0
+  br i1 %t4, label %then.877, label %merge.879
+then.877:
+  %t5 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.325, i64 0, i64 0
+  ret i8* %t5
+merge.879:
+  %t6 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.326, i64 0, i64 0
+  %val.addr = alloca i8*, align 8
+  store i8* %t6, i8** %val.addr, align 8
+  %i.addr = alloca double, align 8
+  store double 0.0, double* %i.addr, align 8
+  br label %while.cond.880
+while.cond.880:
+  %t7 = load double, double* %i.addr, align 8
+  %t8 = load double, double* %dotPos.addr, align 8
+  %t9 = fcmp olt double %t7, %t8
+  br i1 %t9, label %while.body.881, label %while.end.882
+while.body.881:
+  %t10 = load i8*, i8** %val.addr, align 8
+  %t11 = load i8*, i8** %signedVal.addr, align 8
+  %t12 = load double, double* %i.addr, align 8
+  %t13 = call i8* @charAt(i8* %t11, double %t12)
+  %t15 = call i64 @strlen(i8* %t10)
+  %t16 = call i64 @strlen(i8* %t13)
+  %t17 = add i64 %t15, %t16
+  %t18 = add i64 %t17, 1
+  %t19 = call i8* @malloc(i64 %t18)
+  %t20 = call i8* @strcpy(i8* %t19, i8* %t10)
+  %t21 = call i8* @strcat(i8* %t19, i8* %t13)
+  store i8* %t19, i8** %val.addr, align 8
+  %t22 = load double, double* %i.addr, align 8
+  %t23 = fadd double %t22, 1.0
+  store double %t23, double* %i.addr, align 8
+  br label %while.cond.880
+while.end.882:
+  %t24 = load i8*, i8** %val.addr, align 8
+  %t25 = load i8*, i8** %secret.addr, align 8
+  %t26 = call i8* @calculateCookieSignature(i8* %t24, i8* %t25)
+  %expectedSig.addr = alloca i8*, align 8
+  store i8* %t26, i8** %expectedSig.addr, align 8
+  %t27 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.327, i64 0, i64 0
+  %actualSig.addr = alloca i8*, align 8
+  store i8* %t27, i8** %actualSig.addr, align 8
+  %t28 = load double, double* %dotPos.addr, align 8
+  %t29 = fadd double %t28, 1.0
+  %j.addr = alloca double, align 8
+  store double %t29, double* %j.addr, align 8
+  %t30 = load i8*, i8** %signedVal.addr, align 8
+  %t31 = call i64 @strlen(i8* %t30)
+  %t32 = uitofp i64 %t31 to double
+  %len.addr = alloca double, align 8
+  store double %t32, double* %len.addr, align 8
+  br label %while.cond.883
+while.cond.883:
+  %t33 = load double, double* %j.addr, align 8
+  %t34 = load double, double* %len.addr, align 8
+  %t35 = fcmp olt double %t33, %t34
+  br i1 %t35, label %while.body.884, label %while.end.885
+while.body.884:
+  %t36 = load i8*, i8** %actualSig.addr, align 8
+  %t37 = load i8*, i8** %signedVal.addr, align 8
+  %t38 = load double, double* %j.addr, align 8
+  %t39 = call i8* @charAt(i8* %t37, double %t38)
+  %t41 = call i64 @strlen(i8* %t36)
+  %t42 = call i64 @strlen(i8* %t39)
+  %t43 = add i64 %t41, %t42
+  %t44 = add i64 %t43, 1
+  %t45 = call i8* @malloc(i64 %t44)
+  %t46 = call i8* @strcpy(i8* %t45, i8* %t36)
+  %t47 = call i8* @strcat(i8* %t45, i8* %t39)
+  store i8* %t45, i8** %actualSig.addr, align 8
+  %t48 = load double, double* %j.addr, align 8
+  %t49 = fadd double %t48, 1.0
+  store double %t49, double* %j.addr, align 8
+  br label %while.cond.883
+while.end.885:
+  %t50 = load i8*, i8** %actualSig.addr, align 8
+  %t51 = load i8*, i8** %expectedSig.addr, align 8
+  %t53 = call i32 @strcmp(i8* %t50, i8* %t51)
+  %t52 = icmp eq i32 %t53, 0
+  br i1 %t52, label %then.886, label %merge.888
+then.886:
+  %t54 = load i8*, i8** %val.addr, align 8
+  ret i8* %t54
+merge.888:
+  %t55 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.328, i64 0, i64 0
+  ret i8* %t55
+}
+
+define i8* @formatCookie(i8* %key, i8* %val, i8* %secret, %struct.CookieOptions* %opts) {
+entry:
+  %key.addr = alloca i8*, align 8
+  store i8* %key, i8** %key.addr, align 8
+  %val.addr = alloca i8*, align 8
+  store i8* %val, i8** %val.addr, align 8
+  %secret.addr = alloca i8*, align 8
+  store i8* %secret, i8** %secret.addr, align 8
+  %opts.addr = alloca %struct.CookieOptions*, align 8
+  store %struct.CookieOptions* %opts, %struct.CookieOptions** %opts.addr, align 8
+  %t0 = load i8*, i8** %val.addr, align 8
+  %finalVal.addr = alloca i8*, align 8
+  store i8* %t0, i8** %finalVal.addr, align 8
+  %t1 = load %struct.CookieOptions*, %struct.CookieOptions** %opts.addr, align 8
+  %t2 = getelementptr inbounds %struct.CookieOptions, %struct.CookieOptions* %t1, i32 0, i32 6
+  %t3 = load i1, i1* %t2, align 8
+  br i1 %t3, label %log.rhs.889, label %log.merge.890
+log.rhs.889:
+  %t5 = load i8*, i8** %secret.addr, align 8
+  %t6 = call i64 @strlen(i8* %t5)
+  %t7 = uitofp i64 %t6 to double
+  %t8 = fcmp ogt double %t7, 0.0
+  br label %log.merge.890
+log.merge.890:
+  %t4 = phi i1 [ false, %entry ], [ %t8, %log.rhs.889 ]
+  br i1 %t4, label %then.891, label %merge.893
+then.891:
+  %t9 = load i8*, i8** %val.addr, align 8
+  %t10 = load i8*, i8** %secret.addr, align 8
+  %t11 = call i8* @signCookieValue(i8* %t9, i8* %t10)
+  store i8* %t11, i8** %finalVal.addr, align 8
+  br label %merge.893
+merge.893:
+  %t12 = load i8*, i8** %key.addr, align 8
+  %t13 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.329, i64 0, i64 0
+  %t15 = call i64 @strlen(i8* %t12)
+  %t16 = call i64 @strlen(i8* %t13)
+  %t17 = add i64 %t15, %t16
+  %t18 = add i64 %t17, 1
+  %t19 = call i8* @malloc(i64 %t18)
+  %t20 = call i8* @strcpy(i8* %t19, i8* %t12)
+  %t21 = call i8* @strcat(i8* %t19, i8* %t13)
+  %t22 = load i8*, i8** %finalVal.addr, align 8
+  %t24 = call i64 @strlen(i8* %t19)
+  %t25 = call i64 @strlen(i8* %t22)
+  %t26 = add i64 %t24, %t25
+  %t27 = add i64 %t26, 1
+  %t28 = call i8* @malloc(i64 %t27)
+  %t29 = call i8* @strcpy(i8* %t28, i8* %t19)
+  %t30 = call i8* @strcat(i8* %t28, i8* %t22)
+  %t31 = getelementptr inbounds [8 x i8], [8 x i8]* @.str.330, i64 0, i64 0
+  %t33 = call i64 @strlen(i8* %t28)
+  %t34 = call i64 @strlen(i8* %t31)
+  %t35 = add i64 %t33, %t34
+  %t36 = add i64 %t35, 1
+  %t37 = call i8* @malloc(i64 %t36)
+  %t38 = call i8* @strcpy(i8* %t37, i8* %t28)
+  %t39 = call i8* @strcat(i8* %t37, i8* %t31)
+  %t40 = load %struct.CookieOptions*, %struct.CookieOptions** %opts.addr, align 8
+  %t41 = getelementptr inbounds %struct.CookieOptions, %struct.CookieOptions* %t40, i32 0, i32 4
+  %t42 = load i8*, i8** %t41, align 8
+  %t44 = call i64 @strlen(i8* %t37)
+  %t45 = call i64 @strlen(i8* %t42)
+  %t46 = add i64 %t44, %t45
+  %t47 = add i64 %t46, 1
+  %t48 = call i8* @malloc(i64 %t47)
+  %t49 = call i8* @strcpy(i8* %t48, i8* %t37)
+  %t50 = call i8* @strcat(i8* %t48, i8* %t42)
+  %cookieStr.addr = alloca i8*, align 8
+  store i8* %t48, i8** %cookieStr.addr, align 8
+  %t51 = load %struct.CookieOptions*, %struct.CookieOptions** %opts.addr, align 8
+  %t52 = getelementptr inbounds %struct.CookieOptions, %struct.CookieOptions* %t51, i32 0, i32 0
+  %t53 = load i1, i1* %t52, align 8
+  br i1 %t53, label %then.894, label %merge.896
+then.894:
+  %t54 = load i8*, i8** %cookieStr.addr, align 8
+  %t55 = getelementptr inbounds [11 x i8], [11 x i8]* @.str.331, i64 0, i64 0
+  %t57 = call i64 @strlen(i8* %t54)
+  %t58 = call i64 @strlen(i8* %t55)
+  %t59 = add i64 %t57, %t58
+  %t60 = add i64 %t59, 1
+  %t61 = call i8* @malloc(i64 %t60)
+  %t62 = call i8* @strcpy(i8* %t61, i8* %t54)
+  %t63 = call i8* @strcat(i8* %t61, i8* %t55)
+  store i8* %t61, i8** %cookieStr.addr, align 8
+  br label %merge.896
+merge.896:
+  %t64 = load %struct.CookieOptions*, %struct.CookieOptions** %opts.addr, align 8
+  %t65 = getelementptr inbounds %struct.CookieOptions, %struct.CookieOptions* %t64, i32 0, i32 1
+  %t66 = load i1, i1* %t65, align 8
+  br i1 %t66, label %then.897, label %merge.899
+then.897:
+  %t67 = load i8*, i8** %cookieStr.addr, align 8
+  %t68 = getelementptr inbounds [9 x i8], [9 x i8]* @.str.332, i64 0, i64 0
+  %t70 = call i64 @strlen(i8* %t67)
+  %t71 = call i64 @strlen(i8* %t68)
+  %t72 = add i64 %t70, %t71
+  %t73 = add i64 %t72, 1
+  %t74 = call i8* @malloc(i64 %t73)
+  %t75 = call i8* @strcpy(i8* %t74, i8* %t67)
+  %t76 = call i8* @strcat(i8* %t74, i8* %t68)
+  store i8* %t74, i8** %cookieStr.addr, align 8
+  br label %merge.899
+merge.899:
+  %t77 = load %struct.CookieOptions*, %struct.CookieOptions** %opts.addr, align 8
+  %t78 = getelementptr inbounds %struct.CookieOptions, %struct.CookieOptions* %t77, i32 0, i32 2
+  %t79 = load i8*, i8** %t78, align 8
+  %t80 = call i64 @strlen(i8* %t79)
+  %t81 = uitofp i64 %t80 to double
+  %t82 = fcmp ogt double %t81, 0.0
+  br i1 %t82, label %then.900, label %merge.902
+then.900:
+  %t83 = load i8*, i8** %cookieStr.addr, align 8
+  %t84 = getelementptr inbounds [12 x i8], [12 x i8]* @.str.333, i64 0, i64 0
+  %t86 = call i64 @strlen(i8* %t83)
+  %t87 = call i64 @strlen(i8* %t84)
+  %t88 = add i64 %t86, %t87
+  %t89 = add i64 %t88, 1
+  %t90 = call i8* @malloc(i64 %t89)
+  %t91 = call i8* @strcpy(i8* %t90, i8* %t83)
+  %t92 = call i8* @strcat(i8* %t90, i8* %t84)
+  %t93 = load %struct.CookieOptions*, %struct.CookieOptions** %opts.addr, align 8
+  %t94 = getelementptr inbounds %struct.CookieOptions, %struct.CookieOptions* %t93, i32 0, i32 2
+  %t95 = load i8*, i8** %t94, align 8
+  %t97 = call i64 @strlen(i8* %t90)
+  %t98 = call i64 @strlen(i8* %t95)
+  %t99 = add i64 %t97, %t98
+  %t100 = add i64 %t99, 1
+  %t101 = call i8* @malloc(i64 %t100)
+  %t102 = call i8* @strcpy(i8* %t101, i8* %t90)
+  %t103 = call i8* @strcat(i8* %t101, i8* %t95)
+  store i8* %t101, i8** %cookieStr.addr, align 8
+  br label %merge.902
+merge.902:
+  %t104 = load %struct.CookieOptions*, %struct.CookieOptions** %opts.addr, align 8
+  %t105 = getelementptr inbounds %struct.CookieOptions, %struct.CookieOptions* %t104, i32 0, i32 3
+  %t106 = load double, double* %t105, align 8
+  %t107 = fcmp ogt double %t106, 0.0
+  br i1 %t107, label %then.903, label %merge.905
+then.903:
+  %t108 = load i8*, i8** %cookieStr.addr, align 8
+  %t109 = getelementptr inbounds [11 x i8], [11 x i8]* @.str.334, i64 0, i64 0
+  %t111 = call i64 @strlen(i8* %t108)
+  %t112 = call i64 @strlen(i8* %t109)
+  %t113 = add i64 %t111, %t112
+  %t114 = add i64 %t113, 1
+  %t115 = call i8* @malloc(i64 %t114)
+  %t116 = call i8* @strcpy(i8* %t115, i8* %t108)
+  %t117 = call i8* @strcat(i8* %t115, i8* %t109)
+  %t118 = load %struct.CookieOptions*, %struct.CookieOptions** %opts.addr, align 8
+  %t119 = getelementptr inbounds %struct.CookieOptions, %struct.CookieOptions* %t118, i32 0, i32 3
+  %t120 = load double, double* %t119, align 8
+  %t122 = call i8* @malloc(i64 64)
+  %t123 = getelementptr inbounds [4 x i8], [4 x i8]* @.fmt_num, i64 0, i64 0
+  call i32 (i8*, i8*, ...) @sprintf(i8* %t122, i8* %t123, double %t120)
+  %t124 = call i64 @strlen(i8* %t115)
+  %t125 = call i64 @strlen(i8* %t122)
+  %t126 = add i64 %t124, %t125
+  %t127 = add i64 %t126, 1
+  %t128 = call i8* @malloc(i64 %t127)
+  %t129 = call i8* @strcpy(i8* %t128, i8* %t115)
+  %t130 = call i8* @strcat(i8* %t128, i8* %t122)
+  store i8* %t128, i8** %cookieStr.addr, align 8
+  br label %merge.905
+merge.905:
+  %t131 = load %struct.CookieOptions*, %struct.CookieOptions** %opts.addr, align 8
+  %t132 = getelementptr inbounds %struct.CookieOptions, %struct.CookieOptions* %t131, i32 0, i32 5
+  %t133 = load i8*, i8** %t132, align 8
+  %t134 = call i64 @strlen(i8* %t133)
+  %t135 = uitofp i64 %t134 to double
+  %t136 = fcmp ogt double %t135, 0.0
+  br i1 %t136, label %then.906, label %merge.908
+then.906:
+  %t137 = load i8*, i8** %cookieStr.addr, align 8
+  %t138 = getelementptr inbounds [10 x i8], [10 x i8]* @.str.335, i64 0, i64 0
+  %t140 = call i64 @strlen(i8* %t137)
+  %t141 = call i64 @strlen(i8* %t138)
+  %t142 = add i64 %t140, %t141
+  %t143 = add i64 %t142, 1
+  %t144 = call i8* @malloc(i64 %t143)
+  %t145 = call i8* @strcpy(i8* %t144, i8* %t137)
+  %t146 = call i8* @strcat(i8* %t144, i8* %t138)
+  %t147 = load %struct.CookieOptions*, %struct.CookieOptions** %opts.addr, align 8
+  %t148 = getelementptr inbounds %struct.CookieOptions, %struct.CookieOptions* %t147, i32 0, i32 5
+  %t149 = load i8*, i8** %t148, align 8
+  %t151 = call i64 @strlen(i8* %t144)
+  %t152 = call i64 @strlen(i8* %t149)
+  %t153 = add i64 %t151, %t152
+  %t154 = add i64 %t153, 1
+  %t155 = call i8* @malloc(i64 %t154)
+  %t156 = call i8* @strcpy(i8* %t155, i8* %t144)
+  %t157 = call i8* @strcat(i8* %t155, i8* %t149)
+  store i8* %t155, i8** %cookieStr.addr, align 8
+  br label %merge.908
+merge.908:
+  %t158 = load i8*, i8** %cookieStr.addr, align 8
+  ret i8* %t158
+}
+
+define i8* @parseCookieFromHeader(i8* %cookieHeader, i8* %targetKey) {
+entry:
+  %cookieHeader.addr = alloca i8*, align 8
+  store i8* %cookieHeader, i8** %cookieHeader.addr, align 8
+  %targetKey.addr = alloca i8*, align 8
+  store i8* %targetKey, i8** %targetKey.addr, align 8
+  %t0 = load i8*, i8** %cookieHeader.addr, align 8
+  %t1 = call i64 @strlen(i8* %t0)
+  %t2 = uitofp i64 %t1 to double
+  %t3 = fcmp oeq double %t2, 0.0
+  br i1 %t3, label %log.merge.910, label %log.rhs.909
+log.rhs.909:
+  %t5 = load i8*, i8** %targetKey.addr, align 8
+  %t6 = call i64 @strlen(i8* %t5)
+  %t7 = uitofp i64 %t6 to double
+  %t8 = fcmp oeq double %t7, 0.0
+  br label %log.merge.910
+log.merge.910:
+  %t4 = phi i1 [ true, %entry ], [ %t8, %log.rhs.909 ]
+  br i1 %t4, label %then.911, label %merge.913
+then.911:
+  %t9 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.336, i64 0, i64 0
+  ret i8* %t9
+merge.913:
+  %t10 = load i8*, i8** %cookieHeader.addr, align 8
+  %t11 = call i64 @strlen(i8* %t10)
+  %t12 = uitofp i64 %t11 to double
+  %len.addr = alloca double, align 8
+  store double %t12, double* %len.addr, align 8
+  %i.addr = alloca double, align 8
+  store double 0.0, double* %i.addr, align 8
+  %t13 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.337, i64 0, i64 0
+  %curKey.addr = alloca i8*, align 8
+  store i8* %t13, i8** %curKey.addr, align 8
+  %t14 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.338, i64 0, i64 0
+  %curVal.addr = alloca i8*, align 8
+  store i8* %t14, i8** %curVal.addr, align 8
+  %isVal.addr = alloca i1, align 8
+  store i1 false, i1* %isVal.addr, align 8
+  br label %while.cond.914
+while.cond.914:
+  %t15 = load double, double* %i.addr, align 8
+  %t16 = load double, double* %len.addr, align 8
+  %t17 = fcmp olt double %t15, %t16
+  br i1 %t17, label %while.body.915, label %while.end.916
+while.body.915:
+  %t18 = load i8*, i8** %cookieHeader.addr, align 8
+  %t19 = load double, double* %i.addr, align 8
+  %t20 = call i8* @charAt(i8* %t18, double %t19)
+  %ch.addr = alloca i8*, align 8
+  store i8* %t20, i8** %ch.addr, align 8
+  %t21 = load i8*, i8** %ch.addr, align 8
+  %t22 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.339, i64 0, i64 0
+  %t24 = call i32 @strcmp(i8* %t21, i8* %t22)
+  %t23 = icmp eq i32 %t24, 0
+  br i1 %t23, label %log.merge.918, label %log.rhs.917
+log.rhs.917:
+  %t26 = load double, double* %i.addr, align 8
+  %t27 = load double, double* %len.addr, align 8
+  %t28 = fsub double %t27, 1.0
+  %t29 = fcmp oeq double %t26, %t28
+  br label %log.merge.918
+log.merge.918:
+  %t25 = phi i1 [ true, %while.body.915 ], [ %t29, %log.rhs.917 ]
+  br i1 %t25, label %then.919, label %else.920
+then.919:
+  %t30 = load i8*, i8** %ch.addr, align 8
+  %t31 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.340, i64 0, i64 0
+  %t33 = call i32 @strcmp(i8* %t30, i8* %t31)
+  %t32 = icmp ne i32 %t33, 0
+  br i1 %t32, label %then.922, label %merge.924
+then.922:
+  %t34 = load i1, i1* %isVal.addr, align 8
+  br i1 %t34, label %then.925, label %else.926
+then.925:
+  %t35 = load i8*, i8** %curVal.addr, align 8
+  %t36 = load i8*, i8** %ch.addr, align 8
+  %t38 = call i64 @strlen(i8* %t35)
+  %t39 = call i64 @strlen(i8* %t36)
+  %t40 = add i64 %t38, %t39
+  %t41 = add i64 %t40, 1
+  %t42 = call i8* @malloc(i64 %t41)
+  %t43 = call i8* @strcpy(i8* %t42, i8* %t35)
+  %t44 = call i8* @strcat(i8* %t42, i8* %t36)
+  store i8* %t42, i8** %curVal.addr, align 8
+  br label %merge.927
+else.926:
+  %t45 = load i8*, i8** %curKey.addr, align 8
+  %t46 = load i8*, i8** %ch.addr, align 8
+  %t48 = call i64 @strlen(i8* %t45)
+  %t49 = call i64 @strlen(i8* %t46)
+  %t50 = add i64 %t48, %t49
+  %t51 = add i64 %t50, 1
+  %t52 = call i8* @malloc(i64 %t51)
+  %t53 = call i8* @strcpy(i8* %t52, i8* %t45)
+  %t54 = call i8* @strcat(i8* %t52, i8* %t46)
+  store i8* %t52, i8** %curKey.addr, align 8
+  br label %merge.927
+merge.927:
+  br label %merge.924
+merge.924:
+  %t55 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.341, i64 0, i64 0
+  %trimmedKey.addr = alloca i8*, align 8
+  store i8* %t55, i8** %trimmedKey.addr, align 8
+  %k.addr = alloca double, align 8
+  store double 0.0, double* %k.addr, align 8
+  br label %while.cond.928
+while.cond.928:
+  %t56 = load double, double* %k.addr, align 8
+  %t57 = load i8*, i8** %curKey.addr, align 8
+  %t58 = call i64 @strlen(i8* %t57)
+  %t59 = uitofp i64 %t58 to double
+  %t60 = fcmp olt double %t56, %t59
+  br i1 %t60, label %while.body.929, label %while.end.930
+while.body.929:
+  %t61 = load i8*, i8** %curKey.addr, align 8
+  %t62 = load double, double* %k.addr, align 8
+  %t63 = call i8* @charAt(i8* %t61, double %t62)
+  %kc.addr = alloca i8*, align 8
+  store i8* %t63, i8** %kc.addr, align 8
+  %t64 = load i8*, i8** %kc.addr, align 8
+  %t65 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.342, i64 0, i64 0
+  %t67 = call i32 @strcmp(i8* %t64, i8* %t65)
+  %t66 = icmp ne i32 %t67, 0
+  br i1 %t66, label %then.931, label %merge.933
+then.931:
+  %t68 = load i8*, i8** %trimmedKey.addr, align 8
+  %t69 = load i8*, i8** %kc.addr, align 8
+  %t71 = call i64 @strlen(i8* %t68)
+  %t72 = call i64 @strlen(i8* %t69)
+  %t73 = add i64 %t71, %t72
+  %t74 = add i64 %t73, 1
+  %t75 = call i8* @malloc(i64 %t74)
+  %t76 = call i8* @strcpy(i8* %t75, i8* %t68)
+  %t77 = call i8* @strcat(i8* %t75, i8* %t69)
+  store i8* %t75, i8** %trimmedKey.addr, align 8
+  br label %merge.933
+merge.933:
+  %t78 = load double, double* %k.addr, align 8
+  %t79 = fadd double %t78, 1.0
+  store double %t79, double* %k.addr, align 8
+  br label %while.cond.928
+while.end.930:
+  %t80 = load i8*, i8** %trimmedKey.addr, align 8
+  %t81 = load i8*, i8** %targetKey.addr, align 8
+  %t83 = call i32 @strcmp(i8* %t80, i8* %t81)
+  %t82 = icmp eq i32 %t83, 0
+  br i1 %t82, label %then.934, label %merge.936
+then.934:
+  %t84 = load i8*, i8** %curVal.addr, align 8
+  ret i8* %t84
+merge.936:
+  %t85 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.343, i64 0, i64 0
+  store i8* %t85, i8** %curKey.addr, align 8
+  %t86 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.344, i64 0, i64 0
+  store i8* %t86, i8** %curVal.addr, align 8
+  store i1 false, i1* %isVal.addr, align 8
+  br label %merge.921
+else.920:
+  %t87 = load i8*, i8** %ch.addr, align 8
+  %t88 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.345, i64 0, i64 0
+  %t90 = call i32 @strcmp(i8* %t87, i8* %t88)
+  %t89 = icmp eq i32 %t90, 0
+  br i1 %t89, label %then.937, label %else.938
+then.937:
+  store i1 true, i1* %isVal.addr, align 8
+  br label %merge.939
+else.938:
+  %t91 = load i1, i1* %isVal.addr, align 8
+  br i1 %t91, label %then.940, label %else.941
+then.940:
+  %t92 = load i8*, i8** %curVal.addr, align 8
+  %t93 = load i8*, i8** %ch.addr, align 8
+  %t95 = call i64 @strlen(i8* %t92)
+  %t96 = call i64 @strlen(i8* %t93)
+  %t97 = add i64 %t95, %t96
+  %t98 = add i64 %t97, 1
+  %t99 = call i8* @malloc(i64 %t98)
+  %t100 = call i8* @strcpy(i8* %t99, i8* %t92)
+  %t101 = call i8* @strcat(i8* %t99, i8* %t93)
+  store i8* %t99, i8** %curVal.addr, align 8
+  br label %merge.942
+else.941:
+  %t102 = load i8*, i8** %curKey.addr, align 8
+  %t103 = load i8*, i8** %ch.addr, align 8
+  %t105 = call i64 @strlen(i8* %t102)
+  %t106 = call i64 @strlen(i8* %t103)
+  %t107 = add i64 %t105, %t106
+  %t108 = add i64 %t107, 1
+  %t109 = call i8* @malloc(i64 %t108)
+  %t110 = call i8* @strcpy(i8* %t109, i8* %t102)
+  %t111 = call i8* @strcat(i8* %t109, i8* %t103)
+  store i8* %t109, i8** %curKey.addr, align 8
+  br label %merge.942
+merge.942:
+  br label %merge.939
+merge.939:
+  br label %merge.921
+merge.921:
+  %t112 = load double, double* %i.addr, align 8
+  %t113 = fadd double %t112, 1.0
+  store double %t113, double* %i.addr, align 8
+  br label %while.cond.914
+while.end.916:
+  %t114 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.346, i64 0, i64 0
+  ret i8* %t114
+}
+
+define %struct.SessionStore* @createSessionStore() {
+entry:
+  %store.addr = alloca %struct.SessionStore*, align 8
+  %t0 = alloca %struct.SessionStore, align 8
+  store %struct.SessionStore* %t0, %struct.SessionStore** %store.addr, align 8
+  %t1 = load %struct.SessionStore*, %struct.SessionStore** %store.addr, align 8
+  call void @_SessionStore_init(%struct.SessionStore* %t1)
+  %t2 = load %struct.SessionStore*, %struct.SessionStore** %store.addr, align 8
+  ret %struct.SessionStore* %t2
+}
+
+define i8* @getSessionIdFromRequest(%struct.Request* %req, i8* %cookieName, i8* %secret) {
+entry:
+  %req.addr = alloca %struct.Request*, align 8
+  store %struct.Request* %req, %struct.Request** %req.addr, align 8
+  %cookieName.addr = alloca i8*, align 8
+  store i8* %cookieName, i8** %cookieName.addr, align 8
+  %secret.addr = alloca i8*, align 8
+  store i8* %secret, i8** %secret.addr, align 8
+  %t0 = load %struct.Request*, %struct.Request** %req.addr, align 8
+  %t1 = getelementptr inbounds [7 x i8], [7 x i8]* @.str.347, i64 0, i64 0
+  %t2 = call i8* @_Request_header(%struct.Request* %t0, i8* %t1)
+  %rawCookie.addr = alloca i8*, align 8
+  store i8* %t2, i8** %rawCookie.addr, align 8
+  %t3 = load i8*, i8** %rawCookie.addr, align 8
+  %t4 = call i64 @strlen(i8* %t3)
+  %t5 = uitofp i64 %t4 to double
+  %t6 = fcmp oeq double %t5, 0.0
+  br i1 %t6, label %then.943, label %merge.945
+then.943:
+  %t7 = load %struct.Request*, %struct.Request** %req.addr, align 8
+  %t8 = getelementptr inbounds [7 x i8], [7 x i8]* @.str.348, i64 0, i64 0
+  %t9 = call i8* @_Request_header(%struct.Request* %t7, i8* %t8)
+  store i8* %t9, i8** %rawCookie.addr, align 8
+  br label %merge.945
+merge.945:
+  %t10 = load i8*, i8** %rawCookie.addr, align 8
+  %t11 = call i64 @strlen(i8* %t10)
+  %t12 = uitofp i64 %t11 to double
+  %t13 = fcmp oeq double %t12, 0.0
+  br i1 %t13, label %then.946, label %merge.948
+then.946:
+  %t14 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.349, i64 0, i64 0
+  ret i8* %t14
+merge.948:
+  %t15 = load i8*, i8** %rawCookie.addr, align 8
+  %t16 = load i8*, i8** %cookieName.addr, align 8
+  %t17 = call i8* @parseCookieFromHeader(i8* %t15, i8* %t16)
+  %rawSid.addr = alloca i8*, align 8
+  store i8* %t17, i8** %rawSid.addr, align 8
+  %t18 = load i8*, i8** %rawSid.addr, align 8
+  %t19 = call i64 @strlen(i8* %t18)
+  %t20 = uitofp i64 %t19 to double
+  %t21 = fcmp oeq double %t20, 0.0
+  br i1 %t21, label %then.949, label %merge.951
+then.949:
+  %t22 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.350, i64 0, i64 0
+  ret i8* %t22
+merge.951:
+  %t23 = load i8*, i8** %rawSid.addr, align 8
+  %t24 = load i8*, i8** %secret.addr, align 8
+  %t25 = call i8* @verifySignedCookieValue(i8* %t23, i8* %t24)
+  ret i8* %t25
+}
+
+define %struct.HealthEngine* @createHealthEngine() {
+entry:
+  %engine.addr = alloca %struct.HealthEngine*, align 8
+  %t0 = alloca %struct.HealthEngine, align 8
+  store %struct.HealthEngine* %t0, %struct.HealthEngine** %engine.addr, align 8
+  %t1 = load %struct.HealthEngine*, %struct.HealthEngine** %engine.addr, align 8
+  call void @_HealthEngine_init(%struct.HealthEngine* %t1)
+  %t2 = load %struct.HealthEngine*, %struct.HealthEngine** %engine.addr, align 8
+  ret %struct.HealthEngine* %t2
 }
 

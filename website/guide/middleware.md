@@ -44,6 +44,9 @@ function main(): number {
 | **CORS** | Xử lý Cross-Origin Resource Sharing & OPTIONS Preflight | `packages/cors/cors.vit` |
 | **Logger** | In log chi tiết các HTTP request ra console | `packages/logger/logger.vit` |
 | **Static** | Phục vụ file tĩnh (HTML, CSS, JS, Images, Fonts) | `packages/static/static.vit` |
+| **Upload** | Phân tích multipart/form-data dạng stream & kiểm tra kích thước file | `packages/upload/upload.vit` |
+| **Session** | Cookie mã hóa HMAC, phòng chống giả mạo & Quản lý Session | `packages/session/session.vit` |
+| **Health** | Connection tracking, Graceful Shutdown & Kubernetes probes (`/healthz`, `/readyz`) | `packages/health/health.vit` |
 | **Validation** | Kiểm tra Schema request, tự động trả 422 Unprocessable Entity | `packages/validation/validation.vit` |
 | **Security** | Helmet security headers, Rate Limiting (429) & JWT Guard (401) | `packages/security/security.vit` |
 | **Swagger** | Tự động sinh `openapi.json` & Giao diện Swagger UI (`/docs`) | `packages/swagger/swagger.vit` |

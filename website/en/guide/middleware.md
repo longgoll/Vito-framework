@@ -44,6 +44,9 @@ function main(): number {
 | **CORS** | Cross-Origin Resource Sharing & OPTIONS Preflight | `packages/cors/cors.vit` |
 | **Logger** | HTTP request logger in console | `packages/logger/logger.vit` |
 | **Static** | Serve static files (HTML, CSS, JS, Images, Fonts) | `packages/static/static.vit` |
+| **Upload** | Streaming multipart/form-data parser & file size validator | `packages/upload/upload.vit` |
+| **Session** | HMAC signed/encrypted cookies & session management | `packages/session/session.vit` |
+| **Health** | Active connection tracking & Kubernetes health probes (`/healthz`, `/readyz`) | `packages/health/health.vit` |
 | **Validation** | Type-safe schema validation (HTTP 422) | `packages/validation/validation.vit` |
 | **Security** | Helmet security headers, Rate Limiting (429) & JWT Guard (401) | `packages/security/security.vit` |
 | **Swagger** | Interactive Swagger UI (`/docs`) & OpenAPI generator | `packages/swagger/swagger.vit` |

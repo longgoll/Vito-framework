@@ -7,19 +7,19 @@
 ## 🎯 Danh Sách Mục Tiêu Chi Tiết
 
 ### 1. 📤 Multipart Form Data & Streaming File Upload (`packages/upload`)
-- [ ] **Streaming Multipart Parser**: Phân tích dữ liệu multipart/form-data trực tiếp từ socket stream không nạp toàn bộ dữ liệu vào RAM.
-- [ ] **File Save Handler**: Hỗ trợ lưu trữ file lên đĩa cứng (Disk Storage) hoặc chuyển tiếp trực tiếp sang S3/Cloud Storage.
-- [ ] **File Validation Engine**: Kiểm tra kích thước file (Max File Size), MIME Type và Extension an toàn trước khi lưu.
+- [x] **Streaming Multipart Parser**: Phân tích dữ liệu multipart/form-data trực tiếp từ socket stream không nạp toàn bộ dữ liệu vào RAM.
+- [x] **File Save Handler**: Hỗ trợ lưu trữ file lên đĩa cứng (Disk Storage) hoặc chuyển tiếp trực tiếp sang S3/Cloud Storage.
+- [x] **File Validation Engine**: Kiểm tra kích thước file (Max File Size), MIME Type và Extension an toàn trước khi lưu.
 
 ### 2. 🍪 Secure Cookie & Session Management (`packages/session`)
-- [ ] **Signed & Encrypted Cookies**: Hỗ trợ `res.setCookie(key, val, options)` với HMAC signing và AES encryption chống giả mạo.
-- [ ] **Session Middleware**: Quản lý Session lưu trữ trong In-Memory, Redis hoặc Database với Cookie Session ID an toàn.
-- [ ] **SameSite, HttpOnly, Secure Flags**: Tự động áp dụng các cờ bảo mật chuẩn cho Cookies.
+- [x] **Signed & Encrypted Cookies**: Hỗ trợ `res.setCookie(key, val, options)` với HMAC signing và AES encryption chống giả mạo.
+- [x] **Session Middleware**: Quản lý Session lưu trữ trong In-Memory, Redis hoặc Database với Cookie Session ID an toàn.
+- [x] **SameSite, HttpOnly, Secure Flags**: Tự động áp dụng các cờ bảo mật chuẩn cho Cookies.
 
 ### 3. 🛑 Graceful Shutdown & Health Checks (`packages/health`)
-- [ ] **OS Signal Interceptor**: Lắng nghe các tín hiệu `SIGINT`, `SIGTERM` từ hệ điều hành để hoàn tất các HTTP request đang dở dang trước khi đóng ứng dụng.
-- [ ] **Active Connection Tracker**: Đếm và quản lý kết nối đang hoạt động (Active Requests Count).
-- [ ] **Built-in Health Check**: Endpoint `/healthz` (Liveness) và `/readyz` (Readiness) cho Kubernetes / Docker Swarm probes.
+- [x] **OS Signal Interceptor**: Lắng nghe các tín hiệu `SIGINT`, `SIGTERM` từ hệ điều hành để hoàn tất các HTTP request đang dở dang trước khi đóng ứng dụng.
+- [x] **Active Connection Tracker**: Đếm và quản lý kết nối đang hoạt động (Active Requests Count).
+- [x] **Built-in Health Check**: Endpoint `/healthz` (Liveness) và `/readyz` (Readiness) cho Kubernetes / Docker Swarm probes.
 
 ---
 

@@ -1,0 +1,60 @@
+// Vito Graceful Shutdown & Health Checks Package (vito/packages/health/health.vit)
+import { Request, Response } from "../src/vito.vit";
+
+struct HealthEngine {
+    activeConnections: number,
+    totalConnections: number,
+    isShuttingDown: boolean,
+
+    function init(): void {
+        this.activeConnections = 0;
+        this.totalConnections = 0;
+        this.isShuttingDown = false;
+    },
+
+    function increment(): void {
+        this.activeConnections = this.activeConnections + 1;
+        this.totalConnections = this.totalConnections + 1;
+    },
+
+    function decrement(): void {
+        if (this.activeConnections > 0) {
+            this.activeConnections = this.activeConnections - 1;
+        }
+    },
+
+    function triggerShutdown(): void {
+        this.isShuttingDown = true;
+    },
+
+    function handleRequest(req: Request, res: Response): boolean {
+        if (req.method == "GET" && req.path == "/healthz") {
+            let active = this.activeConnections;
+            let total = this.totalConnections;
+            res.setStatus(200).json("{\"status\":\"UP\",\"active_connections\":" + active + ",\"total_connections\":" + total + "}");
+            return false;
+        }
+
+        if (req.method == "GET" && req.path == "/readyz") {
+            if (this.isShuttingDown) {
+                res.setStatus(503).json("{\"status\":\"NOT_READY\",\"message\":\"Server is shutting down\"}");
+            } else {
+                res.setStatus(200).json("{\"status\":\"READY\",\"message\":\"Server is accepting traffic\"}");
+            }
+            return false;
+        }
+
+        if (this.isShuttingDown) {
+            res.setStatus(503).json("{\"error\":\"Service Unavailable\",\"message\":\"Server is undergoing graceful shutdown\"}");
+            return false;
+        }
+
+        return true;
+    }
+}
+
+function createHealthEngine(): HealthEngine {
+    let engine: HealthEngine;
+    engine.init();
+    return engine;
+}

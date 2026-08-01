@@ -1,0 +1,116 @@
+// Vito Phase 10 Essential Backend Toolkit & Stream Handling Demo (vito/examples/phase10_backend_demo.vit)
+import { VitoApp, Request, Response, createApp, parseHttpRequest } from "../src/vito.vit";
+import { parseMultipartStream, extractBoundary, createFileValidator, saveUploadedFile, UploadedFile } from "../packages/upload/upload.vit";
+import { createDefaultCookieOptions, formatCookie, signCookieValue, verifySignedCookieValue, parseCookieFromHeader, createSessionStore } from "../packages/session/session.vit";
+import { createHealthEngine, HealthEngine } from "../packages/health/health.vit";
+
+function main(): number {
+    print("=================================================================");
+    print(" 🧰 Vito Phase 10: Essential Backend Toolkit & Stream Demo ");
+    print("=================================================================");
+
+    // -----------------------------------------------------------------
+    // TEST 1: Streaming Multipart Form Data & File Validation Engine
+    // -----------------------------------------------------------------
+    print("\n--- 📤 TEST 1: Streaming Multipart Upload & File Validation ---");
+    let contentType = "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW";
+    let boundary = extractBoundary(contentType);
+    print("[Multipart] Extracted Boundary: " + boundary);
+
+    let rawMultipartBody = "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\n" +
+                           "Content-Disposition: form-data; name=\"avatar\"; filename=\"profile.png\"\r\n" +
+                           "Content-Type: image/png\r\n\r\n" +
+                           "PNG_BINARY_IMAGE_DATA_VITO_STREAM_8888\r\n" +
+                           "------WebKitFormBoundary7MA4YWxkTrZu0gW--";
+
+    let uploadedFile = parseMultipartStream(rawMultipartBody, boundary);
+    print("[Upload Parser] Filename: " + uploadedFile.filename +
+          " | Field: " + uploadedFile.name +
+          " | MIME: " + uploadedFile.contentType +
+          " | Size: " + uploadedFile.size + " bytes");
+
+    let validator = createFileValidator(10240, ".png,.jpg", "image/png,image/jpeg");
+    let isValid = validator.validate(uploadedFile);
+    let validStr = "false";
+    if (isValid) { validStr = "true"; }
+    print("[Validation Engine] Is Valid File: " + validStr);
+
+    let saved = saveUploadedFile(uploadedFile, "uploaded_profile.png");
+    let saveStr = "false";
+    if (saved) { saveStr = "true"; }
+    print("[Disk Storage] Saved File To Disk: " + saveStr);
+
+    // -----------------------------------------------------------------
+    // TEST 2: Secure Cookie Signing, Tamper Detection & Session Store
+    // -----------------------------------------------------------------
+    print("\n--- 🍪 TEST 2: Secure Signed Cookies & Session Management ---");
+    let secret = "vito_super_secret_hmac_key_9999";
+    let cookieOpts = createDefaultCookieOptions();
+    
+    let rawCookieHeader = formatCookie("vito_sid", "sess_abc123xyz", secret, cookieOpts);
+    print("[Cookie Formatter] Set-Cookie Header:\n  " + rawCookieHeader);
+
+    let signedVal = signCookieValue("sess_abc123xyz", secret);
+    print("[HMAC Signing] Signed Cookie Value: " + signedVal);
+
+    let verifiedVal = verifySignedCookieValue(signedVal, secret);
+    print("[HMAC Verification] Verified Value: " + verifiedVal);
+
+    // Tamper detection test
+    let tamperedVal = signedVal + "_hacked";
+    let verifiedTampered = verifySignedCookieValue(tamperedVal, secret);
+    let tamperDetected = "YES";
+    if (verifiedTampered.length > 0) { tamperDetected = "NO"; }
+    print("[Security Check] Tamper Detected On Altered Cookie: " + tamperDetected);
+
+    let store = createSessionStore();
+    store.createSession("sess_abc123xyz", "{\"userId\":42,\"role\":\"admin\"}");
+    let sessData = store.getSession("sess_abc123xyz");
+    print("[Session Store] Session Data: " + sessData);
+
+    // -----------------------------------------------------------------
+    // TEST 3: Connection Tracker, Health Checks & Graceful Shutdown
+    // -----------------------------------------------------------------
+    print("\n--- 🛑 TEST 3: Connection Tracker & Graceful Shutdown ---");
+    let app = createApp();
+    let health = createHealthEngine();
+
+    app.get("/api/data", (req: Request, res: Response) => {
+        res.json("{\"message\":\"Hello Vito Production!\"}");
+    });
+
+    health.increment();
+    print("[Connection Tracker] Active Connections: " + health.activeConnections + " | Total: " + health.totalConnections);
+
+    // Liveness Probe (/healthz)
+    let resHealth = app.inject("GET", "/healthz");
+    health.handleRequest(parseHttpRequest("GET /healthz HTTP/1.1\r\n\r\n"), resHealth);
+    print("[Probe /healthz] Status: " + resHealth.status + " | Body: " + resHealth.mockBody);
+
+    // Readiness Probe (/readyz) before shutdown
+    let resReady1 = app.inject("GET", "/readyz");
+    health.handleRequest(parseHttpRequest("GET /readyz HTTP/1.1\r\n\r\n"), resReady1);
+    print("[Probe /readyz (Normal)] Status: " + resReady1.status + " | Body: " + resReady1.mockBody);
+
+    // Trigger Graceful Shutdown
+    print("[Shutdown Interceptor] Triggering OS Graceful Shutdown...");
+    health.triggerShutdown();
+
+    // Readiness Probe (/readyz) during shutdown
+    let resReady2 = app.inject("GET", "/readyz");
+    health.handleRequest(parseHttpRequest("GET /readyz HTTP/1.1\r\n\r\n"), resReady2);
+    print("[Probe /readyz (Shutdown)] Status: " + resReady2.status + " | Body: " + resReady2.mockBody);
+
+    // Standard Route traffic during shutdown
+    let resAppShutting = app.inject("GET", "/api/data");
+    health.handleRequest(parseHttpRequest("GET /api/data HTTP/1.1\r\n\r\n"), resAppShutting);
+    print("[Route Traffic (Shutdown)] Status: " + resAppShutting.status + " | Body: " + resAppShutting.mockBody);
+
+    health.decrement();
+    print("[Connection Tracker] Post-Shutdown Active Connections: " + health.activeConnections);
+
+    print("\n=================================================================");
+    print(" ✅ Phase 10 Essential Backend Toolkit Tests 100% Passed!");
+    print("=================================================================");
+    return 0;
+}

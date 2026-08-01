@@ -1,0 +1,208 @@
+// Vito Multipart Form Data & Streaming File Upload Package (vito/packages/upload/upload.vit)
+import { Request, Response } from "../src/vito.vit";
+import { charAt } from "std/string";
+import { writeFile } from "std/fs";
+
+struct UploadedFile {
+    filename: string,
+    name: string,
+    contentType: string,
+    size: number,
+    data: string,
+    isValid: boolean,
+    errorMsg: string
+}
+
+// Zero-allocation String IndexOf Helper
+function uploadStringIndexOf(str: string, target: string): number {
+    let strLen = str.length;
+    let targetLen = target.length;
+    if (targetLen == 0 || targetLen > strLen) { return -1; }
+    let i = 0;
+    let max = strLen - targetLen;
+    while (i <= max) {
+        let isMatch = true;
+        let j = 0;
+        while (j < targetLen) {
+            if (charAt(str, i + j) != charAt(target, j)) {
+                isMatch = false;
+                break;
+            }
+            j = j + 1;
+        }
+        if (isMatch) {
+            return i;
+        }
+        i = i + 1;
+    }
+    return -1;
+}
+
+// 1. Streaming Boundary Scanner & Parser
+function extractBoundary(contentTypeHeader: string): string {
+    let target = "boundary=";
+    let pos = uploadStringIndexOf(contentTypeHeader, target);
+    if (pos < 0) { return ""; }
+    let start = pos + target.length;
+    let len = contentTypeHeader.length;
+    let b = "";
+    let i = start;
+    while (i < len) {
+        let bch = charAt(contentTypeHeader, i);
+        if (bch == ";" || bch == "\r" || bch == "\n" || bch == " ") { break; }
+        b = b + bch;
+        i = i + 1;
+    }
+    return b;
+}
+
+function parseMultipartStream(rawBody: string, boundary: string): UploadedFile {
+    let file: UploadedFile;
+    file.filename = "";
+    file.name = "";
+    file.contentType = "application/octet-stream";
+    file.size = 0;
+    file.data = "";
+    file.isValid = false;
+    file.errorMsg = "";
+
+    if (boundary.length == 0 || rawBody.length == 0) {
+        file.errorMsg = "Missing boundary or body payload";
+        return file;
+    }
+
+    // Locate filename in Disposition header
+    let fnKey = "filename=\"";
+    let fnPos = uploadStringIndexOf(rawBody, fnKey);
+    if (fnPos >= 0) {
+        let fnStart = fnPos + fnKey.length;
+        let fnLen = rawBody.length;
+        let fname = "";
+        let i = fnStart;
+        while (i < fnLen) {
+            let fnCh = charAt(rawBody, i);
+            if (fnCh == "\"") { break; }
+            fname = fname + fnCh;
+            i = i + 1;
+        }
+        file.filename = fname;
+    } else {
+        file.filename = "uploaded_file.bin";
+    }
+
+    // Locate field name in Disposition header
+    let nameKey = "name=\"";
+    let namePos = uploadStringIndexOf(rawBody, nameKey);
+    if (namePos >= 0) {
+        let nStart = namePos + nameKey.length;
+        let nLen = rawBody.length;
+        let name = "";
+        let j = nStart;
+        while (j < nLen) {
+            let nmCh = charAt(rawBody, j);
+            if (nmCh == "\"") { break; }
+            name = name + nmCh;
+            j = j + 1;
+        }
+        file.name = name;
+    } else {
+        file.name = "file";
+    }
+
+    // Locate Content-Type of file part
+    let ctKey = "Content-Type: ";
+    let ctPos = uploadStringIndexOf(rawBody, ctKey);
+    if (ctPos >= 0) {
+        let ctStart = ctPos + ctKey.length;
+        let ctLen = rawBody.length;
+        let ctype = "";
+        let k = ctStart;
+        while (k < ctLen) {
+            let ctCh = charAt(rawBody, k);
+            if (ctCh == "\r" || ctCh == "\n") { break; }
+            ctype = ctype + ctCh;
+            k = k + 1;
+        }
+        file.contentType = ctype;
+    }
+
+    // Locate file binary/data payload after double CRLF
+    let fileData = "";
+    let p = 0;
+    let payloadStart = uploadStringIndexOf(rawBody, "\r\n\r\n");
+    if (payloadStart >= 0) {
+        let contentStart = payloadStart + 4;
+        let contentEnd = uploadStringIndexOf(rawBody, "--" + boundary);
+        if (contentEnd > contentStart) {
+            let dataLen = contentEnd - contentStart;
+            // Trim trailing \r\n if present
+            if (dataLen >= 2 && charAt(rawBody, contentEnd - 2) == "\r" && charAt(rawBody, contentEnd - 1) == "\n") {
+                contentEnd = contentEnd - 2;
+            }
+            p = contentStart;
+            while (p < contentEnd) {
+                fileData = fileData + charAt(rawBody, p);
+                p = p + 1;
+            }
+            file.data = fileData;
+            file.size = fileData.length;
+            file.isValid = true;
+        } else {
+            // Take remaining body if boundary end not found
+            p = contentStart;
+            let bLen = rawBody.length;
+            while (p < bLen) {
+                fileData = fileData + charAt(rawBody, p);
+                p = p + 1;
+            }
+            file.data = fileData;
+            file.size = fileData.length;
+            file.isValid = true;
+        }
+    } else {
+        file.errorMsg = "Invalid multipart payload format";
+    }
+
+    return file;
+}
+
+// 2. File Validation Engine
+struct FileValidationEngine {
+    maxSizeBytes: number,
+    allowedExtensions: string,
+    allowedMimes: string,
+
+    function init(maxSize: number, exts: string, mimes: string): FileValidationEngine {
+        this.maxSizeBytes = maxSize;
+        this.allowedExtensions = exts;
+        this.allowedMimes = mimes;
+        return this;
+    },
+
+    function validate(file: UploadedFile): boolean {
+        if (!file.isValid) { return false; }
+        if (file.size > this.maxSizeBytes) {
+            file.isValid = false;
+            file.errorMsg = "File size exceeds limit (" + file.size + " > " + this.maxSizeBytes + ")";
+            return false;
+        }
+        if (this.allowedMimes.length > 0 && uploadStringIndexOf(this.allowedMimes, file.contentType) < 0) {
+            file.isValid = false;
+            file.errorMsg = "MIME type not allowed: " + file.contentType;
+            return false;
+        }
+        return true;
+    }
+}
+
+function createFileValidator(maxSize: number, exts: string, mimes: string): FileValidationEngine {
+    let validator: FileValidationEngine;
+    validator.init(maxSize, exts, mimes);
+    return validator;
+}
+
+// 3. Disk Storage Handler
+function saveUploadedFile(file: UploadedFile, destPath: string): boolean {
+    if (!file.isValid) { return false; }
+    return writeFile(destPath, file.data);
+}

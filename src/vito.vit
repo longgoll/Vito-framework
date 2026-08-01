@@ -206,6 +206,16 @@ struct Response {
         this.headersStr = this.headersStr + name + ": " + value + "\r\n";
     },
 
+    function setCookie(key: string, value: string, optionsStr: string): void {
+        let cookieHeader = key + "=" + value;
+        if (optionsStr.length > 0) {
+            cookieHeader = cookieHeader + "; " + optionsStr;
+        } else {
+            cookieHeader = cookieHeader + "; Path=/; HttpOnly; SameSite=Lax";
+        }
+        this.setHeader("Set-Cookie", cookieHeader);
+    },
+
     function setStatus(code: number): Response {
         this.status = code;
         this.statusText = "OK";

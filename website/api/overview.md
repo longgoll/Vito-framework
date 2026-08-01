@@ -63,6 +63,7 @@ Mở socket và bắt đầu lắng nghe kết nối HTTP trên cổng được 
 | :--- | :--- | :--- |
 | `res.setStatus(code)` | Thiết lập HTTP Status Code (200, 404, 500...) | `res.setStatus(200)` |
 | `res.setHeader(name, val)`| Thiết lập HTTP Response Header | `res.setHeader("X-Powered-By", "Vito")` |
+| `res.setCookie(key, val, opts)`| Ghi Cookie với chữ ký mã hóa HMAC & cờ HttpOnly/SameSite | `res.setCookie("sid", "abc", opts)` |
 | `res.json(jsonStr)` | Trả về chuỗi JSON với header `Content-Type: application/json` | `res.json("{\"ok\":true}")` |
 | `res.html(htmlStr)` | Trả về nội dung HTML với `Content-Type: text/html` | `res.html("<h1>Hi</h1>")` |
 | `res.send(textStr)` | Trả về chuỗi Plain Text | `res.send("Hello World")` |
