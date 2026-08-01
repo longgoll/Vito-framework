@@ -5,7 +5,24 @@
 *.dylib
 *.wasm
 
-# Build & System
+# Build & System Output
 .vit/
 build/
+dist/
+output.ll
 output.txt
+run_out.txt
+out.txt
+
+# Node.js & VitePress
+node_modules/
+website/node_modules/
+website/.vitepress/dist/
+website/.vitepress/cache/
+
+# OS & Environment
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.local

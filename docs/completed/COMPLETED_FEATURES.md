@@ -15,6 +15,11 @@ vito/
 │   │   └── COMPLETED_FEATURES.md
 │   └── roadmap/                 # Lộ trình phát triển thế hệ tiếp theo (v3.0 Strategic Vision)
 │       └── FUTURE_ROADMAP.md
+├── website/                     # Trang web tài liệu & Landing Page VitePress song ngữ (vi/en)
+│   ├── .vitepress/              # Cấu hình i18n locales, nav, sidebar & theme
+│   ├── public/                  # Logo SVG & assets
+│   ├── index.md & guide/ & api/ # Tài liệu Tiếng Việt (Mặc định)
+│   └── en/                      # Tài liệu Tiếng Anh (English i18n)
 ├── src/                         # Core Web Engine
 │   └── vito.vit                 # HTTP Parser, Dynamic Router, Grouping, DI Container & App Engine
 ├── packages/                    # Hệ sinh thái Official Middleware & Protocol Plugins
@@ -151,5 +156,15 @@ vito/
 
 ---
 
+### 16. 🌐 Official VitePress Landing Page & Dual-Language Website (`website/`)
+- **VitePress SSG Engine Integration**: Tích hợp công cụ đóng gói HTML tĩnh tốc độ cao cho tài liệu framework.
+- **Trình Chuyển Đổi Ngôn Ngữ Song Ngữ (i18n)**: Hỗ trợ 2 phiên bản hoàn chỉnh gồm **Tiếng Việt (`/`)** và **English (`/en/`)** với nút switch ngôn ngữ mượt mà trên Navigation Bar.
+- **Landing Page Quảng Cáo Hiện Đại**: Giao diện Hero section, tagline, nút chuyển hướng nhanh, 6 thẻ tính năng chính và bảng xem trước code mẫu có syntax highlighting.
+- **Bộ Tài Liệu Hướng Dẫn Toàn Diện**: Các trang hướng dẫn chi tiết về Bắt đầu (Getting Started), Định tuyến & Parameters, Hệ thống Middleware, CLI Tooling và API Reference.
+- **Tìm Kiếm Local Search & Theme Toggle**: Tích hợp tìm kiếm full-text nội bộ và chế độ giao diện sáng/tối (Light/Dark Mode).
+
+---
+
 ## 📊 Kết Luận
-Toàn bộ hệ sinh thái **Vito Web Framework** từ Core Engine (HTTP/1.1, HTTP/2, HTTP/3, Native TLS 1.3) đến các gói mở rộng Official Packages (Validation, Security, Swagger UI, SSE, WASM Edge, DB Drivers, Vito ORM & CLI Tools) đã **HOÀN THÀNH 100%** trên nền tảng **VIT Native Compiler Engine**.
+Toàn bộ hệ sinh thái **Vito Web Framework** từ Core Engine (HTTP/1.1, HTTP/2, HTTP/3, Native TLS 1.3) đến các gói mở rộng Official Packages (Validation, Security, Swagger UI, SSE, WASM Edge, DB Drivers, Vito ORM & CLI Tools) và **Trang Web Tài Liệu / Landing Page Song Ngữ (VitePress i18n)** đã **HOÀN THÀNH 100%** trên nền tảng **VIT Native Compiler Engine**.
+
