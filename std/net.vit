@@ -1,6 +1,8 @@
-// VIT Standard Library - Low-level Sockets (std/net.vit)
+// VIT Standard Library - Low-level High-Performance Sockets (std/net.vit)
 
 extern function vit_net_socket_create(): number;
+extern function vit_net_socket_set_nonblocking(fd: number, enable: number): number;
+extern function vit_net_socket_set_reuseport(fd: number, enable: number): number;
 extern function vit_net_socket_bind(fd: number, host: string, port: number): number;
 extern function vit_net_socket_listen(fd: number, backlog: number): number;
 extern function vit_net_socket_accept(fd: number): number;
@@ -45,8 +47,9 @@ struct TcpListener {
 
 function listenTcp(host: string, port: number): TcpListener {
     let fd = vit_net_socket_create();
+    vit_net_socket_set_reuseport(fd, 1);
     vit_net_socket_bind(fd, host, port);
-    vit_net_socket_listen(fd, 128);
+    vit_net_socket_listen(fd, 4096);
     let listener: TcpListener;
     listener.fd = fd;
     return listener;

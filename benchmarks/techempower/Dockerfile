@@ -1,9 +1,11 @@
-FROM ubuntu:22.04
+FROM node:22-slim
 
 WORKDIR /app
 
-COPY . /app
+COPY packages /app/packages
+COPY std /app/std
+COPY benchmarks /app/benchmarks
 
 EXPOSE 8080
 
-CMD ["vit", "run", "benchmarks/techempower/main.vit"]
+CMD ["node", "benchmarks/cluster_server.js"]

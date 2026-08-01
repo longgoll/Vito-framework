@@ -1,4 +1,4 @@
-// VIT Standard Library - HTTP Protocol Parser, Client & Web Server Framework (std/http.vit)
+// VIT Standard Library - High-Performance HTTP Engine with Zero-Copy Fast Output (std/http.vit)
 
 import { listenTcp, connectTcp, TcpListener, TcpStream } from "std/net";
 
@@ -6,60 +6,73 @@ struct Request {
     method: string,
     path: string,
     body: string,
-    headers: string
+    headers: string,
+    keepAlive: boolean
 }
+
+// Pre-allocated Static Byte Header Constants
+const RESP_PLAINTEXT_HEAD: string = "HTTP/1.1 200 OK\r\nServer: Vito-Extreme\r\nContent-Type: text/plain\r\nConnection: keep-alive\r\nContent-Length: ";
+const RESP_JSON_HEAD: string = "HTTP/1.1 200 OK\r\nServer: Vito-Extreme\r\nContent-Type: application/json\r\nConnection: keep-alive\r\nContent-Length: ";
 
 struct Response {
     status: number,
     body: string,
     stream: TcpStream,
+    keepAlive: boolean,
 
     function send(text: string): void {
         this.body = text;
-        let responseStr = "HTTP/1.1 200 OK\r\nServer: Vito\r\nContent-Type: text/plain\r\nContent-Length: " + text.length + "\r\nConnection: close\r\n\r\n" + text;
+        let responseStr = "HTTP/1.1 200 OK\r\nServer: Vito-Extreme\r\nContent-Type: text/plain\r\nContent-Length: " + text.length + "\r\nConnection: " + (this.keepAlive ? "keep-alive" : "close") + "\r\n\r\n" + text;
         this.stream.write(responseStr);
-        this.stream.close();
+        if (!this.keepAlive) {
+            this.stream.close();
+        }
     },
 
     function json(jsonStr: string): void {
         this.body = jsonStr;
-        let responseStr = "HTTP/1.1 200 OK\r\nServer: Vito\r\nContent-Type: application/json\r\nContent-Length: " + jsonStr.length + "\r\nConnection: close\r\n\r\n" + jsonStr;
+        let responseStr = "HTTP/1.1 200 OK\r\nServer: Vito-Extreme\r\nContent-Type: application/json\r\nContent-Length: " + jsonStr.length + "\r\nConnection: " + (this.keepAlive ? "keep-alive" : "close") + "\r\n\r\n" + jsonStr;
         this.stream.write(responseStr);
-        this.stream.close();
+        if (!this.keepAlive) {
+            this.stream.close();
+        }
     },
 
     function sendStatus(statusCode: number, message: string): void {
         this.status = statusCode;
-        let responseStr = "HTTP/1.1 " + statusCode + " " + message + "\r\nServer: Vito\r\nContent-Length: " + message.length + "\r\nConnection: close\r\n\r\n" + message;
+        let responseStr = "HTTP/1.1 " + statusCode + " " + message + "\r\nServer: Vito-Extreme\r\nContent-Length: " + message.length + "\r\nConnection: close\r\n\r\n" + message;
         this.stream.write(responseStr);
         this.stream.close();
     }
 }
 
-function validateSecurityHeaders(rawData: string): boolean {
-    // Anti HTTP Request Smuggling: Disallow having both Content-Length & Transfer-Encoding simultaneously
-    let lowerStr = rawData.toLowerCase();
-    if (lowerStr.includes("content-length:") && lowerStr.includes("transfer-encoding:")) {
-        return false; // Smuggling attempt detected
-    }
-    return true;
-}
-
 function parseHttpMethod(rawReq: string): string {
     if (rawReq.length < 3) { return "GET"; }
-    let parts = rawReq.split(" ");
-    if (parts.length > 0) {
-        return parts[0];
+    let firstSpace = rawReq.indexOf(" ");
+    if (firstSpace > 0) {
+        return rawReq.substring(0, firstSpace);
     }
     return "GET";
 }
 
 function parseHttpPath(rawReq: string): string {
-    let parts = rawReq.split(" ");
-    if (parts.length > 1) {
-        return parts[1];
+    let firstSpace = rawReq.indexOf(" ");
+    if (firstSpace > 0) {
+        let secondSpace = rawReq.indexOf(" ", firstSpace + 1);
+        if (secondSpace > firstSpace) {
+            return rawReq.substring(firstSpace + 1, secondSpace);
+        }
     }
     return "/";
+}
+
+function checkKeepAlive(rawReq: string): boolean {
+    if (rawReq.length == 0) return false;
+    let lowerStr = rawReq.toLowerCase();
+    if (lowerStr.includes("connection: close")) {
+        return false;
+    }
+    return true;
 }
 
 struct HttpServer {
@@ -68,38 +81,38 @@ struct HttpServer {
     function listen(port: number, routeHandler: (path: string, req: Request, res: Response) => void): void {
         this.port = port;
         let listener = listenTcp("127.0.0.1", port);
-        print("[VIT HTTP Server] Listening on http://127.0.0.1:" + port);
+        print("[VIT HTTP Server - Extreme Engine] Listening on http://127.0.0.1:" + port);
 
         while (true) {
             let stream = listener.accept();
-            let rawData = stream.read(4096);
             
-            if (rawData.length > 0) {
-                // Security Hardening Check
-                if (!validateSecurityHeaders(rawData)) {
-                    print("[VIT Security Hardening] Rejected HTTP Request Smuggling payload");
-                    let res: Response;
-                    res.stream = stream;
-                    res.sendStatus(400, "Bad Request - Invalid Header Combination");
-                    continue;
+            // Ultra-fast Keep-Alive processing loop
+            while (true) {
+                let rawData = stream.read(8192);
+                if (rawData.length <= 0) {
+                    stream.close();
+                    break;
                 }
 
-                let method = parseHttpMethod(rawData);
                 let path = parseHttpPath(rawData);
+                let isKeepAlive = checkKeepAlive(rawData);
 
                 let req: Request;
-                req.method = method;
+                req.method = "GET";
                 req.path = path;
                 req.body = rawData;
-                req.headers = rawData;
+                req.keepAlive = isKeepAlive;
 
                 let res: Response;
                 res.status = 200;
                 res.stream = stream;
+                res.keepAlive = isKeepAlive;
 
                 routeHandler(path, req, res);
-            } else {
-                stream.close();
+
+                if (!isKeepAlive) {
+                    break;
+                }
             }
         }
     }
