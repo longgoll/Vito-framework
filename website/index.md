@@ -13,11 +13,14 @@ hero:
       text: Bắt Đầu 🚀
       link: /guide/getting-started
     - theme: alt
+      text: Playground ⚡
+      link: /playground
+    - theme: alt
       text: API Reference 📚
       link: /api/overview
     - theme: alt
       text: Xem trên GitHub 🐙
-      link: https://github.com/vit-lang/vito
+      link: https://github.com/longgoll/Vito-framework
 
 features:
   - icon: ⚡

@@ -15,7 +15,7 @@ if (-not (Test-Path -Path $VitBinDir)) {
 Write-Host "📦 Target Platform: Windows AMD64 (AVX2 Intrinsics)" -ForegroundColor Yellow
 
 $ReleaseTag = "v1.0.0-ultra"
-$DownloadUrl = "https://github.com/vit-lang/vit/releases/download/$ReleaseTag/vit-windows-amd64.zip"
+$DownloadUrl = "https://github.com/longgoll/vit/releases/download/$ReleaseTag/vit-windows-amd64.zip"
 
 Write-Host "📥 Fetching Vit Toolchain..." -ForegroundColor Gray
 

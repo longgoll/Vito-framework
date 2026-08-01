@@ -17,7 +17,7 @@ hero:
       link: /en/api/overview
     - theme: alt
       text: View on GitHub 🐙
-      link: https://github.com/vit-lang/vito
+      link: https://github.com/longgoll/Vito-framework
 
 features:
   - icon: ⚡

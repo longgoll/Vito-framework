@@ -1,99 +1,110 @@
 # Getting Started with Vito 🚀
 
-**Vito** là một Web Framework hiệu năng cao, nhẹ và dễ mở rộng dành cho ngôn ngữ lập trình **VIT**. Framework được thiết kế nhằm mang lại trải nghiệm phát triển (DX) tuyệt vời tương tự như Express / Fastify / Hono trong hệ sinh thái JavaScript/TypeScript, nhưng chạy trực tiếp trên **VIT Native Runtime**.
+**Vito** là một Web Framework hiệu năng cao, nhẹ và dễ mở rộng dành cho ngôn ngữ lập trình **VIT**. Framework được thiết kế nhằm mang lại trải nghiệm phát triển (**Developer Experience - DX**) tuyệt vời, zero-config tương tự như Express / Fastify / Hono trong hệ sinh thái JavaScript/TypeScript, nhưng chạy trực tiếp trên **VIT Native Engine & Runtime**.
 
 ---
 
 ## 🛠 Cài Đặt 1 Dòng Lệnh (1-Line Quick Install)
 
-Cài đặt trọn bộ **Vit Compiler Engine** và **Vito CLI** chỉ với 1 dòng lệnh duy nhất:
+Cài đặt trọn bộ **Vit Compiler Engine** và **Vito CLI** chỉ với 1 dòng lệnh duy nhất (Tự động thiết lập PATH & kiểm tra Toolchain):
 
 ::: code-group
 
-```bash [Linux / macOS]
-curl -fsSL https://vit.dev/install.sh | bash
+```powershell [Windows (PowerShell)]
+iwr -useb https://raw.githubusercontent.com/longgoll/vit/main/install.ps1 | iex
 ```
 
-```powershell [Windows (PowerShell)]
-iwr https://vit.dev/install.ps1 -useb | iex
+```bash [Linux / macOS]
+curl -fsSL https://raw.githubusercontent.com/longgoll/vit/main/install.sh | bash
 ```
 
 :::
 
-### 1. Yêu cầu tiền đề
-- **VIT Compiler Engine**: Đã tích hợp sẵn khi chạy installer.
-- **Hệ điều hành hỗ trợ**: Windows (AMD64 / AVX2), Linux (x86_64 / arm64), macOS (Apple Silicon / Intel).
-
-### 2. Tạo dự án mẫu trong 5 giây
-Sử dụng bộ công cụ `vito CLI` chính thức:
+### 1. Tự Động Kiểm Tra Toolchain (`vit setup`)
+Sau khi cài đặt xong, bạn có thể kiểm tra môi trường bằng lệnh:
 
 ```bash
-vito create my-web-app
-cd my-web-app
+vit setup
 ```
 
+Hệ thống sẽ tự động xác minh đường dẫn `PATH` và kiểm tra bộ trình biên dịch `Clang/LLVM` đi kèm.
 
 ---
 
-## ⚡ Tạo Ứng Dụng HTTP Server Đầu Tiên
+## ⚡ Khởi Tạo Dự Án Mẫu Siêu Tốc (`vit init`)
 
-Tạo file `main.vit` với nội dung sau:
+Chỉ với 1 lệnh đơn giản, `vit` sẽ tự động tạo thư mục dự án với cấu hình chuẩn và file `main.vit`:
 
-```javascript
-import { createApp, Request, Response } from "vito/src/vito.vit";
+```bash
+vit init my-web-app
+cd my-web-app
+```
+
+Cấu trúc dự án được khởi tạo bao gồm:
+```text
+my-web-app/
+├── vit.json          # File cấu hình thông tin dự án
+└── src/
+    └── main.vit      # Entrypoint chính chứa ứng dụng Web Vito
+```
+
+---
+
+## 💻 Viết Ứng Dụng Web API Đầu Tiên (`main.vit`)
+
+Mở file `src/main.vit` và nhập mã nguồn:
+
+```typescript
+import { Vito, Request, Response } from "vito";
 
 function main(): number {
-    // 1. Khởi tạo Vito App Engine
-    let app = createApp();
+    // 1. Khởi tạo Vito Web App Engine
+    let app = Vito.new();
 
-    // 2. Định nghĩa Route GET đơn giản
+    // 2. Route GET HTML
     app.get("/", (req: Request, res: Response) => {
         res.html("<h1>Welcome to Vito Web Framework! 🚀</h1>");
     });
 
-    // 3. Phản hồi JSON API
+    // 3. Route GET JSON API
     app.get("/api/health", (req: Request, res: Response) => {
-        res.json("{\"status\":\"UP\", \"uptime\":\"ok\"}");
+        res.json({ status: "UP", engine: "Vit Native", uptime: "ok" });
     });
 
-    // 4. Lắng nghe cổng 8888
-    app.listen(8888);
+    // 4. Lắng nghe cổng 3000
+    app.listen(3000);
+    print("⚡ Vito Server running at http://localhost:3000");
     return 0;
 }
 ```
 
 ---
 
-## 🚀 Chạy Ứng Dụng
+## 🚀 Chạy Ứng Dụng Với Live-Reload (`vit dev`)
 
-Sử dụng `vit CLI` để khởi chạy ứng dụng ở chế độ phát triển với **Hot Module Reloading (HMR)**:
+Khởi chạy ứng dụng ở chế độ phát triển với công cụ **Live-Reloading & File Watcher**:
 
 ```bash
 vit dev
 ```
 
-Truy cập trình duyệt tại địa chỉ: `http://localhost:8888` để xem kết quả! 🎉
+> 💡 **Tính năng Live-Reload**: Khi bạn chỉnh sửa bất kỳ file `.vit` hoặc `.json` nào trong thư mục `src/`, `vit dev` sẽ tự động biên dịch và khởi động lại server tức thì trong vài millisecond!
+
+Mở trình duyệt tại địa chỉ `http://localhost:3000` để trải nghiệm kết quả! 🎉
 
 ---
 
-## 🏗 Kiến Trúc Dự Án (Monorepo)
+## 🧩 Tích Hợp VS Code Extension & Intellisense
 
-Cấu trúc dự án Vito chuẩn được tổ chức như sau:
+Để có trải nghiệm lập trình tốt nhất với **Autocomplete**, **Syntax Highlighting** và **Code Snippets**:
 
-```text
-vito/
-├── vit.json            # Cấu hình Package Vito
-├── src/                # Core HTTP Server Engine & Parser
-│   └── vito.vit
-├── packages/           # Official Middlewares & Official Extensions
-│   ├── cors/           # Middleware xử lý CORS
-│   ├── logger/         # Request Logger
-│   ├── static/         # Phục vụ File Tĩnh
-│   ├── validation/     # Schema Validator (HTTP 422)
-│   ├── security/       # Rate Limiting & Auth Guard
-│   ├── swagger/        # Swagger UI & OpenAPI Docs Generator
-│   ├── sse/            # Server-Sent Events cho AI/LLM Stream
-│   ├── db/ & orm/      # Native DB Drivers & Vito ORM
-│   └── edge/           # Cloud Edge Runtime WASM Adapter
-└── examples/           # Các ứng dụng mẫu thực tế
-```
+1. Tải về extension **[vscode-vit](https://github.com/longgoll/vit/tree/main/editors/vscode-vit)**.
+2. Mở file `.vit` trong VS Code.
+3. Gõ `vito-server` hoặc `vito-get` và nhấn `Tab` để tự động sinh khung code mẫu!
+4. Extension sẽ tự động kết nối với `vit-lsp` để hiển thị lỗi và gợi ý hàm thời gian thực.
+
+---
+
+## ⚡ Thử Nghiệm Ngay Trên Web (Zero-Install Playground)
+
+Nếu bạn chưa muốn cài đặt vào máy, hãy truy cập ngay **[Interactive Playground](/playground)** trên trang web này để viết và chạy thử code Vito trực tiếp bằng bộ máy WebAssembly (WASI) trong 0 giây!

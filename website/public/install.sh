@@ -31,7 +31,7 @@ mkdir -p "${VIT_BIN_DIR}"
 
 # Download latest prebuilt binaries (Fallback to local release tag)
 RELEASE_TAG="v1.0.0-ultra"
-DOWNLOAD_URL="https://github.com/vit-lang/vit/releases/download/${RELEASE_TAG}/vit-${PLATFORM}-${CPU_ARCH}.tar.gz"
+DOWNLOAD_URL="https://github.com/longgoll/vit/releases/download/${RELEASE_TAG}/vit-${PLATFORM}-${CPU_ARCH}.tar.gz"
 
 echo "📥 Fetching Vit Toolchain from GitHub Releases..."
 # For demonstration/offline bootstrap, create executable stubs if network fails

@@ -73,7 +73,7 @@ In matrix multiplication ($500 \times 500$), Vit leverages `_mm256_fmadd_pd` acr
 Run the open-source suite locally:
 
 ```bash
-git clone https://github.com/vit-lang/vito.git
+git clone https://github.com/longgoll/Vito-framework.git
 cd vito/benchmarks/public_suite
 python run_benchmarks.py
 ```

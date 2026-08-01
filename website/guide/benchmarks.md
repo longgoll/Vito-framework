@@ -73,7 +73,7 @@ Trong thuật toán nhân ma trận ma quỷ $500 \times 500$, Vit sử dụng l
 Cộng đồng có thể tự kiểm chứng tất cả các con số trên bằng bộ mã nguồn mở công khai:
 
 ```bash
-git clone https://github.com/vit-lang/vito.git
+git clone https://github.com/longgoll/Vito-framework.git
 cd vito/benchmarks/public_suite
 python run_benchmarks.py
 ```

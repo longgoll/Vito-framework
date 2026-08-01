@@ -16,6 +16,7 @@ export default defineConfig({
         logo: '/logo.svg',
         nav: [
           { text: 'Trang chủ', link: '/' },
+          { text: 'Playground ⚡', link: '/playground' },
           { text: 'Hướng dẫn', link: '/guide/getting-started' },
           { text: 'Benchmark 🏆', link: '/guide/benchmarks' },
           { text: 'Routing', link: '/guide/routing' },
