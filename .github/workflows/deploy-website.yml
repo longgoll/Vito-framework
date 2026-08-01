@@ -32,12 +32,12 @@ jobs:
           node-version: 20
 
       - name: Setup Pages
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v5
 
       - name: Install dependencies
         run: |
           cd website
-          npm ci || npm install
+          npm install
 
       - name: Build website
         run: |
@@ -47,7 +47,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: website/.vitepress/dist
+          path: ./website/.vitepress/dist
 
       - name: Deploy to GitHub Pages
         id: deployment
