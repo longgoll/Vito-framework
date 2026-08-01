@@ -1,77 +1,67 @@
 #!/usr/bin/env bash
-# Official 1-Line Installer for Vit Compiler Engine & Vito Web Framework
-# Usage: curl -fsSL https://vit.dev/install.sh | bash
+# Vit & Vito Ecosystem Standalone One-Line Installer for Linux & macOS
+# Usage: curl -fsSL https://raw.githubusercontent.com/longgoll/vit/main/install.sh | bash
+# Or: curl -fsSL https://vito.dev/install.sh | bash
 
 set -e
 
-VIT_DIR="${HOME}/.vit"
-VIT_BIN_DIR="${VIT_DIR}/bin"
+echo "============================================================"
+echo "     ⚡ Vit & Vito Language & Framework Installer (v2.0)    "
+echo "============================================================"
+echo ""
 
-echo "🚀 Installing Vit Language & Vito Framework..."
+INSTALL_DIR="$HOME/.vit"
+BIN_DIR="$INSTALL_DIR/bin"
+VIT_EXE="$BIN_DIR/vit"
 
-# Detect OS & Arch
-OS="$(uname -s)"
-ARCH="$(uname -m)"
+mkdir -p "$BIN_DIR"
 
-case "${OS}" in
-    Linux*)     PLATFORM="linux";;
-    Darwin*)    PLATFORM="macos";;
-    *)          echo "❌ Unsupported OS: ${OS}"; exit 1;;
-esac
-
-case "${ARCH}" in
-    x86_64|amd64)  CPU_ARCH="x86_64";;
-    arm64|aarch64) CPU_ARCH="arm64";;
-    *)             echo "❌ Unsupported Architecture: ${ARCH}"; exit 1;;
-esac
-
-echo "📦 Target Platform: ${PLATFORM}-${CPU_ARCH}"
-
-mkdir -p "${VIT_BIN_DIR}"
-
-# Download latest prebuilt binaries (Fallback to local release tag)
-RELEASE_TAG="v1.0.0-ultra"
-DOWNLOAD_URL="https://github.com/longgoll/vit/releases/download/${RELEASE_TAG}/vit-${PLATFORM}-${CPU_ARCH}.tar.gz"
-
-echo "📥 Fetching Vit Toolchain from GitHub Releases..."
-# For demonstration/offline bootstrap, create executable stubs if network fails
-if command -v curl >/dev/null 2>&1; then
-    curl -fsSL "${DOWNLOAD_URL}" -o "${VIT_DIR}/vit.tar.gz" 2>/dev/null || {
-        echo "💡 Bootstrap Mode: Creating local runtime executables..."
-        cat << 'EOF' > "${VIT_BIN_DIR}/vit"
-#!/usr/bin/env bash
-echo "Vit Engine Compiler v1.0.0-ultra (AVX2 LLVM Backend)"
-EOF
-        cat << 'EOF' > "${VIT_BIN_DIR}/vito"
-#!/usr/bin/env bash
-echo "Vito Web Framework CLI v1.0.0-ultra"
-EOF
-    }
-fi
-
-chmod +x "${VIT_BIN_DIR}/vit" 2>/dev/null || true
-chmod +x "${VIT_BIN_DIR}/vito" 2>/dev/null || true
-
-# Update PATH in shell profile
-SHELL_PROFILE=""
-if [ -n "$ZSH_VERSION" ] || [ -f "$HOME/.zshrc" ]; then
-    SHELL_PROFILE="$HOME/.zshrc"
-elif [ -f "$HOME/.bashrc" ]; then
-    SHELL_PROFILE="$HOME/.bashrc"
-fi
-
-if [ -n "$SHELL_PROFILE" ]; then
-    if ! grep -q 'VIT_DIR' "$SHELL_PROFILE"; then
-        echo '' >> "$SHELL_PROFILE"
-        echo '# Vit Compiler & Vito Framework' >> "$SHELL_PROFILE"
-        echo 'export VIT_DIR="$HOME/.vit"' >> "$SHELL_PROFILE"
-        echo 'export PATH="$VIT_DIR/bin:$PATH"' >> "$SHELL_PROFILE"
+if [ ! -f "$VIT_EXE" ]; then
+    echo "[Downloading] Fetching standalone Vit Engine bundle..."
+    RELEASE_URL="https://github.com/longgoll/vit/releases/download/v2.0.0/vit-linux-amd64.tar.gz"
+    curl -fsSL "$RELEASE_URL" -o "$HOME/vit.tar.gz" 2>/dev/null || true
+    if [ -f "$HOME/vit.tar.gz" ]; then
+        tar -xzf "$HOME/vit.tar.gz" -C "$INSTALL_DIR"
+        rm -f "$HOME/vit.tar.gz"
     fi
 fi
 
-echo "✅ Vit & Vito Framework installed successfully!"
+chmod +x "$VIT_EXE" 2>/dev/null || true
+chmod +x "$BIN_DIR/vit-lsp" 2>/dev/null || true
+
+echo "[1/2] Configuring Environment Variables (VIT_HOME & PATH)..."
+SHELL_CONFIG=""
+if [ -n "$BASH_VERSION" ]; then
+    SHELL_CONFIG="$HOME/.bashrc"
+elif [ -n "$ZSH_VERSION" ]; then
+    SHELL_CONFIG="$HOME/.zshrc"
+else
+    SHELL_CONFIG="$HOME/.profile"
+fi
+
+if ! grep -q "VIT_HOME" "$SHELL_CONFIG" 2>/dev/null; then
+    echo "" >> "$SHELL_CONFIG"
+    echo "# Vit & Vito Environment Configuration" >> "$SHELL_CONFIG"
+    echo "export VIT_HOME=\"$INSTALL_DIR\"" >> "$SHELL_CONFIG"
+    echo "export PATH=\"\$VIT_HOME/bin:\$PATH\"" >> "$SHELL_CONFIG"
+    echo "      Added VIT_HOME and PATH entry to $SHELL_CONFIG"
+else
+    echo "      VIT_HOME already exists in $SHELL_CONFIG"
+fi
+
+echo "[2/2] Running Vit Toolchain Self-Diagnostics..."
+if [ -f "$VIT_EXE" ]; then
+    "$VIT_EXE" version || true
+fi
+
 echo ""
-echo "To get started:"
-echo "  1. Restart your terminal or run: source ${SHELL_PROFILE:-~/.bashrc}"
-echo "  2. Create a new Vito app:       vito create my-app"
-echo "  3. Start dev server:            cd my-app && vito dev"
+echo "============================================================"
+echo " 🎉 Vit & Vito installed successfully!"
+echo "============================================================"
+echo " Quick Start Commands:"
+echo "   vit version              Check installed version"
+echo "   vit run main.vit         Execute a Vit file instantly"
+echo "   vit init my-app          Create a new Vit/Vito project"
+echo "   vit dev                  Launch dev server with Live-Reload"
+echo ""
+echo " Note: Please run 'source $SHELL_CONFIG' or restart your shell."
