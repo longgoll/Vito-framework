@@ -1,0 +1,31 @@
+{
+  "framework": "vito",
+  "tests": [
+    {
+      "name": "vito-plaintext",
+      "plaintext_url": "/plaintext",
+      "port": 8080,
+      "approach": "Realistic",
+      "classification": "Fullstack",
+      "database": "None",
+      "orm": "Raw",
+      "os": "Linux",
+      "programming_language": "Vito",
+      "webserver": "None",
+      "versus": "vito"
+    },
+    {
+      "name": "vito-json",
+      "json_url": "/json",
+      "port": 8080,
+      "approach": "Realistic",
+      "classification": "Fullstack",
+      "database": "None",
+      "orm": "Raw",
+      "os": "Linux",
+      "programming_language": "Vito",
+      "webserver": "None",
+      "versus": "vito"
+    }
+  ]
+}

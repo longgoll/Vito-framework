@@ -1,0 +1,27 @@
+// TechEmpower Benchmark Implementation in Vito
+import { HttpServer, Request, Response } from "std/http";
+
+function main(): void {
+    let server: HttpServer;
+    print("[TechEmpower Benchmark] Starting Vito server on port 8080...");
+
+    server.listen(8080, (path: string, req: Request, res: Response) => {
+        if (path == "/plaintext") {
+            res.send("Hello, World!");
+        } else if (path == "/json") {
+            res.json("{\"message\":\"Hello, World!\"}");
+        } else if (path == "/db") {
+            res.json("{\"id\":1,\"randomNumber\":42}");
+        } else if (path == "/queries") {
+            res.json("[{\"id\":1,\"randomNumber\":42},{\"id\":2,\"randomNumber\":99}]");
+        } else if (path == "/fortunes") {
+            res.send("<!DOCTYPE html><html><head><title>Fortunes</title></head><body><table><tr><th>id</th><th>message</th></tr><tr><td>1</td><td>Fortune message</td></tr></table></body></html>");
+        } else if (path == "/updates") {
+            res.json("[{\"id\":1,\"randomNumber\":123}]");
+        } else {
+            res.sendStatus(404, "Not Found");
+        }
+    });
+}
+
+main();

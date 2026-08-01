@@ -5,7 +5,8 @@ import { listenTcp, connectTcp, TcpListener, TcpStream } from "std/net";
 struct Request {
     method: string,
     path: string,
-    body: string
+    body: string,
+    headers: string
 }
 
 struct Response {
@@ -15,25 +16,49 @@ struct Response {
 
     function send(text: string): void {
         this.body = text;
-        let responseStr = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + text.length + "\r\nConnection: close\r\n\r\n" + text;
+        let responseStr = "HTTP/1.1 200 OK\r\nServer: Vito\r\nContent-Type: text/plain\r\nContent-Length: " + text.length + "\r\nConnection: close\r\n\r\n" + text;
         this.stream.write(responseStr);
         this.stream.close();
     },
 
     function json(jsonStr: string): void {
         this.body = jsonStr;
-        let responseStr = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " + jsonStr.length + "\r\nConnection: close\r\n\r\n" + jsonStr;
+        let responseStr = "HTTP/1.1 200 OK\r\nServer: Vito\r\nContent-Type: application/json\r\nContent-Length: " + jsonStr.length + "\r\nConnection: close\r\n\r\n" + jsonStr;
+        this.stream.write(responseStr);
+        this.stream.close();
+    },
+
+    function sendStatus(statusCode: number, message: string): void {
+        this.status = statusCode;
+        let responseStr = "HTTP/1.1 " + statusCode + " " + message + "\r\nServer: Vito\r\nContent-Length: " + message.length + "\r\nConnection: close\r\n\r\n" + message;
         this.stream.write(responseStr);
         this.stream.close();
     }
 }
 
+function validateSecurityHeaders(rawData: string): boolean {
+    // Anti HTTP Request Smuggling: Disallow having both Content-Length & Transfer-Encoding simultaneously
+    let lowerStr = rawData.toLowerCase();
+    if (lowerStr.includes("content-length:") && lowerStr.includes("transfer-encoding:")) {
+        return false; // Smuggling attempt detected
+    }
+    return true;
+}
+
 function parseHttpMethod(rawReq: string): string {
     if (rawReq.length < 3) { return "GET"; }
+    let parts = rawReq.split(" ");
+    if (parts.length > 0) {
+        return parts[0];
+    }
     return "GET";
 }
 
 function parseHttpPath(rawReq: string): string {
+    let parts = rawReq.split(" ");
+    if (parts.length > 1) {
+        return parts[1];
+    }
     return "/";
 }
 
@@ -48,7 +73,17 @@ struct HttpServer {
         while (true) {
             let stream = listener.accept();
             let rawData = stream.read(4096);
+            
             if (rawData.length > 0) {
+                // Security Hardening Check
+                if (!validateSecurityHeaders(rawData)) {
+                    print("[VIT Security Hardening] Rejected HTTP Request Smuggling payload");
+                    let res: Response;
+                    res.stream = stream;
+                    res.sendStatus(400, "Bad Request - Invalid Header Combination");
+                    continue;
+                }
+
                 let method = parseHttpMethod(rawData);
                 let path = parseHttpPath(rawData);
 
@@ -56,6 +91,7 @@ struct HttpServer {
                 req.method = method;
                 req.path = path;
                 req.body = rawData;
+                req.headers = rawData;
 
                 let res: Response;
                 res.status = 200;
