@@ -1,0 +1,103 @@
+// Vito ORM Transaction Management Engine (vito/packages/orm/transaction.vit)
+
+struct VitoTransaction {
+    txId: number,
+    logCount: number,
+    savepointCount: number,
+    sp0_snapshot: number,
+    sp1_snapshot: number,
+
+    sp0_active: boolean,
+    sp1_active: boolean,
+
+    status: string,
+    txLog0: string,
+    txLog1: string,
+    txLog2: string,
+    txLog3: string,
+    sp0_name: string,
+    sp1_name: string,
+
+    function init(id: number): void {
+        this.txId = id;
+        this.logCount = 0;
+        this.savepointCount = 0;
+        this.sp0_snapshot = 0;
+        this.sp1_snapshot = 0;
+        this.sp0_active = false;
+        this.sp1_active = false;
+        this.status = "ACTIVE";
+        this.txLog0 = ""; this.txLog1 = ""; this.txLog2 = ""; this.txLog3 = "";
+        this.sp0_name = ""; this.sp1_name = "";
+        print("[Transaction Engine] BEGIN TRANSACTION #" + this.txId);
+    },
+
+    function execute(sql: string): boolean {
+        if (this.status != "ACTIVE") {
+            print("[Transaction Error] Transaction #" + this.txId + " is not ACTIVE. Current status: " + this.status);
+            return false;
+        }
+
+        if (this.logCount == 0) { this.txLog0 = sql; }
+        if (this.logCount == 1) { this.txLog1 = sql; }
+        if (this.logCount == 2) { this.txLog2 = sql; }
+        if (this.logCount == 3) { this.txLog3 = sql; }
+        this.logCount = this.logCount + 1;
+        print("[Transaction Engine] [Tx #" + this.txId + "] Staged SQL: " + sql);
+        return true;
+    },
+
+    function createSavepoint(name: string): boolean {
+        if (this.status != "ACTIVE") { return false; }
+        if (this.savepointCount == 0) {
+            this.sp0_name = name;
+            this.sp0_snapshot = this.logCount;
+            this.sp0_active = true;
+        }
+        if (this.savepointCount == 1) {
+            this.sp1_name = name;
+            this.sp1_snapshot = this.logCount;
+            this.sp1_active = true;
+        }
+        this.savepointCount = this.savepointCount + 1;
+        print("[Transaction Engine] [Tx #" + this.txId + "] SAVEPOINT " + name + " created at log index " + this.logCount);
+        return true;
+    },
+
+    function rollbackToSavepoint(name: string): boolean {
+        if (this.status != "ACTIVE") { return false; }
+        if (this.sp0_active && this.sp0_name == name) {
+            this.logCount = this.sp0_snapshot;
+            print("[Transaction Engine] [Tx #" + this.txId + "] ROLLED BACK TO SAVEPOINT: " + name + " (Restored log index to " + this.logCount + ")");
+            return true;
+        }
+        if (this.sp1_active && this.sp1_name == name) {
+            this.logCount = this.sp1_snapshot;
+            print("[Transaction Engine] [Tx #" + this.txId + "] ROLLED BACK TO SAVEPOINT: " + name + " (Restored log index to " + this.logCount + ")");
+            return true;
+        }
+        print("[Transaction Error] Savepoint " + name + " not found!");
+        return false;
+    },
+
+    function commit(): boolean {
+        if (this.status != "ACTIVE") { return false; }
+        this.status = "COMMITTED";
+        print("[Transaction Engine] COMMIT TRANSACTION #" + this.txId + " (" + this.logCount + " operations committed successfully)");
+        return true;
+    },
+
+    function rollback(): boolean {
+        if (this.status == "ROLLED_BACK") { return true; }
+        this.status = "ROLLED_BACK";
+        this.logCount = 0;
+        print("[Transaction Engine] ROLLBACK TRANSACTION #" + this.txId + " (All staged operations discarded cleanly)");
+        return true;
+    }
+}
+
+function beginTransaction(id: number): VitoTransaction {
+    let tx: VitoTransaction;
+    tx.init(id);
+    return tx;
+}

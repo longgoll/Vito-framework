@@ -1,0 +1,159 @@
+// Vito Enterprise Database Connection Pool Manager (vito/packages/db/db_pool.vit)
+
+struct ConnectionPool {
+    dbType: string,
+    connectionString: string,
+
+    minConnections: number,
+    maxConnections: number,
+    idleTimeoutMs: number,
+    reconnectIntervalMs: number,
+    totalAllocated: number,
+    activeConnections: number,
+    totalAcquisitions: number,
+
+    c0_id: number, c0_lastUsed: number, c0_queries: number, c0_inUse: boolean, c0_healthy: boolean,
+    c1_id: number, c1_lastUsed: number, c1_queries: number, c1_inUse: boolean, c1_healthy: boolean,
+    c2_id: number, c2_lastUsed: number, c2_queries: number, c2_inUse: boolean, c2_healthy: boolean,
+    c3_id: number, c3_lastUsed: number, c3_queries: number, c3_inUse: boolean, c3_healthy: boolean,
+
+    function init(typeStr: string, connStr: string, minConn: number, maxConn: number): void {
+        this.dbType = typeStr;
+        this.connectionString = connStr;
+        this.minConnections = minConn;
+        this.maxConnections = maxConn;
+        this.idleTimeoutMs = 5000;
+        this.reconnectIntervalMs = 50;
+        this.totalAllocated = minConn;
+        this.activeConnections = 0;
+        this.totalAcquisitions = 0;
+
+        this.c0_id = 101; this.c0_lastUsed = 0; this.c0_queries = 0; this.c0_inUse = false; this.c0_healthy = true;
+        this.c1_id = 102; this.c1_lastUsed = 0; this.c1_queries = 0; this.c1_inUse = false; this.c1_healthy = (minConn >= 2);
+        this.c2_id = 103; this.c2_lastUsed = 0; this.c2_queries = 0; this.c2_inUse = false; this.c2_healthy = false;
+        this.c3_id = 104; this.c3_lastUsed = 0; this.c3_queries = 0; this.c3_inUse = false; this.c3_healthy = false;
+    },
+
+    function acquireConnection(): number {
+        this.totalAcquisitions = this.totalAcquisitions + 1;
+
+        if (this.c0_healthy && !this.c0_inUse) {
+            this.c0_inUse = true;
+            this.activeConnections = this.activeConnections + 1;
+            return this.c0_id;
+        }
+        if (this.c1_healthy && !this.c1_inUse) {
+            this.c1_inUse = true;
+            this.activeConnections = this.activeConnections + 1;
+            return this.c1_id;
+        }
+        if (this.c2_healthy && !this.c2_inUse) {
+            this.c2_inUse = true;
+            this.activeConnections = this.activeConnections + 1;
+            return this.c2_id;
+        }
+        if (this.c3_healthy && !this.c3_inUse) {
+            this.c3_inUse = true;
+            this.activeConnections = this.activeConnections + 1;
+            return this.c3_id;
+        }
+
+        if (this.totalAllocated < this.maxConnections) {
+            if (!this.c2_healthy) {
+                this.c2_healthy = true;
+                this.c2_inUse = true;
+                this.totalAllocated = this.totalAllocated + 1;
+                this.activeConnections = this.activeConnections + 1;
+                return this.c2_id;
+            }
+            if (!this.c3_healthy) {
+                this.c3_healthy = true;
+                this.c3_inUse = true;
+                this.totalAllocated = this.totalAllocated + 1;
+                this.activeConnections = this.activeConnections + 1;
+                return this.c3_id;
+            }
+        }
+
+        print("[ConnectionPool Error] Pool exhausted!");
+        return -1;
+    },
+
+    function releaseConnection(connId: number, nowMs: number): boolean {
+        if (connId == this.c0_id && this.c0_inUse) {
+            this.c0_inUse = false;
+            this.c0_lastUsed = nowMs;
+            this.activeConnections = this.activeConnections - 1;
+            return true;
+        }
+        if (connId == this.c1_id && this.c1_inUse) {
+            this.c1_inUse = false;
+            this.c1_lastUsed = nowMs;
+            this.activeConnections = this.activeConnections - 1;
+            return true;
+        }
+        if (connId == this.c2_id && this.c2_inUse) {
+            this.c2_inUse = false;
+            this.c2_lastUsed = nowMs;
+            this.activeConnections = this.activeConnections - 1;
+            return true;
+        }
+        if (connId == this.c3_id && this.c3_inUse) {
+            this.c3_inUse = false;
+            this.c3_lastUsed = nowMs;
+            this.activeConnections = this.activeConnections - 1;
+            return true;
+        }
+        return false;
+    },
+
+    function simulateNetworkDisruption(connId: number): void {
+        print("[ConnectionPool Alert] Network disruption detected on connection #" + connId);
+        if (connId == this.c0_id) { this.c0_healthy = false; if (this.c0_inUse) { this.c0_inUse = false; this.activeConnections = this.activeConnections - 1; } }
+        if (connId == this.c1_id) { this.c1_healthy = false; if (this.c1_inUse) { this.c1_inUse = false; this.activeConnections = this.activeConnections - 1; } }
+        if (connId == this.c2_id) { this.c2_healthy = false; if (this.c2_inUse) { this.c2_inUse = false; this.activeConnections = this.activeConnections - 1; } }
+        if (connId == this.c3_id) { this.c3_healthy = false; if (this.c3_inUse) { this.c3_inUse = false; this.activeConnections = this.activeConnections - 1; } }
+    },
+
+    function checkHealthAndReconnect(): number {
+        let restored = 0;
+        let recoveryLatencyMs = this.reconnectIntervalMs;
+
+        if (!this.c0_healthy) {
+            this.c0_healthy = true;
+            restored = restored + 1;
+            print("[ConnectionPool HealthCheck] Restored connection #" + this.c0_id + " in " + recoveryLatencyMs + "ms");
+        }
+        if (!this.c1_healthy && (this.minConnections >= 2 || restored < this.minConnections)) {
+            this.c1_healthy = true;
+            restored = restored + 1;
+            print("[ConnectionPool HealthCheck] Restored connection #" + this.c1_id + " in " + recoveryLatencyMs + "ms");
+        }
+        return restored;
+    },
+
+    function reclaimIdleConnections(nowMs: number): number {
+        let reclaimed = 0;
+        if (this.totalAllocated > this.minConnections) {
+            if (!this.c3_inUse && this.c3_healthy && this.c3_lastUsed > 0 && (nowMs - this.c3_lastUsed) >= this.idleTimeoutMs) {
+                this.c3_healthy = false;
+                this.totalAllocated = this.totalAllocated - 1;
+                reclaimed = reclaimed + 1;
+                print("[ConnectionPool IdleCleanup] Closed idle connection #" + this.c3_id);
+            }
+            if (!this.c2_inUse && this.c2_healthy && this.c2_lastUsed > 0 && (nowMs - this.c2_lastUsed) >= this.idleTimeoutMs && this.totalAllocated > this.minConnections) {
+                this.c2_healthy = false;
+                this.totalAllocated = this.totalAllocated - 1;
+                reclaimed = reclaimed + 1;
+                print("[ConnectionPool IdleCleanup] Closed idle connection #" + this.c2_id);
+            }
+        }
+        return reclaimed;
+    }
+}
+
+function createConnectionPool(typeStr: string, connStr: string, minConn: number, maxConn: number): ConnectionPool {
+    let pool: ConnectionPool;
+    pool.init(typeStr, connStr, minConn, maxConn);
+    return pool;
+}

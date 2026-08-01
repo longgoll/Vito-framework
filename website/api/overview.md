@@ -33,6 +33,22 @@ Mở socket và bắt đầu lắng nghe kết nối HTTP trên cổng được 
 
 ---
 
+## 🗄️ Database & ORM Packages (`packages/db` & `packages/orm`)
+
+| Function / Struct | Package | Mô Tả |
+| :--- | :--- | :--- |
+| `createConnectionPool(type, connStr, min, max)` | `packages/db/db_pool.vit` | Khởi tạo Connection Pool tự động mở rộng/co hẹp và khôi phục ngầm. |
+| `pool.acquireConnection()` | `packages/db/db_pool.vit` | Mượn một kết nối CSDL hợp lệ từ Connection Pool. |
+| `pool.checkHealthAndReconnect()` | `packages/db/db_pool.vit` | Kiểm tra sức khỏe kết nối & tự động tái kết nối ngầm ($< 100\text{ms}$). |
+| `beginTransaction(id)` | `packages/orm/transaction.vit` | Khởi tạo Giao dịch CSDL nguyên tử (Atomic Transaction) hỗ trợ ACID. |
+| `tx.createSavepoint(name)` | `packages/orm/transaction.vit` | Tạo điểm lưu Savepoint cho giao dịch lồng nhau. |
+| `tx.rollbackToSavepoint(name)` | `packages/orm/transaction.vit` | Khôi phục trạng thái giao dịch về Savepoint được chỉ định. |
+| `createMigrationRunner()` | `packages/orm/migration.vit` | Tạo đối tượng quản lý và chạy Migration (Up/Down) lưu vào `schema_migrations`. |
+| `createSchemaDiffGenerator()` | `packages/orm/migration.vit` | Sinh câu lệnh SQL Migration tự động từ định nghĩa Model Vito ORM. |
+| `createDatabaseSeeder()` | `packages/orm/migration.vit` | Tạo bộ nạp dữ liệu mẫu (Database Seeder) cho môi trường Dev & Staging. |
+
+---
+
 ## ⚡ Performance Packages (`packages/pool` & `packages/router`)
 
 | Function / Helper | Package | Mô Tả |

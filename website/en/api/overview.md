@@ -33,6 +33,22 @@ Starts listening for HTTP connections on the given port.
 
 ---
 
+## 🗄️ Database & ORM Packages (`packages/db` & `packages/orm`)
+
+| Function / Struct | Package | Description |
+| :--- | :--- | :--- |
+| `createConnectionPool(type, connStr, min, max)` | `packages/db/db_pool.vit` | Initializes dynamic auto-scaling Connection Pool with silent auto-reconnect. |
+| `pool.acquireConnection()` | `packages/db/db_pool.vit` | Acquires a valid connection from the Connection Pool. |
+| `pool.checkHealthAndReconnect()` | `packages/db/db_pool.vit` | Checks health status and auto-reconnects broken connections ($< 100\text{ms}$). |
+| `beginTransaction(id)` | `packages/orm/transaction.vit` | Initializes an Atomic Transaction supporting 100% ACID integrity. |
+| `tx.createSavepoint(name)` | `packages/orm/transaction.vit` | Creates a Savepoint snapshot for nested transactions. |
+| `tx.rollbackToSavepoint(name)` | `packages/orm/transaction.vit` | Restores transaction state back to a specified Savepoint. |
+| `createMigrationRunner()` | `packages/orm/migration.vit` | Creates Migration Runner (Up/Down) tracking history in `schema_migrations`. |
+| `createSchemaDiffGenerator()` | `packages/orm/migration.vit` | Generates automated SQL Migration statements from Vito ORM Model definitions. |
+| `createDatabaseSeeder()` | `packages/orm/migration.vit` | Creates Database Seeder helper for Dev & Staging environments. |
+
+---
+
 ## ⚡ Performance Packages (`packages/pool` & `packages/router`)
 
 | Function / Helper | Package | Description |

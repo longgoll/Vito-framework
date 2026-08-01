@@ -19,6 +19,7 @@ export default defineConfig({
           { text: 'Hướng dẫn', link: '/guide/getting-started' },
           { text: 'Routing', link: '/guide/routing' },
           { text: 'Middleware', link: '/guide/middleware' },
+          { text: 'CSDL & ORM', link: '/guide/database-orm' },
           { text: 'CLI', link: '/guide/cli' },
           { text: 'API Reference', link: '/api/overview' }
         ],
@@ -29,6 +30,7 @@ export default defineConfig({
               { text: 'Bắt Đầu', link: '/guide/getting-started' },
               { text: 'Định Tuyến & Parameters', link: '/guide/routing' },
               { text: 'Hệ Thống Middleware', link: '/guide/middleware' },
+              { text: 'Quản Lý CSDL & Vito ORM', link: '/guide/database-orm' },
               { text: 'CLI & Công Cụ Phát Triển', link: '/guide/cli' }
             ]
           },
@@ -36,6 +38,7 @@ export default defineConfig({
             text: '📦 Hệ Sinh Thái',
             items: [
               { text: 'Tổng Quan Middleware', link: '/guide/middleware' },
+              { text: 'Database Pool & Vito ORM', link: '/guide/database-orm' },
               { text: 'Tra Cứu API Reference', link: '/api/overview' }
             ]
           }
@@ -55,6 +58,7 @@ export default defineConfig({
           { text: 'Guide', link: '/en/guide/getting-started' },
           { text: 'Routing', link: '/en/guide/routing' },
           { text: 'Middleware', link: '/en/guide/middleware' },
+          { text: 'Database & ORM', link: '/en/guide/database-orm' },
           { text: 'CLI', link: '/en/guide/cli' },
           { text: 'API Reference', link: '/en/api/overview' }
         ],
@@ -65,6 +69,7 @@ export default defineConfig({
               { text: 'Getting Started', link: '/en/guide/getting-started' },
               { text: 'Routing & Parameters', link: '/en/guide/routing' },
               { text: 'Middleware System', link: '/en/guide/middleware' },
+              { text: 'Database & Vito ORM', link: '/en/guide/database-orm' },
               { text: 'CLI & Developer Tooling', link: '/en/guide/cli' }
             ]
           },
@@ -72,6 +77,7 @@ export default defineConfig({
             text: '📦 Ecosystem',
             items: [
               { text: 'Official Middlewares', link: '/en/guide/middleware' },
+              { text: 'Database Pool & Vito ORM', link: '/en/guide/database-orm' },
               { text: 'API Reference', link: '/en/api/overview' }
             ]
           }

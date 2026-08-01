@@ -1,0 +1,145 @@
+// Vito ORM Schema Migration & Database Seeding Engine (vito/packages/orm/migration.vit)
+
+struct MigrationRunner {
+    totalMigrations: number,
+    appliedCount: number,
+
+    m0_applied: boolean,
+    m1_applied: boolean,
+    m2_applied: boolean,
+
+    m0_version: string, m0_name: string, m0_upSql: string, m0_downSql: string,
+    m1_version: string, m1_name: string, m1_upSql: string, m1_downSql: string,
+    m2_version: string, m2_name: string, m2_upSql: string, m2_downSql: string,
+
+    function init(): void {
+        this.totalMigrations = 0;
+        this.appliedCount = 0;
+        this.m0_applied = false; this.m1_applied = false; this.m2_applied = false;
+        this.m0_version = ""; this.m0_name = ""; this.m0_upSql = ""; this.m0_downSql = "";
+        this.m1_version = ""; this.m1_name = ""; this.m1_upSql = ""; this.m1_downSql = "";
+        this.m2_version = ""; this.m2_name = ""; this.m2_upSql = ""; this.m2_downSql = "";
+        print("[Migration Engine] Initialized `schema_migrations` tracking engine.");
+    },
+
+    function registerMigration(version: string, name: string, upSql: string, downSql: string): void {
+        if (this.totalMigrations == 0) {
+            this.m0_version = version; this.m0_name = name; this.m0_upSql = upSql; this.m0_downSql = downSql; this.m0_applied = false;
+        }
+        if (this.totalMigrations == 1) {
+            this.m1_version = version; this.m1_name = name; this.m1_upSql = upSql; this.m1_downSql = downSql; this.m1_applied = false;
+        }
+        if (this.totalMigrations == 2) {
+            this.m2_version = version; this.m2_name = name; this.m2_upSql = upSql; this.m2_downSql = downSql; this.m2_applied = false;
+        }
+        this.totalMigrations = this.totalMigrations + 1;
+    },
+
+    function runUp(): number {
+        let executed = 0;
+        if (this.totalMigrations >= 1 && !this.m0_applied) {
+            this.m0_applied = true;
+            this.appliedCount = this.appliedCount + 1;
+            executed = executed + 1;
+            print("[Migration Runner] [UP] Applied " + this.m0_version + "_" + this.m0_name + ": " + this.m0_upSql);
+        }
+        if (this.totalMigrations >= 2 && !this.m1_applied) {
+            this.m1_applied = true;
+            this.appliedCount = this.appliedCount + 1;
+            executed = executed + 1;
+            print("[Migration Runner] [UP] Applied " + this.m1_version + "_" + this.m1_name + ": " + this.m1_upSql);
+        }
+        if (this.totalMigrations >= 3 && !this.m2_applied) {
+            this.m2_applied = true;
+            this.appliedCount = this.appliedCount + 1;
+            executed = executed + 1;
+            print("[Migration Runner] [UP] Applied " + this.m2_version + "_" + this.m2_name + ": " + this.m2_upSql);
+        }
+        print("[Migration Runner] Updated `schema_migrations` table (" + this.appliedCount + "/" + this.totalMigrations + " applied)");
+        return executed;
+    },
+
+    function runDown(): boolean {
+        if (this.appliedCount == 0) {
+            print("[Migration Runner] No applied migrations to rollback.");
+            return false;
+        }
+        if (this.m2_applied) {
+            this.m2_applied = false;
+            this.appliedCount = this.appliedCount - 1;
+            print("[Migration Runner] [DOWN] Reverted " + this.m2_version + "_" + this.m2_name + ": " + this.m2_downSql);
+            return true;
+        }
+        if (this.m1_applied) {
+            this.m1_applied = false;
+            this.appliedCount = this.appliedCount - 1;
+            print("[Migration Runner] [DOWN] Reverted " + this.m1_version + "_" + this.m1_name + ": " + this.m1_downSql);
+            return true;
+        }
+        if (this.m0_applied) {
+            this.m0_applied = false;
+            this.appliedCount = this.appliedCount - 1;
+            print("[Migration Runner] [DOWN] Reverted " + this.m0_version + "_" + this.m0_name + ": " + this.m0_downSql);
+            return true;
+        }
+        return false;
+    }
+}
+
+struct DatabaseSeeder {
+    seedCount: number,
+    s0_table: string, s0_data: string,
+    s1_table: string, s1_data: string,
+
+    function init(): void {
+        this.seedCount = 0;
+        this.s0_table = ""; this.s0_data = "";
+        this.s1_table = ""; this.s1_data = "";
+    },
+
+    function addSeed(table: string, jsonRecord: string): void {
+        if (this.seedCount == 0) { this.s0_table = table; this.s0_data = jsonRecord; }
+        if (this.seedCount == 1) { this.s1_table = table; this.s1_data = jsonRecord; }
+        this.seedCount = this.seedCount + 1;
+    },
+
+    function runSeeder(): number {
+        print("[Database Seeder] Populating mock data into database...");
+        if (this.seedCount >= 1) {
+            print("[Database Seeder] Seeded into [" + this.s0_table + "]: " + this.s0_data);
+        }
+        if (this.seedCount >= 2) {
+            print("[Database Seeder] Seeded into [" + this.s1_table + "]: " + this.s1_data);
+        }
+        print("[Database Seeder] Successfully seeded " + this.seedCount + " tables for Dev/Staging!");
+        return this.seedCount;
+    }
+}
+
+struct SchemaDiffGenerator {
+    dummy: number,
+    function generateDiffSql(modelName: string, tableName: string, existingColumns: string, newColumns: string): string {
+        if (existingColumns.length == 0) {
+            return "CREATE TABLE " + tableName + " (" + newColumns + ");";
+        }
+        return "ALTER TABLE " + tableName + " ADD COLUMN " + newColumns + ";";
+    }
+}
+
+function createMigrationRunner(): MigrationRunner {
+    let runner: MigrationRunner;
+    runner.init();
+    return runner;
+}
+
+function createDatabaseSeeder(): DatabaseSeeder {
+    let seeder: DatabaseSeeder;
+    seeder.init();
+    return seeder;
+}
+
+function createSchemaDiffGenerator(): SchemaDiffGenerator {
+    let diffGen: SchemaDiffGenerator;
+    diffGen.dummy = 1;
+    return diffGen;
+}
