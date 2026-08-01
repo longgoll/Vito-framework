@@ -154,24 +154,25 @@ const currentTab = computed(() => {
 
 <style scoped>
 .code-comparison {
-  background: var(--vp-c-bg-soft, rgba(255, 255, 255, 0.02));
-  border: 1px solid var(--vp-c-divider, rgba(255, 255, 255, 0.1));
+  background: var(--vp-c-bg-soft, #f8fafc);
+  border: 1px solid var(--vp-c-divider, #e2e8f0);
   border-radius: 16px;
   padding: 1.5rem;
   margin: 2.5rem 0;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
 }
 
 .comparison-header h3 {
   margin: 0;
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   font-weight: 700;
+  color: var(--vp-c-text-1, #0f172a);
 }
 
 .subtitle {
   margin: 0.25rem 0 1rem 0;
-  font-size: 0.85rem;
-  color: var(--vp-c-text-2);
+  font-size: 0.88rem;
+  color: var(--vp-c-text-2, #475569);
 }
 
 .tabs-list {
@@ -180,48 +181,48 @@ const currentTab = computed(() => {
   overflow-x: auto;
   padding-bottom: 0.5rem;
   margin-bottom: 1rem;
-  border-bottom: 1px solid var(--vp-c-divider, rgba(255, 255, 255, 0.1));
+  border-bottom: 1px solid var(--vp-c-divider, #cbd5e1);
 }
 
 .tabs-list button {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.5rem 0.85rem;
+  padding: 0.55rem 0.9rem;
   font-size: 0.85rem;
   font-weight: 600;
   border-radius: 8px;
-  border: 1px solid transparent;
-  background: transparent;
-  color: var(--vp-c-text-2);
+  border: 1px solid var(--vp-c-divider, #cbd5e1);
+  background: var(--vp-c-bg-alt, #ffffff);
+  color: var(--vp-c-text-1, #0f172a);
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s ease;
 }
 
 .tabs-list button:hover {
-  background: var(--vp-c-bg-mute);
-  color: var(--vp-c-text-1);
+  background: var(--vp-c-brand-soft, rgba(79, 70, 229, 0.1));
+  border-color: var(--vp-c-brand-1, #4f46e5);
 }
 
 .tabs-list button.active {
-  background: var(--vp-c-bg-alt, rgba(100, 108, 255, 0.15));
-  border-color: var(--vp-c-brand-1, #646cff);
-  color: var(--vp-c-text-1);
+  background: #4f46e5;
+  border-color: #4f46e5;
+  color: #ffffff;
 }
 
 .tab-badge {
-  font-size: 0.7rem;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 0.1rem 0.4rem;
+  font-size: 0.72rem;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.15rem 0.45rem;
   border-radius: 4px;
-  color: var(--vp-c-brand-1, #646cff);
+  color: inherit;
 }
 
 .code-body {
-  background: var(--vp-code-block-bg, #1e1e20);
+  background: #0f172a;
   border-radius: 10px;
-  border: 1px solid var(--vp-c-divider, rgba(255, 255, 255, 0.08));
+  border: 1px solid #334155;
   overflow: hidden;
 }
 
@@ -229,32 +230,33 @@ const currentTab = computed(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.4rem 1rem;
-  background: rgba(0, 0, 0, 0.2);
-  font-size: 0.75rem;
-  color: var(--vp-c-text-3);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0.5rem 1rem;
+  background: #1e293b;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  border-bottom: 1px solid #334155;
 }
 
 .lang-tag {
   text-transform: uppercase;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.5px;
-  color: var(--vp-c-brand-1, #646cff);
+  color: #38bdf8;
 }
 
 .perf-stat span {
-  font-weight: 600;
-  color: var(--vp-c-text-2);
+  font-weight: 700;
+  color: #34d399;
 }
 
 .code-block {
   margin: 0;
   padding: 1.25rem;
   font-family: var(--vp-font-family-mono, monospace);
-  font-size: 0.88rem;
-  line-height: 1.5;
-  color: #e3e3e3;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #f8fafc;
   overflow-x: auto;
+  background: #0f172a;
 }
 </style>

@@ -2,6 +2,8 @@
 
 > High-performance, lightweight, expressive Web Server Framework for the **VIT Language ecosystem**.
 
+🌐 **Official Documentation & Website**: [https://longgoll.github.io/Vito-framework/](https://longgoll.github.io/Vito-framework/)
+
 [English](#english) | [Tiếng Việt](#tiếng-việt)
 
 ---
@@ -11,6 +13,8 @@
 
 ### 🌟 Overview
 **Vito** is an open-source, modern Web Framework built on top of the native **VIT Compiler runtime**. Designed for simplicity, speed, and DX excellence.
+
+📖 **Full Online Guide & Interactive Playground**: [https://longgoll.github.io/Vito-framework/](https://longgoll.github.io/Vito-framework/)
 
 ### 🛠 Features
 - ⚡ **HTTP Request Parser**: Automatically parses HTTP Methods (`GET`, `POST`, `PUT`, `DELETE`), Path, Query parameters, and Body content.
@@ -31,15 +35,27 @@
 vito/
 ├── vit.json            # Framework package config
 ├── README.md           # Documentation
+├── website/            # Documentation Website (VitePress)
 ├── src/                # Core Web Framework Engine
 │   └── vito.vit        # HTTP Parser, Dynamic Matcher, Route Grouping & App Engine
-├── packages/           # Official Middleware Plugins
+├── packages/           # Official Middleware & Enterprise Packages (27 Modules)
+│   ├── auth/           # JWT Guard Pro, OAuth2 PKCE, API Key, Argon2id/AES-256-GCM, RBAC
 │   ├── cors/           # CORS header & OPTIONS preflight middleware
+│   ├── db/             # Connection Pooling for Postgres, SQLite, MySQL
+│   ├── events/         # Async Event Emitter & Redis Pub/Sub Cluster
 │   ├── health/         # Connection tracking & Kubernetes health probes (/healthz, /readyz)
 │   ├── logger/         # Request logger middleware
+│   ├── metrics/        # Prometheus /metrics exporter & OpenTelemetry
+│   ├── orm/            # Vito ORM, ACID Transactions, Savepoints, Migrations & Seeders
+│   ├── queue/          # Background Job Queue (Redis/Memory drivers, DLQ)
+│   ├── router/         # Radix Trie O(1) fast path & dynamic routing engine
+│   ├── security/       # Helmet security headers, Rate Limiter (429) & JWT Guard
 │   ├── session/        # Signed/Encrypted cookies & session management
-│   ├── static/         # Static file serving middleware
-│   └── upload/         # Multipart form data streaming & file validation engine
+│   ├── sse/            # Server-Sent Events for AI/LLM Token Streaming
+│   ├── static/         # Static file serving middleware with ETag & Gzip
+│   ├── swagger/        # OpenAPI 3.0 auto generator & Swagger UI (/docs)
+│   ├── upload/         # Multipart form data streaming & file validation engine
+│   └── websocket/      # WebSockets Engine (50K+ conns, Room Broadcast & Heartbeat)
 └── examples/           # Web app examples
     ├── app_demo.vit    # Complete router, dynamic params, grouping & middleware demo
     └── standalone_demo.vit
@@ -101,26 +117,36 @@ function main(): number {
 ### 🌟 Tổng Quan
 **Vito** là một Web Framework nguồn mở, hiện đại được xây dựng trực tiếp trên bộ biên dịch **VIT Compiler runtime**. Được thiết kế tối ưu cho tốc độ thực thi Native, cú pháp ngắn gọn và trải nghiệm lập trình (DX) mượt mà.
 
+📖 **Trang Tài Liệu Hướng Dẫn & Thử Nghiệm Tương Tác**: [https://longgoll.github.io/Vito-framework/](https://longgoll.github.io/Vito-framework/)
+
 ### 🛠 Tính Năng Chi Tiết
 - ⚡ **Bộ Phân Tích HTTP Request**: Tự động phân tích các HTTP Method (`GET`, `POST`, `PUT`, `DELETE`), URL Path, Query Parameter và nội dung Body.
 - 🎯 **Tham Số Route Động (`:id`)**: Hỗ trợ khớp đường dẫn với tham số động (ví dụ `/users/:id`, `/products/:category/:id`) thông qua `req.param(key)`.
 - 🔍 **Trích Xuất Query & Header**: Truy cập nhanh các query URL bằng `req.query(key)` và các HTTP request header với `req.header(key)`.
 - 🛣 **Router Linh Hoạt**: Đăng ký các route xử lý ngắn gọn bằng `.get()`, `.post()`, `.put()`, `.delete()`.
-- 👥 **Phân Nhom Đường Dẫn (Route Grouping)**: Tạo tiền tố route dạng module hóa bằng `app.group("/api/v1", (v1) => { v1.get("/users", ...); })`.
-- 🎨 **Tùy Bổn Xử Lý Lỗi**: Định nghĩa handler tùy chỉnh cho lỗi 404 Trang Không Tìm Thấy bằng `app.setNotFoundHandler(...)`.
+- 👥 **Phân Nhóm Đường Dẫn (Route Grouping)**: Tạo tiền tố route dạng module hóa bằng `app.group("/api/v1", (v1) => { v1.get("/users", ...); })`.
+- 🎨 **Tùy Biến Xử Lý Lỗi**: Định nghĩa handler tùy chỉnh cho lỗi 404 Trang Không Tìm Thấy bằng `app.setNotFoundHandler(...)`.
 - 🔗 **Chuỗi Middleware Execution**: Cho phép liên kết chuỗi middleware (`app.use()`) để hỗ trợ CORS, ghi log request, phục vụ static file, quản lý Session và Upload file multipart.
 - 📁 **Static File Serving**: Trả về các file tĩnh HTML/CSS/JS/Hình ảnh trực tiếp từ ổ đĩa bằng `createStaticMiddleware(publicDir)`.
 - 📦 **Nội Dung Trả Về (Response Context)**: Hỗ trợ sẵn các hàm tiện ích trả về JSON (`res.json()`), HTML (`res.html()`), văn bản (`res.send()`), mã trạng thái (`res.setStatus(code)`), và thiết lập header (`res.setHeader()`).
 
 ---
 
-### 📦 Các Gói Middleware Tích Hợp (`vito/packages`)
+### 📦 27 Gói Mô-Đun & Middleware Tích Hợp (`vito/packages`)
 
+- `packages/auth`: JWT Guard Pro (HS256/RS256/ES256), OAuth2 PKCE (Google/GitHub/Microsoft), API Key Guard, Argon2id/Bcrypt Hasher, AES-256-GCM Encryption, RBAC/ABAC Gate Engine.
 - `packages/cors`: Middleware xử lý cross-origin request và tự động phản hồi OPTIONS preflight request.
+- `packages/db` & `packages/orm`: Vito ORM, Connection Pooling (Postgres, SQLite, MySQL), ACID Transactions, Savepoints & Migrations.
+- `packages/events`: Async Event Emitter & Redis Pub/Sub Cluster Adapter.
 - `packages/logger`: Middleware ghi log mọi HTTP request (Method, Path, Response Code, Execution Time) ra console.
+- `packages/metrics`: Prometheus `/metrics` Exporter & OpenTelemetry tracing.
+- `packages/queue`: Background Job Queue Engine (Redis/Memory drivers, Exponential Backoff Retry & DLQ).
+- `packages/sse`: Server-Sent Events cho AI/LLM Token Streaming.
 - `packages/static`: Middleware phục vụ file tĩnh với bộ đệm bộ nhớ đĩa hiệu năng cao.
+- `packages/swagger`: Tự động tạo OpenAPI 3.0 Specs & Giao diện Swagger UI tại `/docs`.
 - `packages/session`: Quản lý cookie mã hóa và phiên làm việc của người dùng.
 - `packages/upload`: Xử lý upload file dạng Multipart Form-Data và kiểm tra định dạng file.
+- `packages/websocket`: WebSockets Server Engine (50K+ conns, Room Broadcast & Heartbeat).
 - `packages/health`: Cung cấp các Endpoint probe kiểm tra sức khỏe hệ thống cho Kubernetes (`/healthz`, `/readyz`).
 
 ---
