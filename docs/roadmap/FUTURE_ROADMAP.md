@@ -1,12 +1,12 @@
-# Vito Web Framework - Roadmap & Future Vision (v2.0 Completed & v3.0 Strategic Vision) 🗺🚀
+# Vito Web Framework - Roadmap & Future Vision 🗺🚀
 
 > **Cột mốc v1.0 & v2.0**: ✅ **Toàn bộ Phase 1 - 8 đã hoàn thành 100%** và được ghi nhận chi tiết tại [COMPLETED_FEATURES.md](file:///f:/Dev/product/vit-lag/vito/docs/completed/COMPLETED_FEATURES.md).
 > 
-> **Tầm nhìn v3.0**: Định hình **Vito Web Framework** trở thành **AI-Native & Distributed Service Mesh Web Engine thế hệ mới**, tối ưu toàn diện cho các hệ thống Agentic AI, Vector Search, WebSockets/WebTransport và Cluster phân tán.
+> **Tầm nhìn v3.0 (Tập trung Cốt Lõi & Hiệu Năng Đỉnh Cao)**: Định hình **Vito Web Framework** trở thành một Backend Web Engine thế hệ mới - **Siêu Nhanh, Vững Chắc, Tối Ưu Bộ Nhớ (Zero-Allocation) & Cung Cấp Đầy Đủ Công Cụ Backend Tiêu Chuẩn**.
 
 ---
 
-## 🏛 📊 Báo Cáo Tiến Độ Lộ Trình (Phases 1 -> 8 Status)
+## 🏛 📊 Báo Cáo Tiến Độ Lộ Trình (Phases 1 -> 8 Status - ✅ Completed)
 
 | Phase | Tên Mô-đun / Lộ Trình | Trạng Thái | Mô Tả & Đơn Vị Thực Thi |
 | :--- | :--- | :---: | :--- |
@@ -21,60 +21,71 @@
 
 ---
 
-## 🔮 🚀 Tầm Nhìn Chiến Lược Vito v3.0 (AI Agentic & Distributed Systems)
+## 🎯 🚀 Tầm Nhìn Chiến Lược Vito v3.0 (Backend Core & High Performance)
+
+Chi tiết cụ thể của từng Phase đã được tách thành từng tài liệu riêng biệt trong thư mục [docs/roadmap](file:///f:/Dev/product/vit-lag/vito/docs/roadmap):
 
 ```text
        ┌───────────────────────────────────────────────────────────┐
-       │   PHASE 9: AI/LLM Native Agentic Engine & Streaming       │
-       │   (MCP Server/Client, Streaming Protocol, Vector Store)  │
+       │   PHASE 9: Core Engine Optimization & Memory Arena        │
+       │   (Zero-Alloc Router, Memory Pool, Ultra-low Latency p99) │
        └─────────────────────────────┬─────────────────────────────┘
                                      │
                                      ▼
        ┌───────────────────────────────────────────────────────────┐
-       │   PHASE 10: Enterprise Distributed Cluster & Service Mesh │
-       │   (Raft Consensus, Service Discovery, Distributed Mesh)   │
+       │   PHASE 10: Essential Backend Toolkit & Streaming         │
+       │   (Multipart Stream Upload, Cookies, Sessions, Shutdown)  │
        └─────────────────────────────┬─────────────────────────────┘
                                      │
                                      ▼
        ┌───────────────────────────────────────────────────────────┐
-       │   PHASE 11: Real-Time WebSockets & WebTransport Engine    │
-       │   (Full-Duplex WS, HTTP/3 WebTransport, Event Bus)        │
+       │   PHASE 11: Enterprise Database Pool & Advanced ORM       │
+       │   (Connection Pooling, Transactions, Schema Migrations)   │
+       └─────────────────────────────┬─────────────────────────────┘
+                                     │
+                                     ▼
+       ┌───────────────────────────────────────────────────────────┐
+       │   PHASE 12: Native Auth Engine & Security Suite           │
+       │   (JWT/OAuth2/API Key Guard, Argon2id, AES-256-GCM)      │
+       └─────────────────────────────┬─────────────────────────────┘
+                                     │
+                                     ▼
+       ┌───────────────────────────────────────────────────────────┐
+       │   PHASE 13: Real-Time WebSockets & Job Queue Engine       │
+       │   (Production WebSockets, Internal Event Bus, Job Queue) │
+       └─────────────────────────────┬─────────────────────────────┘
+                                     │
+                                     ▼
+       ┌───────────────────────────────────────────────────────────┐
+       │   PHASE 14: Observability, Metrics & DX Tooling           │
+       │   (Prometheus /metrics, OpenTelemetry, CLI Generators)    │
+       └─────────────────────────────┬─────────────────────────────┘
+                                     │
+                                     ▼
+       ┌───────────────────────────────────────────────────────────┐
+       │   PHASE 15: TechEmpower Benchmarks & Security Audit       │
+       │   (Official Suite Integration, Stress Testing, Hardening) │
+       └─────────────────────────────┬─────────────────────────────┘
+                                     │
+                                     ▼
+       ┌───────────────────────────────────────────────────────────┐
+       │   PHASE 16: Future Expansion (AI MCP & Distributed Mesh)  │
+       │   (AI Agentic MCP Protocol, Vector Store, Raft Mesh)     │
        └───────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🧠 PHASE 9: AI/LLM Native Agentic Engine & Streaming Protocol
+## 📂 Danh Sách Các File PHASE Lộ Trình Chi Tiết
 
-### 9.1. Model Context Protocol (MCP) Server & Client Native Integration
-- **Mục tiêu**: Tích hợp chuẩn giao tiếp MCP (Model Context Protocol) trực tiếp vào Vito Kernel (`packages/mcp/mcp.vit`).
-- **Lợi ích**: Giúp các ứng dụng Vito kết nối và cung cấp Tools/Resources cho các mô hình AI Agentic một cách tự động, chuẩn hóa.
-
-### 9.2. AI Streaming First & Token-by-Token Backpressure Control
-- **Mục tiêu**: Hỗ trợ streaming token siêu tốc với kiểm soát luồng dữ liệu (Backpressure) tức thì cho LLM Inference Server (`packages/ai/ai.vit`).
-
-### 9.3. Native In-Memory Vector Search Engine
-- **Mục tiêu**: Tích hợp Vector Storage & HNSW Indexing engine trong bộ nhớ (`packages/vector/vector.vit`) cho RAG (Retrieval-Augmented Generation).
-
----
-
-## 🌐 PHASE 10: Enterprise Distributed Cluster & Service Mesh
-
-### 10.1. Raft Consensus & Cluster State Synchronization
-- **Mục tiêu**: Tích hợp thuật toán Raft Consensus (`packages/cluster/cluster.vit`) cho phép các nút (node) Vito tự động phát hiện, bầu chọn leader và đồng bộ trạng thái cluster không cần dịch vụ bên thứ ba.
-
-### 10.2. Service Mesh & Distributed Circuit Breaker
-- **Mục tiêu**: Tự động cân bằng tải (Load Balancing), Service Discovery và ngắt mạch tự động (Circuit Breaker) giữa các vi dịch vụ Vito (`packages/mesh/mesh.vit`).
-
----
-
-## ⚡ PHASE 11: Real-time WebSockets & WebTransport Engine
-
-### 11.1. Full-Duplex WebSocket Server (`packages/websocket/websocket.vit`)
-- **Mục tiêu**: Khởi chạy WebSocket Server hiệu năng cao với khả năng xử lý hàng trăm ngàn kết nối đồng thời.
-
-### 11.2. WebTransport over HTTP/3 (`packages/webtransport/webtransport.vit`)
-- **Mục tiêu**: Tận dụng giao thức HTTP/3 QUIC để cung cấp truyền tải dữ liệu 2 chiều không tin cậy (Datagram) và có tin cậy (Stream) với độ trễ siêu thấp cho game thời gian thực và video streaming.
+1. [PHASE_09_CORE_ENGINE_PERF.md](file:///f:/Dev/product/vit-lag/vito/docs/roadmap/PHASE_09_CORE_ENGINE_PERF.md) - **Tối ưu Core Engine & Quản Lý Bộ Nhớ**
+2. [PHASE_10_ESSENTIAL_BACKEND.md](file:///f:/Dev/product/vit-lag/vito/docs/roadmap/PHASE_10_ESSENTIAL_BACKEND.md) - **Bộ Công Cụ Backend Cơ Bản & Stream Upload**
+3. [PHASE_11_DATA_POOL_ORM.md](file:///f:/Dev/product/vit-lag/vito/docs/roadmap/PHASE_11_DATA_POOL_ORM.md) - **Enterprise DB Connection Pool & Transaction ORM**
+4. [PHASE_12_AUTH_SECURITY_SUITE.md](file:///f:/Dev/product/vit-lag/vito/docs/roadmap/PHASE_12_AUTH_SECURITY_SUITE.md) - **Hệ Thống Xác Thực Auth & Security Toolkit**
+5. [PHASE_13_REALTIME_ASYNC_JOBS.md](file:///f:/Dev/product/vit-lag/vito/docs/roadmap/PHASE_13_REALTIME_ASYNC_JOBS.md) - **WebSockets Real-time & Background Job Queues**
+6. [PHASE_14_OBSERVABILITY_DX.md](file:///f:/Dev/product/vit-lag/vito/docs/roadmap/PHASE_14_OBSERVABILITY_DX.md) - **Giám Sát Prometheus Metrics & CLI Generator**
+7. [PHASE_15_BENCHMARKS_HARDENING.md](file:///f:/Dev/product/vit-lag/vito/docs/roadmap/PHASE_15_BENCHMARKS_HARDENING.md) - **TechEmpower Benchmarks & Stress Test**
+8. [PHASE_16_ADVANCED_EXPANSION.md](file:///f:/Dev/product/vit-lag/vito/docs/roadmap/PHASE_16_ADVANCED_EXPANSION.md) - **Mở Rộng Tương Lai (AI MCP, Vector & Mesh)**
 
 ---
 
@@ -83,13 +94,14 @@
 | Tính Năng / Chỉ Số | Fastify (Node.js) | Fiber (Go) | Hono (Bun/CF) | NestJS (TS) | **Vito Framework (Native)** |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Nền Tảng Biên Dịch** | JS Engine | Go Compiler | JS/Wasm | JS Engine | **VIT Native (C/LLVM Direct)** |
+| **Memory Allocation** | GC Overhead | Minimal | GC Overhead | GC Overhead | **✅ Zero-Alloc Memory Arena** |
 | **Native TLS 1.3** | Cần Nginx | Có | Tuỳ Runtime | Cần Nginx | **✅ Native Built-in** |
 | **WASM Edge Ready** | Khó | Không | Có | Không | **✅ Native WASM Target (<1ms)** |
 | **HTTP/3 QUIC** | Chưa | Đang làm | Có | Chưa | **✅ Native Support (UDP)** |
-| **CLI Tooling** | Thô sơ | Khá | Khá | Rất Tốt | **✅ Đầy Đủ (`vit` CLI)** |
-| **Native DB & ORM** | Cần ORM ngoài | Cần GORM | Cần Drizzle | Cần Prisma | **✅ Native Drivers & Vito ORM** |
+| **CLI Tooling** | Thô sơ | Khá | Khá | Rất Tốt | **✅ Đầy Đủ (`vit` CLI Suite)** |
+| **Native DB & Connection Pool** | Cần Driver ngoài | Cần GORM | Cần Driver ngoài | Cần Prisma | **✅ Native Pooling & Vito ORM** |
 | **Single Binary Executable** | Không | Có | Không | Không | **✅ Có (< 5MB Executable)** |
 
 ---
 
-> 🎯 **Cam Kết**: Vito Web Framework khẳng định vị thế đỉnh cao của một Web Framework thế hệ mới – **Siêu nhanh, Siêu an toàn và Sẵn sàng cho Kỷ nguyên Cloud-Native Edge & Agentic AI Systems**.
+> 🎯 **Cam Kết**: Vito Web Framework khẳng định vị thế đỉnh cao của một Web Framework thế hệ mới – **Siêu nhanh, Siêu vững chắc và Đáp ứng đầy đủ tiêu chuẩn sản xuất (Production-Ready Backend Engine)**.
