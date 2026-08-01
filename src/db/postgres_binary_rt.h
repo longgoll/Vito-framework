@@ -40,7 +40,9 @@ typedef struct {
 vito_db_ring_pool_t* vito_db_ring_pool_create(void);
 bool vito_db_ring_pool_push(vito_db_ring_pool_t* pool, void* conn);
 void* vito_db_ring_pool_pop(vito_db_ring_pool_t* pool);
-void vito_db_ring_pool_destroy(vito_db_ring_pool_t* pool);
+// Zero-allocation binary field readers & query pipelining
+int32_t pg_binary_read_int32(const uint8_t* ptr);
+size_t pg_binary_build_pipeline_query(const char* query, uint8_t* out_buf, size_t out_cap);
 
 #ifdef __cplusplus
 }

@@ -74,3 +74,26 @@ void* vito_db_ring_pool_pop(vito_db_ring_pool_t* pool) {
 void vito_db_ring_pool_destroy(vito_db_ring_pool_t* pool) {
     if (pool) free(pool);
 }
+
+int32_t pg_binary_read_int32(const uint8_t* ptr) {
+    if (!ptr) return 0;
+    return (int32_t)read_u32_be(ptr);
+}
+
+size_t pg_binary_build_pipeline_query(const char* query, uint8_t* out_buf, size_t out_cap) {
+    if (!query || !out_buf) return 0;
+    size_t qlen = strlen(query);
+    size_t total_len = 1 + 4 + qlen + 1; // 'Q' + int32 len + query_str + '\0'
+    if (total_len > out_cap) return 0;
+
+    out_buf[0] = 'Q';
+    uint32_t msg_len = (uint32_t)(4 + qlen + 1);
+    out_buf[1] = (uint8_t)(msg_len >> 24);
+    out_buf[2] = (uint8_t)(msg_len >> 16);
+    out_buf[3] = (uint8_t)(msg_len >> 8);
+    out_buf[4] = (uint8_t)(msg_len);
+
+    memcpy(out_buf + 5, query, qlen);
+    out_buf[5 + qlen] = '\0';
+    return total_len;
+}

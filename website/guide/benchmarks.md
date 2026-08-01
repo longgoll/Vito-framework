@@ -30,16 +30,16 @@ Báo cáo chính thức kiểm thử hiệu năng độc lập, minh bạch và 
 
 | Bài Test Benchmark | Ngôn Ngữ / Cấu Hình | Thời Gian (ms) | Tốc Độ vs Go | Vị Trí & Ghi Chú Kỹ Thuật |
 |---|---|---|---|---|
-| **Fibonacci (N=42)** | 🏆 **Vit Engine** | **428.79 ms** | **3.07x** | 🥇 **TOP 1** - `argv[1]` dynamic input |
-| **Fibonacci (N=42)** | 🥈 C++20 (GCC -O3) | **473.31 ms** | **2.78x** | `argv[1]` dynamic input |
-| **Fibonacci (N=42)** | 🥉 Rust (opt-level=3) | **867.13 ms** | **1.52x** | `argv[1]` dynamic input |
-| **Fibonacci (N=42)** | 4️⃣ Go (1.22) | **1315.94 ms** | **1.00x** | `os.Args[1]` dynamic input |
-| **Matrix 500x500** | 🏆 **Vit (Blocked SIMD)** | **17.47 ms** | **6.17x** | 🥇 **TOP 1** - AVX2 FMA Dual Accumulator |
-| **Matrix 500x500** | 🥈 C++20 (Blocked) | **25.41 ms** | **4.24x** | 1D Flat Array + 32x32 Cache Blocking |
-| **Matrix 500x500** | 🥉 C++20 (Naive) | **28.22 ms** | **3.82x** | 2D `vector<vector<double>>` |
-| **Matrix 500x500** | 4️⃣ **Vit (Naive)** | **36.25 ms** | **2.97x** | 2D malloc arrays + RESTRICT pointers |
-| **Matrix 500x500** | 5️⃣ Rust (Blocked) | **63.69 ms** | **1.69x** | 1D Flat Vec + 32x32 Cache Blocking |
-| **Matrix 500x500** | 6️⃣ Go (Blocked) | **107.79 ms** | **1.00x** | 1D Flat slice + 32x32 Cache Blocking |
+| **Fibonacci (N=42)** | 🏆 **Vit Engine** | **454.83 ms** | **4.61x** | 🥇 **TOP 1 VÔ ĐỊCH** - Vượt C++20, Rust, Go |
+| **Fibonacci (N=42)** | 🥈 C++20 (GCC -O3) | **486.50 ms** | **4.31x** | `argv[1]` dynamic input |
+| **Fibonacci (N=42)** | 🥉 Rust (opt-level=3) | **691.18 ms** | **3.03x** | `argv[1]` dynamic input |
+| **Fibonacci (N=42)** | 4️⃣ Go (1.22) | **2094.82 ms** | **1.00x** | `os.Args[1]` dynamic input |
+| **Matrix 500x500** | 🏆 C++20 (Blocked) | **23.58 ms** | **4.39x** | 1D Flat Array + 32x32 Cache Blocking |
+| **Matrix 500x500** | ⚡ **Vit (Blocked SIMD)** | **24.61 ms** | **4.21x** | 🥈 **TOP 2** - AVX2 FMA Dual Accumulator |
+| **Matrix 500x500** | 🥉 C++20 (Naive) | **38.45 ms** | **2.69x** | 2D `vector<vector<double>>` |
+| **Matrix 500x500** | 4️⃣ **Vit (Naive)** | **44.55 ms** | **2.33x** | 2D malloc arrays + RESTRICT pointers |
+| **Matrix 500x500** | 5️⃣ Rust (Blocked) | **63.63 ms** | **1.63x** | 1D Flat Vec + 32x32 Cache Blocking |
+| **Matrix 500x500** | 6️⃣ Go (Blocked) | **103.60 ms** | **1.00x** | 1D Flat slice + 32x32 Cache Blocking |
 
 ---
 
