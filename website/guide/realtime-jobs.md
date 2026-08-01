@@ -1,106 +1,98 @@
-# WebSockets & Background Job Queues ⚡
+# Realtime WebSockets & Job Queue ⚡
 
-**Vito Framework** cung cấp hạ tầng giao tiếp thời gian thực hai chiều chuẩn Production (**Production-Grade WebSockets Engine**) và hệ thống hàng chờ công việc nền (**Background Job Queues & Async Event Bus**) với độ trễ thấp và khả năng mở rộng cao.
+Hạ tầng giao tiếp thời gian thực hai chiều (**WebSockets Server Engine**), **SSE AI Streaming** và hệ thống hàng chờ công việc nền (**Background Job Queues**) giúp Vito xử lý trôi chảy các bài toán quy mô lớn.
 
 ---
 
-## 🔌 Production-Grade WebSocket Engine (`packages/websocket`)
+## 🔌 1. Enterprise WebSocket Engine (`packages/websocket`)
 
-Module `packages/websocket/websocket.vit` cung cấp giải pháp xử lý kết nối WebSocket độ tin cậy cao, hỗ trợ phân nhóm Room/Channel, kiểm tra kết nối sống (Heartbeat Ping/Pong) và nén dữ liệu theo khung truyền per-message deflate.
+Truyền nhận dữ liệu 2 chiều độ trễ siêu thấp, hỗ trợ 50,000+ kết nối mở đồng thời với chi phí RAM $< 500\text{MB}$:
 
-### Tính Năng Nổi Bật:
-- **Xử Lý Kết Nối Đồng Thời**: Hỗ trợ tới 50,000+ kết nối mở đồng thời với chi phí bộ nhớ tối thiểu ($< 500MB$ RAM).
-- **Phân Nhóm Room & Broadcast**: Phân chia kết nối vào các Room / Channel riêng biệt, hỗ trợ gửi tin nhắn toàn hệ thống (Broadcast), theo phòng (Room Broadcast) hoặc tin nhắn riêng (Unicast).
-- **Heartbeat Ping/Pong & Stale Eviction**: Tự động gửi PING frame định kỳ và thu hồi (Evict) các kết nối bị đứt ngầm hoặc hết thời gian chờ (Stale connections).
-- **Per-Message Deflate Compression**: Nén nòng dữ liệu WebSocket frame để giảm thiểu băng thông mạng khi truyền dữ liệu lớn.
+<div class="card-grid">
+  <div class="feature-mini-card">
+    <div class="icon">📡</div>
+    <h4>Room & Broadcast Engine</h4>
+    <p>Phân nhóm kết nối vào các Room / Channel riêng biệt, gửi broadcast theo phòng hoặc toàn hệ thống.</p>
+  </div>
 
-### Ví Dụ Sử Dụng:
+  <div class="feature-mini-card">
+    <div class="icon">💓</div>
+    <h4>Heartbeat Ping/Pong</h4>
+    <p>Tự động phát hiện và thu hồi (Evict) các kết nối bị đứt ngầm hoặc hết thời gian chờ.</p>
+  </div>
+
+  <div class="feature-mini-card">
+    <div class="icon">📦</div>
+    <h4>Per-Message Deflate</h4>
+    <p>Nén WebSocket frame ngầm để tiết kiệm tối đa băng thông khi truyền tin nhắn lớn.</p>
+  </div>
+</div>
 
 ```typescript
-import { createWebSocketServer, compressFrame, decompressFrame } from "vito/packages/websocket/websocket.vit";
+import { createWebSocketServer } from "vito/packages/websocket/websocket.vit";
 
-// 1. Khởi tạo WebSocket Server (Cổng 8080, Tối đa 50,000 kết nối)
+// Khởi tạo WebSocket Server tại cổng 8080 (Sức chứa 50,000 conns)
 let wsServer = createWebSocketServer(8080, 50000);
 
-// 2. Tiếp nhận kết nối mới
+// Tiếp nhận kết nối từ Client
 let client1 = wsServer.acceptConnection("192.168.1.10");
 let client2 = wsServer.acceptConnection("192.168.1.11");
 
-// 3. Quản lý Room & Gửi tin nhắn Broadcast
-let chatRoom: WebSocketRoom;
-chatRoom.init("room_vip_lounge");
-chatRoom.addClient(client1.id);
-chatRoom.addClient(client2.id);
-
-wsServer.broadcastToRoom(chatRoom, "{\"event\":\"chat:msg\",\"text\":\"Chào mừng tới VIP Room!\"}");
-
-// 4. Kiểm tra Heartbeat & Dọn dẹp kết nối chết
-wsServer.checkHeartbeats(client1, 1700000010);
+// Gửi tin nhắn Broadcast theo Room
+wsServer.broadcastToRoom("room_vip", JSON.stringify({ event: "trade:update", price: 95400 }));
 ```
 
 ---
 
-## 📬 Internal Async Event Bus & Redis Pub/Sub (`packages/events`)
+## 🌊 2. Server-Sent Events (SSE) cho AI Streaming (`packages/sse`)
 
-Hệ thống sự kiện nội bộ giúp tách rời (decouple) logic nghiệp vụ của ứng dụng mà không làm gián đoạn vòng đời xử lý HTTP Request chính.
-
-### Tính Năng Nổi Bật:
-- **Async Event Emitter** (`packages/events/event_bus.vit`): Đăng ký và phát hành sự kiện bất đồng bộ (`app.on("user:registered", handler)`).
-- **Redis Pub/Sub Cluster Adapter** (`packages/events/redis_pubsub.vit`): Mở rộng giao tiếp sự kiện liên Node trong mô hình hạ tầng đa Server (Distributed Cluster).
-
-### Ví Dụ Sử Dụng:
+Chuyên biệt cho các ứng dụng trí tuệ nhân tạo (AI/LLM) cần phát trực tiếp từng token văn bản về Client:
 
 ```typescript
-import { createEventBus } from "vito/packages/events/event_bus.vit";
-import { createRedisPubSubAdapter } from "vito/packages/events/redis_pubsub.vit";
+import { createSSEResponse } from "vito/packages/sse/sse.vit";
 
-// 1. Đăng ký & Dispatch Sự Kiện Nội Bộ
-let eventBus = createEventBus();
-eventBus.on("user:registered", "SendWelcomeEmailHandler");
-eventBus.on("user:registered", "AuditLoggerHandler");
+app.get("/api/v1/chat/stream", (req: Request, res: Response) => {
+    let sse = createSSEResponse(res);
 
-// Phát hành sự kiện không ngắt quãng HTTP Thread
-eventBus.emitAsync("user:registered", "{\"userId\":\"usr_999\"}");
-
-// 2. Redis Pub/Sub liên Node
-let redisPubSub = createRedisPubSubAdapter("127.0.0.1", 6379);
-redisPubSub.subscribeChannel("vito:cluster:events");
-redisPubSub.publishCluster("vito:cluster:events", "{\"event\":\"cache:purge\"}");
+    // Stream từng token dữ liệu AI
+    sse.sendEvent("token", JSON.stringify({ text: "Xin " }));
+    sse.sendEvent("token", JSON.stringify({ text: "chào " }));
+    sse.sendEvent("token", JSON.stringify({ text: "bạn!" }));
+    
+    sse.close();
+});
 ```
 
 ---
 
-## ⏳ Background Job Queue Engine (`packages/queue`)
+## ⏳ 3. Background Job Queue Engine (`packages/queue`)
 
-Module `packages/queue/queue.vit` cho phép đẩy các tác vụ nặng (Gửi email hàng loạt, xử lý ảnh, tạo báo cáo) xuống hàng chờ công việc nền để xử lý bất đồng bộ.
+Đẩy các tác vụ nặng (Xử lý video, gửi mail hàng loạt, xuất file Excel) xuống hàng chờ công việc nền để xử lý bất đồng bộ:
 
-### Tính Năng Nổi Bật:
-- **Hỗ Trợ Multi-Driver**: Driver `Memory` (Trong bộ nhớ) cho ứng dụng đơn lẻ và `Redis` cho môi trường Production đa Server.
-- **Hoãn & Lên Lịch Chạy Job**: Hỗ trợ hoãn chạy công việc theo thời gian tùy chỉnh (`scheduleJob`).
-- **Cơ Chế Thử Lại (Exponential Backoff Retry)**: Tự động khôi phục tác vụ thất bại theo chiến lược tăng thời gian chờ mũ ($1s, 2s, 4s, ...$).
-- **Dead Letter Queue (DLQ)**: Cách ly và lưu trữ các job lỗi quá số lần retry cho phép (`maxRetries`) để phục vụ quản trị và kiểm tra.
+::: code-group
 
-### Ví Dụ Sử Dụng:
-
-```typescript
+```typescript [1. Push Job to Queue]
 import { createJobQueue, Job } from "vito/packages/queue/queue.vit";
 
-// 1. Khởi tạo Hàng chờ công việc Redis
+// Khởi tạo Redis Job Queue
 let jobQueue = createJobQueue("redis");
 
-// 2. Khởi tạo Job & Đẩy vào hàng chờ
+// Tạo Job gửi Mail
 let emailJob: Job;
-emailJob.init("job_email_001", "email:send", "{\"to\":\"dev@vito.dev\"}");
-jobQueue.pushJob(emailJob);
+emailJob.init("job_101", "email:send", JSON.stringify({ to: "user@vito.dev" }));
 
-// 3. Lên lịch hoãn chạy Job (Delay 5000ms)
+// Đẩy Job vào hàng chờ
+jobQueue.pushJob(emailJob);
+```
+
+```typescript [2. Delayed Job & Dead Letter Queue (DLQ)]
+// Lên lịch hoãn chạy Job (Delay 5000ms)
 let reportJob: Job;
-reportJob.init("job_report_002", "report:export", "{\"format\":\"pdf\"}");
+reportJob.init("job_102", "report:export", JSON.stringify({ format: "pdf" }));
 jobQueue.scheduleJob(reportJob, 5000);
 
-// 4. Worker xử lý Job & Tự động đẩy vào Dead Letter Queue (DLQ) nếu thất bại
-jobQueue.processNextJob(false, ""); // Thành công
-
-// Thử lại thất bại -> Chuyển vào DLQ khi vượt maxRetries
-jobQueue.processNextJob(true, "Lỗi kết nối tới dịch vụ Email");
+// Khi Job xử lý thất bại quá maxRetries, tự động chuyển vào Dead Letter Queue (DLQ)
+jobQueue.processNextJob(true, "Lỗi kết nối tới SMTP Server");
 ```
+
+:::

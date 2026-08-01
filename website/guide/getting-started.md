@@ -1,110 +1,103 @@
-# Getting Started with Vito 🚀
+# Khởi Đầu Siêu Tốc (Quick Start Guide) 🚀
 
-**Vito** là một Web Framework hiệu năng cao, nhẹ và dễ mở rộng dành cho ngôn ngữ lập trình **VIT**. Framework được thiết kế nhằm mang lại trải nghiệm phát triển (**Developer Experience - DX**) tuyệt vời, zero-config tương tự như Express / Fastify / Hono trong hệ sinh thái JavaScript/TypeScript, nhưng chạy trực tiếp trên **VIT Native Engine & Runtime**.
+Chào mừng bạn đến với **Vito Framework** — Web Framework hiệu năng cao, siêu nhẹ và giàu tính năng được thiết kế riêng cho ngôn ngữ **VIT**.
 
----
-
-## 🛠 Cài Đặt 1 Dòng Lệnh (1-Line Quick Install)
-
-Cài đặt trọn bộ **Vit Compiler Engine** và **Vito CLI** chỉ với 1 dòng lệnh duy nhất (Tự động thiết lập PATH & kiểm tra Toolchain):
-
-::: code-group
-
-```powershell [Windows (PowerShell)]
-iwr -useb https://raw.githubusercontent.com/longgoll/vit/main/install.ps1 | iex
-```
-
-```bash [Linux / macOS]
-curl -fsSL https://raw.githubusercontent.com/longgoll/vit/main/install.sh | bash
-```
-
+::: tip 💡 Trải Nghiệm Học Tập Tương Tác
+Sử dụng bộ công cụ tương tác 4 bước bên dưới để thực hành theo lộ trình cài đặt, viết code và vận hành Web Server Vito trong **3 phút**!
 :::
 
-### 1. Tự Động Kiểm Tra Toolchain (`vit setup`)
-Sau khi cài đặt xong, bạn có thể kiểm tra môi trường bằng lệnh:
-
-```bash
-vit setup
-```
-
-Hệ thống sẽ tự động xác minh đường dẫn `PATH` và kiểm tra bộ trình biên dịch `Clang/LLVM` đi kèm.
+<QuickStartFlow />
 
 ---
 
-## ⚡ Khởi Tạo Dự Án Mẫu Siêu Tốc (`vit init`)
+## ⚡ Các Tính Năng Nổi Bật Của Vito Framework
 
-Chỉ với 1 lệnh đơn giản, `vit` sẽ tự động tạo thư mục dự án với cấu hình chuẩn và file `main.vit`:
+<div class="card-grid">
+  <div class="feature-mini-card">
+    <div class="icon">🚀</div>
+    <h4>Cực Kỳ Nhanh (Native Speed)</h4>
+    <p>Chạy trực tiếp trên VIT Native Engine với bộ phân luồng Async I/O đạt 245K+ req/s.</p>
+  </div>
 
-```bash
-vit init my-web-app
-cd my-web-app
-```
+  <div class="feature-mini-card">
+    <div class="icon">🧩</div>
+    <h4>Cú Pháp Mạch Lạc (Expressive DX)</h4>
+    <p>Cú pháp quen thuộc gần gũi với Express / Fastify / Hono giúp lập trình viên tiếp cận tức thì.</p>
+  </div>
 
-Cấu trúc dự án được khởi tạo bao gồm:
-```text
-my-web-app/
-├── vit.json          # File cấu hình thông tin dự án
-└── src/
-    └── main.vit      # Entrypoint chính chứa ứng dụng Web Vito
-```
+  <div class="feature-mini-card">
+    <div class="icon">🔥</div>
+    <h4>Zero-Config Live Reload</h4>
+    <p>Biên dịch & tự động cập nhật Server trong vài millisecond ngay khi bạn bấm lưu file.</p>
+  </div>
+
+  <div class="feature-mini-card">
+    <div class="icon">🛠️</div>
+    <h4>Bộ Công Cụ CLI Tích Hợp</h4>
+    <p>Hỗ trợ khởi tạo dự án `vit init`, kiểm tra `vit setup` và biên dịch `vit build` tiện lợi.</p>
+  </div>
+</div>
 
 ---
 
-## 💻 Viết Ứng Dụng Web API Đầu Tiên (`main.vit`)
+## 💻 Mã Nguồn Dự Án Mẫu Chi Tiết (`src/main.vit`)
 
-Mở file `src/main.vit` và nhập mã nguồn:
+Dưới đây là cấu trúc hoàn chỉnh của một ứng dụng Web API thương mại viết bằng **Vito**:
 
 ```typescript
 import { Vito, Request, Response } from "vito";
 
 function main(): number {
-    // 1. Khởi tạo Vito Web App Engine
+    // 1. Khởi tạo Vito App Engine
     let app = Vito.new();
 
-    // 2. Route GET HTML
+    // 2. Định nghĩa Route GET HTML
     app.get("/", (req: Request, res: Response) => {
-        res.html("<h1>Welcome to Vito Web Framework! 🚀</h1>");
+        res.html("""
+            <!DOCTYPE html>
+            <html>
+            <head><title>Vito Web Server</title></head>
+            <body style="font-family: sans-serif; text-align: center; padding: 50px;">
+                <h1>⚡ Welcome to Vito Web Framework!</h1>
+                <p>Native speed, zero overhead, modern DX.</p>
+            </body>
+            </html>
+        """);
     });
 
-    // 3. Route GET JSON API
-    app.get("/api/health", (req: Request, res: Response) => {
-        res.json({ status: "UP", engine: "Vit Native", uptime: "ok" });
+    // 3. Định nghĩa API Health Check (JSON)
+    app.get("/api/v1/health", (req: Request, res: Response) => {
+        res.json({
+            status: "UP",
+            engine: "Vit Native Phase 9",
+            uptime_seconds: 3600
+        });
     });
 
-    // 4. Lắng nghe cổng 3000
+    // 4. Lắng nghe tại cổng 3000
     app.listen(3000);
-    print("⚡ Vito Server running at http://localhost:3000");
+    print("⚡ Vito HTTP Server is listening at http://localhost:3000");
     return 0;
 }
 ```
 
 ---
 
-## 🚀 Chạy Ứng Dụng Với Live-Reload (`vit dev`)
+## 🛠 Tra Cứu Nhanh Lệnh CLI (Developer Cheat Sheet)
 
-Khởi chạy ứng dụng ở chế độ phát triển với công cụ **Live-Reloading & File Watcher**:
-
-```bash
-vit dev
-```
-
-> 💡 **Tính năng Live-Reload**: Khi bạn chỉnh sửa bất kỳ file `.vit` hoặc `.json` nào trong thư mục `src/`, `vit dev` sẽ tự động biên dịch và khởi động lại server tức thì trong vài millisecond!
-
-Mở trình duyệt tại địa chỉ `http://localhost:3000` để trải nghiệm kết quả! 🎉
+| Lệnh CLI | Tác dụng | Trường hợp sử dụng |
+| :--- | :--- | :--- |
+| `vit setup` | Kiểm tra môi trường PATH & LLVM Toolchain | Thực thi 1 lần sau khi cài đặt |
+| `vit init <app-name>` | Tự động tạo thư mục dự án Vito chuẩn | Khởi tạo dự án mới |
+| `vit dev` | Chạy dev server với Live-Reload tự động | Sử dụng trong quá trình phát triển |
+| `vit build` | Đóng gói ra file Binary Native tối ưu | Sử dụng để deploy Server Production |
 
 ---
 
-## 🧩 Tích Hợp VS Code Extension & Intellisense
+## 🧩 Các Bước Tiếp Theo
 
-Để có trải nghiệm lập trình tốt nhất với **Autocomplete**, **Syntax Highlighting** và **Code Snippets**:
+Bây giờ bạn đã sẵn sàng khám phá sâu hơn về hệ sinh thái Vito Framework:
 
-1. Tải về extension **[vscode-vit](https://github.com/longgoll/vit/tree/main/editors/vscode-vit)**.
-2. Mở file `.vit` trong VS Code.
-3. Gõ `vito-server` hoặc `vito-get` và nhấn `Tab` để tự động sinh khung code mẫu!
-4. Extension sẽ tự động kết nối với `vit-lsp` để hiển thị lỗi và gợi ý hàm thời gian thực.
-
----
-
-## ⚡ Thử Nghiệm Ngay Trên Web (Zero-Install Playground)
-
-Nếu bạn chưa muốn cài đặt vào máy, hãy truy cập ngay **[Interactive Playground](/playground)** trên trang web này để viết và chạy thử code Vito trực tiếp bằng bộ máy WebAssembly (WASI) trong 0 giây!
+- 🎯 **[Định Tuyến & Route Params](/guide/routing)**: Học cách xử lý URL Dynamic Parameters, Query Strings và Route Grouping.
+- 🧱 **[Hệ Thống Middleware](/guide/middleware)**: Xây dựng Logger, CORS, Rate Limiting và Auth Guard.
+- ⚡ **[Thử Nghiệm Trực Tiếp Trên Browser](/playground)**: Trải nghiệm viết và chạy code Vito trực tiếp bằng WebAssembly!

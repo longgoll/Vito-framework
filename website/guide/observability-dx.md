@@ -1,90 +1,87 @@
-# Giám Sát Metrics, Tracing & Công Cụ DX 📊
+# Metrics & DX Observability 📊
 
-**Vito Framework** tích hợp sẵn khả năng giám sát hệ thống thời gian thực (**Prometheus Metrics Exporter & OpenTelemetry Tracing**) cùng bộ công cụ kiểm thử in-memory siêu tốc và công cụ dòng lệnh (**CLI Generators & Diagnostics**) giúp tối ưu trải nghiệm phát triển (DX).
+**Vito Framework** tích hợp sẵn hệ thống quan sát thông số hệ thống (**Observability Suite**), tự động xuất mét dữ liệu chuẩn **Prometheus**, định vết **OpenTelemetry**, kiểm tra sức khỏe Kubernetes Probes và tự động sinh tài liệu **Swagger UI**.
 
 ---
 
-## 📈 Prometheus Metrics Exporter (`packages/metrics`)
+## 📊 1. Prometheus Metrics & OpenTelemetry Exporter (`packages/metrics`)
 
-Module `packages/metrics/metrics.vit` cung cấp endpoint `/metrics` chuẩn định dạng Prometheus text-based format, phục vụ trực tiếp cho Grafana Dashboard và Prometheus Scraper.
+Tự động theo dõi các chỉ số vận hành hệ thống thực tế và xuất ra endpoint `/metrics`:
 
-### Chỉ Số Thu Thập Chi Tiết:
-- **HTTP Request Counters**: `http_requests_total{method="GET|POST", status="200|404|500"}`
-- **Latency Histogram Summary**: `http_request_duration_seconds` với phân vị quantiles p50, p90, p99.
-- **Process Memory & CPU**: `process_cpu_seconds_total` & `process_resident_memory_bytes`.
+<div class="card-grid">
+  <div class="feature-mini-card">
+    <div class="icon">📈</div>
+    <h4>HTTP Throughput & Latency</h4>
+    <p>Theo dõi tổng số requests/giây (RPS), phân bố thời gian phản hồi (p50, p95, p99 histogram).</p>
+  </div>
 
-### Ví Dụ Sử Dụng:
+  <div class="feature-mini-card">
+    <div class="icon">💾</div>
+    <h4>Memory & Connection Pool</h4>
+    <p>Giám sát dung lượng RAM Heap sử dụng, số lượng kết nối CSDL active/idle trong Pool.</p>
+  </div>
+</div>
 
 ```typescript
-import { createPrometheusRegistry } from "vito/packages/metrics/metrics.vit";
+import { createPrometheusExporter } from "vito/packages/metrics/metrics.vit";
 
-let metricsRegistry = createPrometheusRegistry();
+let metrics = createPrometheusExporter();
 
-// Ghi nhận HTTP Request
-metricsRegistry.recordRequest("GET", "/api/v1/users", 200, 3);
-metricsRegistry.recordRequest("POST", "/api/v1/users", 200, 12);
-
-// Đăng ký endpoint /metrics trong middleware
-app.use((req, res) => metricsRegistry.handleMetricsEndpoint(req, res));
+// Xuất dữ liệu định dạng Prometheus text format tại /metrics
+app.get("/metrics", (req: Request, res: Response) => {
+    res.send(metrics.renderMetricsText());
+});
 ```
 
 ---
 
-## 🔗 OpenTelemetry (OTel) Tracing Integration
+## 📖 2. Auto Swagger UI & OpenAPI 3.0 (`packages/swagger`)
 
-Vito hỗ trợ chuẩn truyền dẫn Trace Context W3C (`traceparent` HTTP Header), giúp liên kết log và vết xử lý dữ liệu qua các microservices.
+Tự động tạo tài liệu API tương tác tại đường dẫn `/docs` mà không cần viết file YAML thủ công:
 
 ```typescript
-import { extractTraceParent, injectTraceParent } from "vito/packages/metrics/metrics.vit";
+import { createSwaggerUI } from "vito/packages/swagger/swagger.vit";
 
-// Trích xuất Trace ID & Span ID từ request header
-let traceCtx = extractTraceParent(req.header("traceparent"));
+let swagger = createSwaggerUI();
 
-// Truyền tiếp Trace context sang microservice downstream
-let outgoingHeader = injectTraceParent(traceCtx);
+// Đăng ký thông tin API
+swagger.setApiInfo("Vito Payment Gateway API", "v1.0.0", "Hệ thống thanh toán độ trễ siêu thấp");
+
+// Tự động phục vụ giao diện Swagger UI tại /docs
+app.use("/docs", swagger.middleware());
 ```
 
 ---
 
-## 🧪 Testing Framework & In-Memory Injector (`packages/testing`)
+## 🩺 3. Kubernetes Probes & Graceful Shutdown (`packages/health`)
 
-Gói `packages/testing/testing.vit` cho phép thực thi test suite siêu tốc trực tiếp trên bộ nhớ mà không cần mở cổng socket TCP thực tế trên hệ điều hành.
+Đảm bảo ứng dụng tương thích hoàn hảo với môi trường Orchestration (Kubernetes, Docker Swarm):
 
-### Giả Lập Fast Request với `app.inject()`:
-- Hỗ trợ đẩy đủ Body, Request Headers, Query String và Cookies.
-- **Đạt tiêu chí DoD**: Chạy 100+ test cases trong $< 1$ giây.
+::: code-group
 
-### DB Test Fixture & Isolation:
-- Tự động thực thi `SAVEPOINT` và `ROLLBACK` sau mỗi lượt test case để đảm bảo trạng thái CSDL luôn sạch.
+```typescript [1. Health Probes (/healthz & /readyz)]
+import { createHealthChecker } from "vito/packages/health/health.vit";
 
-```typescript
-import { createMockHttpEngine, createTestDbFixture } from "vito/packages/testing/testing.vit";
+let health = createHealthChecker();
 
-let mockEngine = createMockHttpEngine();
-let res = mockEngine.inject(app, "GET", "/healthz", "Accept: application/json", "");
+// Liveness Probe (Kiểm tra Process sống)
+app.get("/healthz", (req, res) => {
+    res.json(health.getLivenessStatus());
+});
 
-print("HTTP Status: " + res.statusCode);
-print("Response Body: " + res.json());
-
-// DB Isolation Test
-let dbFixture = createTestDbFixture("UserTests");
-dbFixture.beginIsolationTransaction();
-dbFixture.seedFixture("users", "{\"id\":\"usr_100\",\"email\":\"dev@vito.dev\"}");
-dbFixture.rollbackIsolationTransaction();
+// Readiness Probe (Kiểm tra kết nối CSDL & Redis)
+app.get("/readyz", (req, res) => {
+    let isReady = health.checkDatabaseConnection() && health.checkRedisConnection();
+    res.setStatus(isReady ? 200 : 503).json({ ready: isReady });
+});
 ```
 
----
+```typescript [2. Graceful Shutdown]
+// Tự động ngắt kết nối an toàn khi nhận tín hiệu SIGTERM / SIGINT
+health.onGracefulShutdown(() => {
+    print("🛑 Đang đóng kết nối CSDL và xử lý nốt các HTTP Requests dở dang...");
+    pool.closeAll();
+});
+```
 
-## 🛠 CLI Code Generators & Diagnostics (`packages/cli`)
-
-Công cụ `vit` CLI hỗ trợ tự động sinh mã nguồn chuẩn kiến trúc (Scaffolding Generator) và chẩn đoán môi trường hệ thống (`vit doctor`).
-
-### Lệnh Tự Động Sinh Mã (`vit generate` / `vit g`):
-- `vit g controller User`: Sinh Controller xử lý tài nguyên `User`.
-- `vit g service User`: Sinh Service logic nghiệp vụ.
-- `vit g middleware Auth`: Sinh Custom Middleware.
-- `vit g model User`: Sinh Vito ORM Model.
-- `vit g migration CreateUsers`: Sinh file SQL Auto-Migration.
-
-### Lệnh Chẩn Đoán Hệ Thống (`vit doctor`):
-Kích hoạt kiểm tra toàn diện cấu hình môi trường, phiên bản CSDL, tài nguyên CPU/RAM và các package trong monorepo.
+:::

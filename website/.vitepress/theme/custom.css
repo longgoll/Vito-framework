@@ -1,114 +1,232 @@
-/* Bun.sh inspired clean, minimalist layout & typography for VitePress */
+/* Modern Premium Styling for Vito Documentation */
 :root {
-  /* Warm cream & crisp accent system for Light mode */
-  --vp-c-brand-1: #18181b;
-  --vp-c-brand-2: #27272a;
-  --vp-c-brand-3: #3f3f46;
-  --vp-c-brand-soft: rgba(24, 24, 27, 0.05);
+  /* Vibrant, sleek modern theme palette */
+  --vp-c-brand-1: #6366f1;
+  --vp-c-brand-2: #4f46e5;
+  --vp-c-brand-3: #4338ca;
+  --vp-c-brand-soft: rgba(99, 102, 241, 0.12);
 
-  --vp-font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-  --vp-font-family-mono: "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+  
+  --vp-font-family-base: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --vp-font-family-mono: "JetBrains Mono", "Fira Code", monospace;
 }
 
 .dark {
-  /* Dark mode accent override */
-  --vp-c-brand-1: #f4f4f5;
-  --vp-c-brand-2: #e4e4e7;
-  --vp-c-brand-3: #d4d4d8;
-  --vp-c-brand-soft: rgba(244, 244, 245, 0.08);
+  --vp-c-brand-1: #818cf8;
+  --vp-c-brand-2: #6366f1;
+  --vp-c-brand-3: #4f46e5;
+  --vp-c-brand-soft: rgba(129, 140, 248, 0.16);
+
+  --vp-c-bg: #090d16;
+  --vp-c-bg-alt: #0e1424;
+  --vp-c-bg-elv: #131b2e;
+  --vp-c-bg-soft: #111827;
 }
 
 /* Header & Nav refinement */
 .VPNav {
   border-bottom: 1px solid var(--vp-c-divider) !important;
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
 }
 
-/* Hero Section */
-.VPHero .name {
+/* Document typography */
+.vp-doc h1 {
   font-weight: 800;
   letter-spacing: -0.03em;
+  background: linear-gradient(135deg, var(--vp-c-text-1) 30%, var(--vp-c-brand-1));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+  margin-bottom: 1.5rem;
 }
 
-.VPHero .text {
+.vp-doc h2 {
   font-weight: 700;
   letter-spacing: -0.02em;
+  border-top: none;
+  padding-top: 1.5rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
 }
 
-.VPHero .tagline {
-  color: var(--vp-c-text-2);
-  font-weight: 400;
-  max-width: 640px;
-  margin: 0 auto;
+/* Visual Pipeline Flow Boxes */
+.pipeline-flow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 1.25rem;
+  background: var(--vp-c-bg-soft, #f8fafc);
+  border: 1px solid var(--vp-c-divider, #e2e8f0);
+  border-radius: 14px;
+  margin: 1.5rem 0;
 }
 
-/* Action Buttons */
-.VPButton.brand {
-  background-color: var(--vp-c-text-1) !important;
-  color: var(--vp-c-bg) !important;
-  border: 1px solid var(--vp-c-text-1) !important;
-  font-weight: 600;
-  border-radius: 8px;
+.pipeline-step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--vp-c-bg-alt, #ffffff);
+  border: 1px solid var(--vp-c-divider, #cbd5e1);
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--vp-c-text-1, #0f172a);
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.03);
 }
 
-.VPButton.brand:hover {
-  opacity: 0.9;
+.pipeline-arrow {
+  color: var(--vp-c-brand-1, #4f46e5);
+  font-weight: 800;
+  font-size: 1.1rem;
 }
 
-.VPButton.alt {
-  background-color: var(--vp-c-bg-alt) !important;
-  color: var(--vp-c-text-1) !important;
-  border: 1px solid var(--vp-c-divider) !important;
-  font-weight: 500;
-  border-radius: 8px;
+/* Custom Visual Step Cards */
+.guide-steps {
+  display: grid;
+  gap: 1.25rem;
+  margin: 1.5rem 0;
 }
 
-.VPButton.alt:hover {
-  border-color: var(--vp-c-text-2) !important;
+.guide-step-card {
+  position: relative;
+  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 }
 
-/* Clean Feature Cards */
-.VPFeature {
-  border: 1px solid var(--vp-c-divider) !important;
-  background-color: var(--vp-c-bg-soft) !important;
-  border-radius: 12px !important;
-  transition: border-color 0.2s ease, transform 0.2s ease;
-}
-
-.VPFeature:hover {
-  border-color: var(--vp-c-text-3) !important;
+.guide-step-card:hover {
+  border-color: var(--vp-c-brand-1);
   transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.15);
 }
 
-.VPFeature .icon {
-  background-color: transparent !important;
-  font-size: 1.25rem;
+.guide-step-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.guide-step-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--vp-c-brand-1), var(--vp-c-brand-2));
+  color: white;
+  font-weight: 800;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.guide-step-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
   color: var(--vp-c-text-1);
 }
 
-.VPFeature .title {
-  font-weight: 600;
-  color: var(--vp-c-text-1);
-  font-size: 1.05rem;
+/* Feature Grid Cards */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
 }
 
-.VPFeature .details {
+.feature-mini-card {
+  background: var(--vp-c-bg-soft, #f8fafc);
+  border: 1px solid var(--vp-c-divider, #e2e8f0);
+  border-radius: 12px;
+  padding: 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.feature-mini-card:hover {
+  border-color: var(--vp-c-brand-1);
+  box-shadow: 0 8px 20px -4px rgba(99, 102, 241, 0.12);
+}
+
+.feature-mini-card .icon {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.feature-mini-card h4 {
+  margin: 0 0 0.4rem 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--vp-c-text-1);
+}
+
+.feature-mini-card p {
+  margin: 0;
+  font-size: 0.88rem;
   color: var(--vp-c-text-2);
-  font-size: 0.9rem;
   line-height: 1.5;
 }
 
-/* Tables & Benchmark showcase container */
+/* HTTP Method Badges */
+.method-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: var(--vp-font-family-mono);
+}
+
+.method-badge.get { background: rgba(16, 185, 129, 0.15); color: #059669; border: 1px solid rgba(16, 185, 129, 0.3); }
+.method-badge.post { background: rgba(59, 130, 246, 0.15); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.3); }
+.method-badge.put { background: rgba(245, 158, 11, 0.15); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.3); }
+.method-badge.delete { background: rgba(239, 68, 68, 0.15); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+.dark .method-badge.get { color: #34d399; }
+.dark .method-badge.post { color: #60a5fa; }
+.dark .method-badge.put { color: #fbbf24; }
+.dark .method-badge.delete { color: #f87171; }
+
+/* Custom Callout Box */
+.callout-box {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(168, 85, 247, 0.05) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.callout-box .callout-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  color: var(--vp-c-brand-1);
+  margin-bottom: 0.5rem;
+}
+
+/* Tables refinement */
 .vp-doc table {
   border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
+  border-radius: 10px;
   overflow: hidden;
   display: table;
   width: 100%;
 }
 
-.benchmark-showcase {
-  background: var(--vp-c-bg-soft) !important;
-  border: 1px solid var(--vp-c-divider) !important;
-  border-radius: 12px !important;
+.vp-doc th {
+  background-color: var(--vp-c-bg-soft);
+  font-weight: 700;
+  color: var(--vp-c-text-1);
 }

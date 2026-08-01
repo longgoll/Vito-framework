@@ -1,103 +1,70 @@
-# CLI & Developer Tooling 🛠
+# Bộ Công Cụ Vito CLI & Developer Tooling 🛠️
 
-Bộ công cụ **`vit` CLI** được tích hợp sẵn theo triết lý **All-in-One**, mang lại trải nghiệm phát triển mượt mà và tiện lợi tối đa cho lập trình viên mà không cần thêm công cụ bên thứ ba.
-
----
-
-## 🛠 Danh Sách Lệnh CLI Chính (`vit <command>`)
-
-### 1. `vit init [project-name]`
-Khởi tạo cấu trúc dự án Vit/Vito mới với file cấu hình `vit.json` và code mẫu `src/main.vit`:
-
-```bash
-vit init my-awesome-api
-cd my-awesome-api
-```
+**Vito CLI** là công cụ dòng lệnh đa năng giúp tự động hóa quy trình phát triển, từ khởi tạo dự án, live-reload watcher, chạy migration CSDL đến biên dịch đóng gói sản phẩm ra file Native Binary.
 
 ---
 
-### 2. `vit dev [file]` (Live-Reload Server)
-Khởi chạy Development Server hỗ trợ **Live-Reloading & File Watcher**. Tự động theo dõi các file nguồn `.vit` và tự động khởi động lại ứng dụng tức thì ngay khi bạn lưu file (Ctrl+S):
+## ⚡ Các Lệnh CLI Thường Dùng
 
-```bash
-vit dev
-# Hoặc chỉ định file cụ thể:
-vit dev src/main.vit
-```
+<div class="card-grid">
+  <div class="feature-mini-card">
+    <div class="icon">📦</div>
+    <h4><code>vit init &lt;app-name&gt;</code></h4>
+    <p>Khởi tạo thư mục dự án Vito mới với cấu trúc chuẩn và các file mẫu.</p>
+  </div>
 
----
+  <div class="feature-mini-card">
+    <div class="icon">🔥</div>
+    <h4><code>vit dev</code></h4>
+    <p>Khởi chạy Dev Server với công cụ File Watcher & Hot-Reloading siêu tốc.</p>
+  </div>
 
-### 3. `vit run <file>`
-Biên dịch và thực thi ứng dụng Vit trực tiếp bằng JIT Compiler siêu tốc mà không xuất file ra đĩa:
+  <div class="feature-mini-card">
+    <div class="icon">🚀</div>
+    <h4><code>vit build</code></h4>
+    <p>Biên dịch mã nguồn ra file Binary Native tối ưu hóa tối đa cho Production.</p>
+  </div>
 
-```bash
-vit run src/main.vit
-```
-
----
-
-### 4. `vit build <file> [options]`
-Biên dịch AOT ứng dụng thành **Single Standalone Executable Binary** siêu nhỏ gọn (< 5MB), không phụ thuộc môi trường khi deploy production:
-
-```bash
-# Biên dịch AOT mặc định
-vit build src/main.vit -o ./dist/server.exe
-
-# Biên dịch tối ưu hóa cao cấp (-O3 -march=native --lto=thin)
-vit build src/main.vit -O3 -march=native --lto=thin -o ./dist/server_fast.exe
-
-# Biên dịch ra WebAssembly (WASI)
-vit build src/main.vit --target wasm32-wasi -o ./dist/app.wasm
-```
+  <div class="feature-mini-card">
+    <div class="icon">🔍</div>
+    <h4><code>vit setup</code></h4>
+    <p>Kiểm tra biến môi trường PATH, bộ dịch Clang/LLVM và công cụ đi kèm.</p>
+  </div>
+</div>
 
 ---
 
-### 5. `vit setup`
-Tự động cấu hình biến môi trường `VIT_HOME` và tự động thêm thư mục chứa `vit` vào User `PATH` trong Hệ điều hành Windows/Linux/macOS:
+## 🗄️ Quản Lý CSDL với Vito CLI Migration Runner
 
-```bash
-vit setup
+::: code-group
+
+```bash [1. Tạo Migration Mới]
+vit migrate create add_users_table
+# -> Đã tạo file: migrations/20260802_001_add_users_table.vit
 ```
+
+```bash [2. Nâng Cấp Schema (Up)]
+vit migrate up
+# -> [✓] Executed migration: 20260802_001_add_users_table (4ms)
+```
+
+```bash [3. Khôi Phục Schema (Down)]
+vit migrate rollback
+# -> [✓] Reverted migration: 20260802_001_add_users_table (2ms)
+```
+
+:::
 
 ---
 
-### 6. `vit fmt [path]`
-Code Formatter tự động định dạng và chuẩn hóa thụt lề, dấu ngoặc cho mã nguồn Vit:
+## 🛠 Tra Cứu Toàn Bộ Lệnh CLI (Cheat Sheet)
 
-```bash
-vit fmt src/
-```
-
----
-
-### 7. `vit lint [path]`
-Linter tích hợp kiểm tra tĩnh mã nguồn, phát hiện các nguy cơ tiềm ẩn và gợi ý tối ưu hiệu năng:
-
-```bash
-vit lint src/main.vit
-```
-
----
-
-### 8. `vit lsp`
-Khởi chạy **Language Server Protocol (JSON-RPC)** qua stdin/stdout, phục vụ kết nối trực tiếp với các IDE như VS Code, Neovim, Sublime Text.
-
-```bash
-vit lsp
-```
-
----
-
-## 🧪 In-Memory Testing Injector (`app.inject`)
-
-Vito hỗ trợ phương thức thử nghiệm trực tiếp API trong bộ nhớ mà không cần mở cổng TCP socket thực tế:
-
-```typescript
-// Test GET /users/:id trực tiếp trong bộ nhớ
-let res = app.inject("GET", "/users/42");
-
-// Kiểm tra Status Code và Body
-if (res.statusCode == 200) {
-    print("Test Passed: " + res.body);
-}
-```
+| Câu lệnh CLI | Tham số / Tuỳ chọn | Mục đích sử dụng |
+| :--- | :--- | :--- |
+| `vit setup` | N/A | Xác minh Toolchain & PATH |
+| `vit init` | `<app-name>` | Tạo khung dự án mới |
+| `vit dev` | `--port 3000` | Khởi chạy Dev Server Hot-Reload |
+| `vit build` | `--release --target native` | Biên dịch Binary Production |
+| `vit migrate up` | N/A | Chạy tất cả các migrations chưa áp dụng |
+| `vit migrate rollback` | N/A | Khôi phục 1 bước migration gần nhất |
+| `vit seed` | N/A | Đổ dữ liệu mẫu (Seeder) vào CSDL |

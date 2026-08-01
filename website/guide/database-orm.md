@@ -1,19 +1,32 @@
-# Quản Lý CSDL & Vito ORM 🗄️
+# Quản Lý CSDL & Vito ORM Enterprise 🗄️
 
-**Vito Framework** cung cấp giải pháp quản lý cơ sở dữ liệu và ORM chuẩn Enterprise, tích hợp sẵn Connection Pooling tự động, Transaction Management an toàn và Auto Schema Migrations.
+**Vito Framework** tích hợp sẵn bộ quản lý Cơ sở dữ liệu và **Vito ORM** cấp Enterprise, bao gồm Connection Pooling tự động, Giao dịch nguyên tử ACID Transactions 100%, Savepoints và Schema Auto-Migrations.
 
 ---
 
-## 🏊 Connection Pool Manager (`packages/db/db_pool.vit`)
+## 🏊 1. Connection Pool Manager (`packages/db/db_pool.vit`)
 
-Connection Pool Manager giúp tự động quản lý vòng đời kết nối CSDL, tối ưu hiệu năng và tự động phục hồi kết nối đứt gãy.
+Quản lý vòng đời kết nối CSDL thông minh, tự động khôi phục kết nối bị gián đoạn và tối ưu hóa tài nguyên phần cứng.
 
-### Tính Năng Nổi Bật:
-- **Dynamic Connection Pooling**: Tự động mở rộng số lượng kết nối tới CSDL khi tải tăng cao và giới hạn theo `minConnections` và `maxConnections`.
-- **Fast Auto-Reconnect (< 100ms)**: Tự động phát hiện gián đoạn kết nối CSDL và tái tạo kết nối ngầm.
-- **Idle Connection Cleanup**: Tự động dọn dẹp các kết nối nhàn rỗi vượt quá ngưỡng `idleTimeoutMs`.
+<div class="card-grid">
+  <div class="feature-mini-card">
+    <div class="icon">⚡</div>
+    <h4>Dynamic Connection Pooling</h4>
+    <p>Tự động mở rộng kết nối theo tải thực tế trong khoảng `minConnections` và `maxConnections`.</p>
+  </div>
 
-### Ví Dụ Sử Dụng:
+  <div class="feature-mini-card">
+    <div class="icon">🔄</div>
+    <h4>Fast Auto-Reconnect (< 100ms)</h4>
+    <p>Tự động phát hiện đứt gãy mạng và tái tạo kết nối ngầm tức thì.</p>
+  </div>
+
+  <div class="feature-mini-card">
+    <div class="icon">🧹</div>
+    <h4>Idle Connection Eviction</h4>
+    <p>Thu hồi kết nối nhàn rỗi vượt quá ngưỡng `idleTimeoutMs` để giải phóng RAM.</p>
+  </div>
+</div>
 
 ```typescript
 import { createConnectionPool } from "vito/packages/db/db_pool.vit";
@@ -21,111 +34,97 @@ import { createConnectionPool } from "vito/packages/db/db_pool.vit";
 // Khởi tạo Connection Pool cho PostgreSQL
 let pool = createConnectionPool(
     "PostgreSQL",
-    "postgresql://vito_admin:secret@localhost:5432/vito_prod",
-    2, // minConnections
-    10 // maxConnections
+    "postgresql://admin:secret@localhost:5432/vito_db",
+    2,  // minConnections
+    10  // maxConnections
 );
 
 // Mượn kết nối từ Pool
 let connId = pool.acquireConnection();
 
-// Giải phóng kết nối về Pool sau khi hoàn tất
+// Giải phóng kết nối về lại Pool
 pool.releaseConnection(connId, 1000);
-
-// Tự động kiểm tra sức khỏe và phục hồi kết nối đứt gãy (< 100ms)
-let restoredCount = pool.checkHealthAndReconnect();
-
-// Thu hồi kết nối nhàn rỗi
-pool.reclaimIdleConnections(5000);
 ```
 
 ---
 
-## 🔄 Transaction Management Engine (`packages/orm/transaction.vit`)
+## 🔄 2. Transaction Management & Savepoints (`packages/orm/transaction.vit`)
 
-Hỗ trợ giao dịch CSDL nguyên tử (Atomic Transactions), đảm bảo tính toàn vẹn dữ liệu **ACID 100%** và điểm lưu (Savepoint) cho các giao dịch lồng nhau.
+Đảm bảo tính toàn vẹn dữ liệu tuyệt đối (**ACID 100%**) cho các thao tác tài chính và ngân hàng:
 
-### Ví Dụ Sử Dụng Transaction & ACID Rollback:
+::: code-group
 
-```typescript
+```typescript [1. Atomic Commit / Rollback]
 import { beginTransaction } from "vito/packages/orm/transaction.vit";
 
-// 1. Giao dịch thành công (COMMIT)
+// Khởi tạo Transaction
 let tx = beginTransaction(1001);
-tx.execute("INSERT INTO users (name, email) VALUES ('Alice', 'alice@vito.dev')");
-tx.execute("UPDATE account_balances SET amount = amount - 500 WHERE user_id = 10");
-tx.commit(); // Xử lý commit an toàn
 
-// 2. Giao dịch gặp lỗi (ROLLBACK tự động)
-let tx2 = beginTransaction(1002);
-tx2.execute("INSERT INTO orders (id, total) VALUES (501, 1200)");
-// Khi phát hiện lỗi trong quá trình xử lý:
-tx2.rollback(); // Toàn bộ câu lệnh trước đó bị hủy bỏ hoàn toàn (100% ACID)
+try {
+    tx.execute("UPDATE accounts SET balance = balance - 500 WHERE id = 10");
+    tx.execute("UPDATE accounts SET balance = balance + 500 WHERE id = 20");
+    
+    // Commit an toàn nếu không xảy ra lỗi
+    tx.commit();
+} catch (e) {
+    // Tự động Rollback 100% nếu có lỗi
+    tx.rollback();
+}
 ```
 
-### Nested Transactions & Savepoints:
-
-```typescript
-let tx3 = beginTransaction(1003);
-tx3.execute("INSERT INTO audit_logs (action) VALUES ('CHECKOUT')");
+```typescript [2. Nested Savepoints]
+let tx = beginTransaction(1002);
+tx.execute("INSERT INTO orders (id, user_id) VALUES (501, 12)");
 
 // Tạo điểm lưu Savepoint
-tx3.createSavepoint("sp_audit_done");
+tx.createSavepoint("sp_order_created");
 
-// Thử hiện các câu lệnh phụ
-tx3.execute("UPDATE coupons SET used = true WHERE code = 'DISCOUNT50'");
+// Thử áp dụng mã giảm giá
+tx.execute("UPDATE coupons SET used = true WHERE code = 'PROMO50'");
 
-// Khi gặp lỗi ở câu lệnh phụ, chỉ khôi phục về Savepoint thay vì hủy toàn bộ
-tx3.rollbackToSavepoint("sp_audit_done");
+// Khi gặp sự cố với mã giảm giá, chỉ rollback về Savepoint thay vì hủy đơn hàng
+tx.rollbackToSavepoint("sp_order_created");
 
-tx3.commit();
+tx.commit(); // Đơn hàng vẫn được lưu an toàn!
 ```
+
+:::
 
 ---
 
-## 📜 Migration Runner & Database Seeder (`packages/orm/migration.vit`)
+## 📜 3. Schema Migration & Seeder (`packages/orm/migration.vit`)
 
-Quản lý lịch sử nâng cấp cấu trúc bảng (Up/Down Migrations) và công cụ đổ dữ liệu mẫu (Seeder) cho Dev & Staging.
+Quản lý lịch sử thay đổi cấu trúc bảng (Up/Down Migrations) và công cụ đổ dữ liệu mẫu:
 
-### 1. Schema Migration Engine
+::: code-group
 
-```typescript
-import { createMigrationRunner, createSchemaDiffGenerator } from "vito/packages/orm/migration.vit";
+```typescript [1. Schema Migration Runner]
+import { createMigrationRunner } from "vito/packages/orm/migration.vit";
 
 let migrator = createMigrationRunner();
 
-// Đăng ký migration
+// Đăng ký Migration
 migrator.registerMigration(
-    "20260801_001",
+    "20260802_001",
     "create_users_table",
-    "CREATE TABLE users (id SERIAL PRIMARY KEY, username VARCHAR(50));",
+    "CREATE TABLE users (id SERIAL PRIMARY KEY, username VARCHAR(50), email VARCHAR(100));",
     "DROP TABLE users;"
 );
 
-// Chạy Migration (Lưu vết tự động vào bảng `schema_migrations`)
+// Tiến hành nâng cấp Schema
 migrator.runUp();
-
-// Revert migration nếu cần
-migrator.runDown();
 ```
 
-### 2. Schema Diff Generator
-
-```typescript
-let diffGen = createSchemaDiffGenerator();
-let diffSql = diffGen.generateDiffSql("Product", "products", "", "id INT, title VARCHAR(100), price NUMERIC");
-// Trả về câu lệnh SQL: CREATE TABLE products (id INT, title VARCHAR(100), price NUMERIC);
-```
-
-### 3. Database Seeder
-
-```typescript
+```typescript [2. Database Seeder]
 import { createDatabaseSeeder } from "vito/packages/orm/migration.vit";
 
 let seeder = createDatabaseSeeder();
-seeder.addSeed("users", '{"username":"vito_admin","email":"admin@vito.dev"}');
-seeder.addSeed("products", '{"title":"Vito Enterprise Server","price":999}');
 
-// Nạp dữ liệu vào CSDL
+seeder.addSeed("users", JSON.stringify({ username: "admin", role: "SuperAdmin" }));
+seeder.addSeed("products", JSON.stringify({ name: "Vito Enterprise", price: 999 }));
+
+// Thực thi Nạp dữ liệu
 seeder.runSeeder();
 ```
+
+:::

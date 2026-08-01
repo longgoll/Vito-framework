@@ -1,117 +1,148 @@
-# Routing & Parameters 🎯
+# Định Tuyến & Route Parameters 🎯
 
-Hệ thống định tuyến (Router) trong **Vito** dựa trên **Radix Trie / Segment Matcher Engine** thế hệ 9 (Phase 9 Performance Engine), giúp khớp đường dẫn chính xác với tốc độ tối ưu $O(1)$ Fast Path và hỗ trợ nhiều dạng dynamic parameters & wildcard matching.
+Hệ thống định tuyến (**Router Engine**) của **Vito Framework** được thiết kế dựa trên thuật toán **Radix Trie (Phase 9 Engine)**, kết hợp giữa tốc độ phản hồi cực đại và khả năng trích xuất tham số linh hoạt.
+
+<RouteVisualizer />
 
 ---
 
-## 🛣 Định Nghĩa Route Cơ Bản
+## ⚡ 1. Các Phương Thức HTTP Cơ Bản
 
-Vito hỗ trợ đầy đủ các phương thức HTTP chuẩn:
+Vito cung cấp cú pháp cực kỳ ngắn gọn cho tất cả các HTTP Methods phổ biến:
 
-```javascript
-app.get("/users", (req, res) => { res.send("GET /users"); });
-app.post("/users", (req, res) => { res.send("POST /users"); });
-app.put("/users", (req, res) => { res.send("PUT /users"); });
-app.delete("/users", (req, res) => { res.send("DELETE /users"); });
+<div class="card-grid">
+  <div class="feature-mini-card">
+    <span class="method-badge get">GET</span>
+    <h4>Truy Vấn Dữ Liệu</h4>
+    <p>Sử dụng `app.get("/path", handler)` để xử lý câu lệnh lấy dữ liệu hoặc trang HTML.</p>
+  </div>
+
+  <div class="feature-mini-card">
+    <span class="method-badge post">POST</span>
+    <h4>Tạo Mới Dữ Liệu</h4>
+    <p>Sử dụng `app.post("/path", handler)` để tiếp nhận dữ liệu từ Form hoặc Body JSON.</p>
+  </div>
+
+  <div class="feature-mini-card">
+    <span class="method-badge put">PUT</span>
+    <h4>Cập Nhật Dữ Liệu</h4>
+    <p>Sử dụng `app.put("/path", handler)` để ghi đè hoặc chỉnh sửa tài nguyên hiện có.</p>
+  </div>
+
+  <div class="feature-mini-card">
+    <span class="method-badge delete">DELETE</span>
+    <h4>Xóa Tài Nguyên</h4>
+    <p>Sử dụng `app.delete("/path", handler)` để thực hiện các thao tác gỡ bỏ tài nguyên.</p>
+  </div>
+</div>
+
+```typescript
+app.get("/users", (req: Request, res: Response) => { res.send("GET /users"); });
+app.post("/users", (req: Request, res: Response) => { res.send("POST /users"); });
+app.put("/users/:id", (req: Request, res: Response) => { res.send("PUT /users"); });
+app.delete("/users/:id", (req: Request, res: Response) => { res.send("DELETE /users"); });
 ```
 
 ---
 
-## ⚡ Static Route Fast Path ($O(1)$ Direct Lookup)
+## 🎯 2. Route Parameters Động & Wildcard
 
-Đối với các đường dẫn tĩnh (Static Routes), Vito tự động kích hoạt luồng **Static Fast Path** phân tách với độ phức tạp $O(1)$ bỏ qua giai đoạn duyệt cây Trie động, mang lại tốc độ phản hồi tối đa:
+Bạn có thể dễ dàng định nghĩa tham số URL với cú pháp `:paramName` hoặc wildcard nhiều phân đoạn `*filepath`:
 
-```javascript
-app.get("/health", (req, res) => { res.json("{\"status\":\"healthy\"}"); });
-app.get("/metrics", (req, res) => { res.json("{\"uptime\": 3600}"); });
-```
+::: code-group
 
----
-
-## 🎯 Route Parameters Động (`:param` & `*wildcard`)
-
-Bạn có thể khai báo các phân đoạn tham số động bằng dấu cú pháp `:paramName` hoặc đường dẫn đa cấp wildcard `*filepath`. Truy xuất giá trị tham số thông qua hàm `req.param(key)`:
-
-```javascript
-// Khớp URL dạng /users/123 hoặc /users/abc
+```typescript [1. Param Động Single Segment (:id)]
+// URL thực tế: /users/101 hoặc /users/alex
 app.get("/users/:id", (req: Request, res: Response) => {
     let userId = req.param("id");
-    res.json("{\"user_id\":\"" + userId + "\"}");
+    res.json({ status: "success", user_id: userId });
 });
+```
 
-// Khớp URL nhiều cấp: /products/electronics/laptop-1
+```typescript [2. Multi Params (:category/:id)]
+// URL thực tế: /products/electronics/laptop-m3
 app.get("/products/:category/:id", (req: Request, res: Response) => {
     let cat = req.param("category");
-    let pId = req.param("id");
-    res.json("{\"category\":\"" + cat + "\", \"item_id\":\"" + pId + "\"}");
+    let itemId = req.param("id");
+    res.json({ category: cat, item_id: itemId });
 });
+```
 
-// Khớp Wildcard đa phân đoạn: /files/docs/2026/report.pdf
+```typescript [3. Wildcard Path (*filepath)]
+// URL thực tế: /files/docs/2026/q3/report.pdf
 app.get("/files/*filepath", (req: Request, res: Response) => {
-    let filePath = req.param("filepath");
-    res.send("Requested file: " + filePath);
+    let path = req.param("filepath");
+    res.send("Requested path: " + path);
 });
 ```
 
----
-
-## 🔄 Trailing Slash Normalization (Strict vs Lax Mode)
-
-Mặc định, Vito hoạt động ở chế độ **Lax Trailing Slash**, tự động chuẩn hóa `/users/` tương đương `/users` mà không cần ghi đè hoặc khai báo 2 lần. Bạn có thể bật chế độ **Strict Mode** nếu muốn phân biệt chính xác:
-
-```javascript
-// Thiết lập Strict Trailing Slash Mode
-app.setStrictSlash(true);
-```
+:::
 
 ---
 
-## 🔍 URL Search Query Parameters (`?key=value`)
+## 🔍 3. URL Search Query String (`?key=value`)
 
-Để lấy tham số URL search query (ví dụ: `/search?q=vit-lang&page=2`), sử dụng hàm `req.query(key)`:
+Để trích xuất các tham số từ Query String (ví dụ: `/search?q=vit-lang&page=2`), sử dụng phương thức `req.query(key)`:
 
-```javascript
+```typescript
 app.get("/search", (req: Request, res: Response) => {
-    let query = req.query("q");
-    let page = req.query("page");
-    res.json("{\"search_term\":\"" + query + "\", \"page\":\"" + page + "\"}");
+    let keyword = req.query("q");
+    let pageNum = req.query("page");
+
+    res.json({
+        search_query: keyword,
+        page: pageNum,
+        results: []
+    });
 });
 ```
 
 ---
 
-## 👥 Route Grouping (`app.group`)
+## 👥 4. Gom Nhóm Route Mô-đun (Route Grouping)
 
-Gom nhóm các đường dẫn có chung tiền tố URL (Prefix) giúp cấu trúc mã nguồn mô-đun và gọn gàng hơn:
+Quản lý tiền tố đường dẫn (Prefix) và Middleware tập trung bằng tính năng **Route Grouping**:
 
-```javascript
+```typescript
+// Tất cả các route bên trong đều có prefix '/api/v1'
 app.group("/api/v1", (v1) => {
-    // URL thực tế: /api/v1/users
+    // 📍 GET /api/v1/users
     v1.get("/users", (req, res) => {
-        res.json("[\"Alice\", \"Bob\"]");
+        res.json(["Alice", "Bob", "Charlie"]);
     });
 
-    // URL thực tế: /api/v1/users/:id
+    // 📍 GET /api/v1/users/42
     v1.get("/users/:id", (req, res) => {
         let id = req.param("id");
-        res.json("{\"id\":\"" + id + "\"}");
+        res.json({ id: id, name: "User " + id });
     });
 });
 ```
 
 ---
 
-## 🎨 Custom 404 Not Found & Error Handling
+## 🎨 5. Tùy Biến Trang Lỗi 404 (Not Found Handler)
 
-Mặc định Vito sẽ trả về trang 404 tiêu chuẩn. Bạn có thể tùy biến trang lỗi 404 bằng `app.setNotFoundHandler`:
+Dễ dàng thay thế trang thông báo lỗi 404 mặc định bằng giao diện HTML hoặc JSON chuẩn của dự án:
 
-```javascript
+```typescript
 app.setNotFoundHandler((req: Request, res: Response) => {
-    res.setStatus(404).html("""
-        <div style="text-align: center; padding: 50px;">
-            <h1>404 - Page Not Found 😢</h1>
-            <p>Đường dẫn bạn yêu cầu không tồn tại trên server Vito!</p>
-        </div>
-    """);
+    res.setStatus(404).json({
+        error: "Route Not Found",
+        path: req.path(),
+        timestamp: "2026-08-02"
+    });
 });
 ```
+
+---
+
+## 📋 Tra Cứu Nhanh API Reference (Cheat Sheet)
+
+| Phương thức | Trả về | Ví dụ sử dụng |
+| :--- | :--- | :--- |
+| `req.param(key)` | `string` | `let userId = req.param("id");` |
+| `req.query(key)` | `string` | `let page = req.query("page");` |
+| `res.json(data)` | `Response` | `res.json({ success: true });` |
+| `res.html(content)` | `Response` | `res.html("<h1>Title</h1>");` |
+| `res.setStatus(code)`| `Response` | `res.setStatus(200);` |
