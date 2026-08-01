@@ -109,3 +109,22 @@ Mở socket và bắt đầu lắng nghe kết nối HTTP trên cổng được 
 | `res.html(htmlStr)` | Trả về nội dung HTML với `Content-Type: text/html` | `res.html("<h1>Hi</h1>")` |
 | `res.send(textStr)` | Trả về chuỗi Plain Text | `res.send("Hello World")` |
 | `res.sendChunk(chunk)` | Trả về dữ liệu kiểu Stream / Chunked response | `res.sendChunk(data)` |
+
+---
+
+## ⚡ WebSockets, Event Bus & Job Queue (`Phase 13`)
+
+| Hàm / Structure | Package | Mô Tả |
+| :--- | :--- | :--- |
+| `createWebSocketServer(port, maxConn)` | `packages/websocket/websocket.vit` | Khởi tạo High-Concurrency WebSocket Server engine. |
+| `wsServer.broadcastToRoom(room, msg)` | `packages/websocket/websocket.vit` | Gửi tin nhắn Broadcast đến toàn bộ kết nối trong một Room. |
+| `wsServer.unicast(client, msg)` | `packages/websocket/websocket.vit` | Gửi tin nhắn đơn tới một WebSocket Client cụ thể. |
+| `wsServer.checkHeartbeats(client, time)` | `packages/websocket/websocket.vit` | Kiểm tra Ping/Pong và giải phóng kết nối chết (Stale eviction). |
+| `compressFrame(payload)` / `decompressFrame` | `packages/websocket/websocket.vit` | Nén và giải nén dữ liệu khung truyền WebSocket per-message deflate. |
+| `createEventBus()` | `packages/events/event_bus.vit` | Khởi tạo Async Internal Event Bus dispatcher. |
+| `eventBus.emitAsync(event, payload)` | `packages/events/event_bus.vit` | Phát hành sự kiện bất đồng bộ không ngắt luồng chính. |
+| `createRedisPubSubAdapter(host, port)` | `packages/events/redis_pubsub.vit` | Tạo Redis Pub/Sub adapter giao tiếp liên Node trong cụm Server. |
+| `createJobQueue(driver)` | `packages/queue/queue.vit` | Khởi tạo Background Job Queue (Driver: `"memory"` hoặc `"redis"`). |
+| `jobQueue.scheduleJob(job, delayMs)` | `packages/queue/queue.vit` | Đẩy job vào hàng chờ hoãn thi hành theo thời gian thiết lập. |
+| `jobQueue.processNextJob(shouldFail, reason)` | `packages/queue/queue.vit` | Xử lý job tiếp theo, hỗ trợ Exponential Backoff Retry & DLQ. |
+

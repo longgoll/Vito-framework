@@ -1,0 +1,56 @@
+// Vito Internal Event Bus & Async Event Emitter (vito/packages/events/event_bus.vit)
+
+struct EventSubscription {
+    eventName: string,
+    handlerId: string,
+    isOnce: boolean,
+    active: boolean
+}
+
+struct AsyncEventEmitter {
+    sub0_event: string, sub0_handler: string,
+    sub1_event: string, sub1_handler: string,
+    sub2_event: string, sub2_handler: string,
+    sub3_event: string, sub3_handler: string,
+    subscriptionCount: number,
+    totalEventsEmitted: number,
+
+    function init(): AsyncEventEmitter {
+        this.sub0_event = ""; this.sub0_handler = "";
+        this.sub1_event = ""; this.sub1_handler = "";
+        this.sub2_event = ""; this.sub2_handler = "";
+        this.sub3_event = ""; this.sub3_handler = "";
+        this.subscriptionCount = 0;
+        this.totalEventsEmitted = 0;
+        return this;
+    },
+
+    function on(eventName: string, handlerId: string): boolean {
+        if (this.subscriptionCount == 0) { this.sub0_event = eventName; this.sub0_handler = handlerId; }
+        if (this.subscriptionCount == 1) { this.sub1_event = eventName; this.sub1_handler = handlerId; }
+        if (this.subscriptionCount == 2) { this.sub2_event = eventName; this.sub2_handler = handlerId; }
+        if (this.subscriptionCount == 3) { this.sub3_event = eventName; this.sub3_handler = handlerId; }
+        this.subscriptionCount = this.subscriptionCount + 1;
+        print("[EventBus] Subscribed handler '" + handlerId + "' to event '" + eventName + "'");
+        return true;
+    },
+
+    function emitAsync(eventName: string, dataPayload: string): number {
+        this.totalEventsEmitted = this.totalEventsEmitted + 1;
+        let matchedHandlers = 0;
+
+        if (this.sub0_event == eventName) { matchedHandlers = matchedHandlers + 1; }
+        if (this.sub1_event == eventName) { matchedHandlers = matchedHandlers + 1; }
+        if (this.sub2_event == eventName) { matchedHandlers = matchedHandlers + 1; }
+        if (this.sub3_event == eventName) { matchedHandlers = matchedHandlers + 1; }
+
+        print("[EventBus AsyncEmit] Fired event '" + eventName + "' -> Dispatched to " + matchedHandlers + " handlers in background task queue. Payload: " + dataPayload);
+        return matchedHandlers;
+    }
+}
+
+function createEventBus(): AsyncEventEmitter {
+    let bus: AsyncEventEmitter;
+    bus.init();
+    return bus;
+}

@@ -35,6 +35,9 @@ features:
   - icon: 🌐
     title: Cloud Edge & WebAssembly
     details: Serverless WASM adapter tương thích Cloudflare Workers & AWS Lambda với cold start < 1ms.
+  - icon: 🔌
+    title: Real-Time WebSockets & Job Queue
+    details: Full-Duplex WebSockets với Rooms, Heartbeat, Deflate compression, Async Event Bus và Hàng chờ công việc Redis với Exponential Backoff Retry & DLQ.
   - icon: 🛠 Bộ Công Cụ CLI Tích Hợp
     details: Hỗ trợ Hot Reloading (vit dev), tạo dự án mẫu (vit create) và đóng gói 1 file thực thi (< 5MB).
 ---

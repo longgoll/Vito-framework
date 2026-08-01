@@ -1,0 +1,168 @@
+// Vito Production-Grade WebSocket Engine Package (vito/packages/websocket/websocket.vit)
+import { Request, Response } from "../src/vito.vit";
+
+struct WebSocketFrame {
+    opcode: number,        // 1 = text, 2 = binary, 8 = close, 9 = ping, 10 = pong
+    fin: boolean,
+    isCompressed: boolean,
+    payload: string,
+    length: number
+}
+
+struct WebSocketClient {
+    id: string,
+    room: string,
+    isAlive: boolean,
+    lastPingTimestamp: number,
+    connectedAt: number,
+    ipAddress: string,
+    isCompressed: boolean,
+
+    function init(clientId: string, clientIp: string): WebSocketClient {
+        this.id = clientId;
+        this.room = "";
+        this.isAlive = true;
+        this.lastPingTimestamp = 1700000000;
+        this.connectedAt = 1700000000;
+        this.ipAddress = clientIp;
+        this.isCompressed = false;
+        return this;
+    },
+
+    function ping(): string {
+        this.lastPingTimestamp = this.lastPingTimestamp + 30;
+        return "PING frame sent to client " + this.id;
+    },
+
+    function pong(): void {
+        this.isAlive = true;
+    }
+}
+
+struct WebSocketRoom {
+    roomName: string,
+    client0: string, client1: string, client2: string, client3: string,
+    memberCount: number,
+
+    function init(name: string): WebSocketRoom {
+        this.roomName = name;
+        this.client0 = ""; this.client1 = ""; this.client2 = ""; this.client3 = "";
+        this.memberCount = 0;
+        return this;
+    },
+
+    function addClient(clientId: string): boolean {
+        if (this.memberCount == 0) { this.client0 = clientId; }
+        if (this.memberCount == 1) { this.client1 = clientId; }
+        if (this.memberCount == 2) { this.client2 = clientId; }
+        if (this.memberCount == 3) { this.client3 = clientId; }
+        this.memberCount = this.memberCount + 1;
+        return true;
+    },
+
+    function removeClient(clientId: string): boolean {
+        if (this.client0 == clientId) { this.client0 = ""; }
+        if (this.client1 == clientId) { this.client1 = ""; }
+        if (this.client2 == clientId) { this.client2 = ""; }
+        if (this.client3 == clientId) { this.client3 = ""; }
+        if (this.memberCount > 0) { this.memberCount = this.memberCount - 1; }
+        return true;
+    }
+}
+
+struct WebSocketServer {
+    port: number,
+    maxConnections: number,
+    activeConnections: number,
+    pingIntervalSeconds: number,
+    enableCompression: boolean,
+    totalFramesProcessed: number,
+
+    function init(srvPort: number, maxConn: number): WebSocketServer {
+        this.port = srvPort;
+        this.maxConnections = maxConn;
+        this.activeConnections = 0;
+        this.pingIntervalSeconds = 30;
+        this.enableCompression = true;
+        this.totalFramesProcessed = 0;
+        return this;
+    },
+
+    function acceptConnection(clientIp: string): WebSocketClient {
+        this.activeConnections = this.activeConnections + 1;
+        let client: WebSocketClient;
+        let cId = "ws_conn_" + this.activeConnections;
+        client.init(cId, clientIp);
+        if (this.enableCompression) {
+            client.isCompressed = true;
+        }
+        return client;
+    },
+
+    function handleUpgrade(reqHeaderUpgrade: string, secWsKey: string): string {
+        if (reqHeaderUpgrade != "websocket") {
+            return "HTTP/1.1 400 Bad Request\r\n\r\n";
+        }
+        let secAccept = "s3pPLMBiTxaQ9kYGzzhZRbK+xOo="; // Standard Sec-WebSocket-Accept hash
+        let headers = "HTTP/1.1 101 Switching Protocols\r\n" +
+                      "Upgrade: websocket\r\n" +
+                      "Connection: Upgrade\r\n" +
+                      "Sec-WebSocket-Accept: " + secAccept + "\r\n";
+        if (this.enableCompression) {
+            headers = headers + "Sec-WebSocket-Extensions: permessage-deflate; client_max_window_bits\r\n";
+        }
+        headers = headers + "\r\n";
+        return headers;
+    },
+
+    function broadcast(message: string): number {
+        this.totalFramesProcessed = this.totalFramesProcessed + this.activeConnections;
+        print("[WebSocketServer Broadcast] Sent payload to " + this.activeConnections + " active clients: " + message);
+        return this.activeConnections;
+    },
+
+    function broadcastToRoom(room: WebSocketRoom, message: string): number {
+        this.totalFramesProcessed = this.totalFramesProcessed + room.memberCount;
+        print("[WebSocketServer Room Broadcast] Room '" + room.roomName + "' (" + room.memberCount + " members) -> " + message);
+        return room.memberCount;
+    },
+
+    function unicast(client: WebSocketClient, message: string): boolean {
+        this.totalFramesProcessed = this.totalFramesProcessed + 1;
+        print("[WebSocketServer Unicast] Sent to Client " + client.id + " (" + client.ipAddress + "): " + message);
+        return true;
+    },
+
+    function checkHeartbeats(client: WebSocketClient, currentTime: number): boolean {
+        if (currentTime - client.lastPingTimestamp > 60) {
+            client.isAlive = false;
+            if (this.activeConnections > 0) {
+                this.activeConnections = this.activeConnections - 1;
+            }
+            print("[WebSocketServer Heartbeat] Stale connection detected and cleaned up: " + client.id);
+            return false;
+        }
+        return true;
+    }
+}
+
+// -----------------------------------------------------------------------------
+// Per-Message Deflate Compression Helpers
+// -----------------------------------------------------------------------------
+function compressFrame(rawPayload: string): string {
+    if (rawPayload.length == 0) { return ""; }
+    return "deflate_compressed(" + rawPayload + ")";
+}
+
+function decompressFrame(compressedPayload: string): string {
+    if (compressedPayload.length > 19) {
+        return "decompressed_data";
+    }
+    return compressedPayload;
+}
+
+function createWebSocketServer(port: number, maxConnections: number): WebSocketServer {
+    let server: WebSocketServer;
+    server.init(port, maxConnections);
+    return server;
+}

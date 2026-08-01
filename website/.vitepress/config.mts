@@ -21,6 +21,7 @@ export default defineConfig({
           { text: 'Middleware', link: '/guide/middleware' },
           { text: 'CSDL & ORM', link: '/guide/database-orm' },
           { text: 'Auth & Bảo Mật', link: '/guide/auth-security' },
+          { text: 'Realtime & Jobs', link: '/guide/realtime-jobs' },
           { text: 'CLI', link: '/guide/cli' },
           { text: 'API Reference', link: '/api/overview' }
         ],
@@ -33,6 +34,7 @@ export default defineConfig({
               { text: 'Hệ Thống Middleware', link: '/guide/middleware' },
               { text: 'Quản Lý CSDL & Vito ORM', link: '/guide/database-orm' },
               { text: 'Xác Thực & Bảo Mật (Auth)', link: '/guide/auth-security' },
+              { text: 'Realtime & Job Queue ⚡', link: '/guide/realtime-jobs' },
               { text: 'CLI & Công Cụ Phát Triển', link: '/guide/cli' }
             ]
           },
@@ -42,6 +44,7 @@ export default defineConfig({
               { text: 'Tổng Quan Middleware', link: '/guide/middleware' },
               { text: 'Database Pool & Vito ORM', link: '/guide/database-orm' },
               { text: 'Auth & Security Suite', link: '/guide/auth-security' },
+              { text: 'Realtime WebSockets & Jobs', link: '/guide/realtime-jobs' },
               { text: 'Tra Cứu API Reference', link: '/api/overview' }
             ]
           }
@@ -63,6 +66,7 @@ export default defineConfig({
           { text: 'Middleware', link: '/en/guide/middleware' },
           { text: 'Database & ORM', link: '/en/guide/database-orm' },
           { text: 'Auth & Security', link: '/en/guide/auth-security' },
+          { text: 'Realtime & Jobs', link: '/en/guide/realtime-jobs' },
           { text: 'CLI', link: '/en/guide/cli' },
           { text: 'API Reference', link: '/en/api/overview' }
         ],
@@ -75,6 +79,7 @@ export default defineConfig({
               { text: 'Middleware System', link: '/en/guide/middleware' },
               { text: 'Database & Vito ORM', link: '/en/guide/database-orm' },
               { text: 'Auth & Security Suite', link: '/en/guide/auth-security' },
+              { text: 'Realtime & Job Queue ⚡', link: '/en/guide/realtime-jobs' },
               { text: 'CLI & Developer Tooling', link: '/en/guide/cli' }
             ]
           },
@@ -84,6 +89,7 @@ export default defineConfig({
               { text: 'Official Middlewares', link: '/en/guide/middleware' },
               { text: 'Database Pool & Vito ORM', link: '/en/guide/database-orm' },
               { text: 'Auth & Security Suite', link: '/en/guide/auth-security' },
+              { text: 'Realtime WebSockets & Jobs', link: '/en/guide/realtime-jobs' },
               { text: 'API Reference', link: '/en/api/overview' }
             ]
           }

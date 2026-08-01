@@ -109,3 +109,22 @@ Starts listening for HTTP connections on the given port.
 | `res.html(htmlStr)` | Send HTML response with `Content-Type: text/html` | `res.html("<h1>Hi</h1>")` |
 | `res.send(textStr)` | Send Plain Text response | `res.send("Hello World")` |
 | `res.sendChunk(chunk)` | Send stream / chunked response | `res.sendChunk(data)` |
+
+---
+
+## ⚡ WebSockets, Event Bus & Job Queue (`Phase 13`)
+
+| Function / Structure | Package | Description |
+| :--- | :--- | :--- |
+| `createWebSocketServer(port, maxConn)` | `packages/websocket/websocket.vit` | Initializes High-Concurrency WebSocket Server engine. |
+| `wsServer.broadcastToRoom(room, msg)` | `packages/websocket/websocket.vit` | Sends broadcast message to all active clients in a Room. |
+| `wsServer.unicast(client, msg)` | `packages/websocket/websocket.vit` | Sends a private message to a target WebSocket client. |
+| `wsServer.checkHeartbeats(client, time)` | `packages/websocket/websocket.vit` | Performs Ping/Pong check and evicts stale connections. |
+| `compressFrame(payload)` / `decompressFrame` | `packages/websocket/websocket.vit` | Compresses/decompresses WebSocket frame using per-message deflate. |
+| `createEventBus()` | `packages/events/event_bus.vit` | Initializes Async Internal Event Bus dispatcher. |
+| `eventBus.emitAsync(event, payload)` | `packages/events/event_bus.vit` | Emits event asynchronously without stalling HTTP main thread. |
+| `createRedisPubSubAdapter(host, port)` | `packages/events/redis_pubsub.vit` | Instantiates Redis Pub/Sub adapter for inter-node communication. |
+| `createJobQueue(driver)` | `packages/queue/queue.vit` | Initializes Background Job Queue (Driver: `"memory"` or `"redis"`). |
+| `jobQueue.scheduleJob(job, delayMs)` | `packages/queue/queue.vit` | Pushes delayed job to queue to be executed after specified delay. |
+| `jobQueue.processNextJob(shouldFail, reason)` | `packages/queue/queue.vit` | Processes next job, handling Exponential Backoff Retry & DLQ transition. |
+

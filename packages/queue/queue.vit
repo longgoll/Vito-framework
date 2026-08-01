@@ -1,0 +1,169 @@
+// Vito Background Job Queue Engine with DLQ & Retry Policy (vito/packages/queue/queue.vit)
+import { RedisClient, connectRedis } from "../packages/db/redis.vit";
+
+struct Job {
+    id: string,
+    jobType: string,         // "email:send", "image:process", "report:export"
+    payload: string,
+    attempts: number,
+    maxRetries: number,
+    backoffFactor: number,   // Multiplier for exponential backoff (e.g. 2 -> 1s, 2s, 4s...)
+    status: string,          // "pending", "processing", "completed", "failed", "dlq"
+    delayMs: number,
+    scheduledAt: number,
+    errorMessage: string,
+
+    function init(jobId: string, jType: string, dataPayload: string): Job {
+        this.id = jobId;
+        this.jobType = jType;
+        this.payload = dataPayload;
+        this.attempts = 0;
+        this.maxRetries = 3;
+        this.backoffFactor = 2;
+        this.status = "pending";
+        this.delayMs = 0;
+        this.scheduledAt = 1700000000;
+        this.errorMessage = "";
+        return this;
+    },
+
+    function calculateBackoffDelay(): number {
+        let delay = 1000;
+        let i = 0;
+        while (i < this.attempts) {
+            delay = delay * this.backoffFactor;
+            i = i + 1;
+        }
+        return delay;
+    }
+}
+
+struct DeadLetterQueue {
+    dlq0_id: string, dlq0_type: string, dlq0_error: string,
+    dlq1_id: string, dlq1_type: string, dlq1_error: string,
+    count: number,
+
+    function init(): DeadLetterQueue {
+        this.dlq0_id = ""; this.dlq0_type = ""; this.dlq0_error = "";
+        this.dlq1_id = ""; this.dlq1_type = ""; this.dlq1_error = "";
+        this.count = 0;
+        return this;
+    },
+
+    function push(job: Job): boolean {
+        if (this.count == 0) { this.dlq0_id = job.id; this.dlq0_type = job.jobType; this.dlq0_error = job.errorMessage; }
+        if (this.count == 1) { this.dlq1_id = job.id; this.dlq1_type = job.jobType; this.dlq1_error = job.errorMessage; }
+        this.count = this.count + 1;
+        print("[DeadLetterQueue DLQ] Job ID '" + job.id + "' moved to DLQ after exceeding " + job.maxRetries + " retries. Reason: " + job.errorMessage);
+        return true;
+    }
+}
+
+struct VitoJobQueue {
+    driver: string,          // "memory" or "redis"
+    redisHost: string,
+    redisPort: number,
+    j0_id: string, j0_type: string, j0_payload: string, j0_status: string, j0_attempts: number, j0_maxRetries: number, j0_delayMs: number,
+    j1_id: string, j1_type: string, j1_payload: string, j1_status: string, j1_attempts: number, j1_maxRetries: number, j1_delayMs: number,
+    jobCount: number,
+    completedCount: number,
+    failedCount: number,
+    dlq: DeadLetterQueue,
+
+    function init(queueDriver: string): VitoJobQueue {
+        this.driver = queueDriver;
+        this.redisHost = "127.0.0.1";
+        this.redisPort = 6379;
+        this.j0_id = ""; this.j0_type = ""; this.j0_payload = ""; this.j0_status = ""; this.j0_attempts = 0; this.j0_maxRetries = 3; this.j0_delayMs = 0;
+        this.j1_id = ""; this.j1_type = ""; this.j1_payload = ""; this.j1_status = ""; this.j1_attempts = 0; this.j1_maxRetries = 3; this.j1_delayMs = 0;
+        this.jobCount = 0;
+        this.completedCount = 0;
+        this.failedCount = 0;
+        let dlqObj: DeadLetterQueue;
+        dlqObj.init();
+        this.dlq = dlqObj;
+        return this;
+    },
+
+    function pushJob(job: Job): boolean {
+        if (this.jobCount == 0) {
+            this.j0_id = job.id; this.j0_type = job.jobType; this.j0_payload = job.payload;
+            this.j0_status = job.status; this.j0_attempts = job.attempts; this.j0_maxRetries = job.maxRetries; this.j0_delayMs = job.delayMs;
+        }
+        if (this.jobCount == 1) {
+            this.j1_id = job.id; this.j1_type = job.jobType; this.j1_payload = job.payload;
+            this.j1_status = job.status; this.j1_attempts = job.attempts; this.j1_maxRetries = job.maxRetries; this.j1_delayMs = job.delayMs;
+        }
+        this.jobCount = this.jobCount + 1;
+        if (this.driver == "redis") {
+            print("[Redis Queue Driver] RPUSH queue:default -> Job " + job.id + " (" + job.jobType + ")");
+        } else {
+            print("[Memory Queue Driver] Pushed Job " + job.id + " (" + job.jobType + ") to queue. Delay: " + job.delayMs + "ms");
+        }
+        return true;
+    },
+
+    function scheduleJob(job: Job, delayMilliseconds: number): boolean {
+        job.delayMs = delayMilliseconds;
+        job.status = "scheduled";
+        return this.pushJob(job);
+    },
+
+    function processNextJob(shouldFail: boolean, failureReason: string): boolean {
+        if (this.jobCount == 0) {
+            print("[JobQueue] No pending jobs to process.");
+            return false;
+        }
+
+        let targetId = this.j0_id;
+        let targetType = this.j0_type;
+        let targetAttempts = this.j0_attempts;
+        let targetMaxRetries = this.j0_maxRetries;
+
+        if (this.j0_status == "completed" || this.j0_status == "dlq") {
+            if (this.jobCount >= 2 && this.j1_status != "completed" && this.j1_status != "dlq") {
+                targetId = this.j1_id;
+                targetType = this.j1_type;
+                targetAttempts = this.j1_attempts;
+                targetMaxRetries = this.j1_maxRetries;
+            }
+        }
+
+        print("[JobQueue Worker] Picked up Job ID: '" + targetId + "' (" + targetType + ") - Attempt #" + (targetAttempts + 1));
+
+        if (shouldFail) {
+            targetAttempts = targetAttempts + 1;
+            this.j0_attempts = targetAttempts;
+
+            if (targetAttempts >= targetMaxRetries) {
+                this.j0_status = "dlq";
+                this.failedCount = this.failedCount + 1;
+                let failedJob: Job;
+                failedJob.init(targetId, targetType, "payload");
+                failedJob.attempts = targetAttempts;
+                failedJob.maxRetries = targetMaxRetries;
+                failedJob.errorMessage = failureReason;
+                this.dlq.push(failedJob);
+                return false;
+            } else {
+                this.j0_status = "pending";
+                let backoff = 1000;
+                let k = 0;
+                while (k < targetAttempts) { backoff = backoff * 2; k = k + 1; }
+                print("[JobQueue Retry Policy] Job ID '" + targetId + "' failed. Scheduling Retry #" + targetAttempts + " with Exponential Backoff (" + backoff + "ms delay)");
+                return false;
+            }
+        } else {
+            this.j0_status = "completed";
+            this.completedCount = this.completedCount + 1;
+            print("[JobQueue Worker] Job ID '" + targetId + "' (" + targetType + ") COMPLETED SUCCESSFULLY! ✨");
+            return true;
+        }
+    }
+}
+
+function createJobQueue(driver: string): VitoJobQueue {
+    let q: VitoJobQueue;
+    q.init(driver);
+    return q;
+}

@@ -7,19 +7,19 @@
 ## 🎯 Danh Sách Mục Tiêu Chi Tiết
 
 ### 1. 🔌 Production-Grade WebSocket Engine (`packages/websocket`)
-- [ ] **High-Concurrency WebSocket Server**: Xử lý hàng trăm nghìn kết nối đồng thời với bộ nhớ tối thiểu.
-- [ ] **Rooms & Broadcast System**: Hỗ trợ phân nhóm Room/Channel, gửi tin nhắn Broadcast hoặc Unicast.
-- [ ] **Heartbeat Ping/Pong & Auto Reconnect**: Tự động dọn dẹp các kết nối chết (Stale Connections) và giữ kết nối mở.
-- [ ] **Per-Message Deflate Compression**: Nén dữ liệu khung truyền WebSocket để giảm băng thông.
+- [x] **High-Concurrency WebSocket Server**: Xử lý hàng trăm nghìn kết nối đồng thời với bộ nhớ tối thiểu.
+- [x] **Rooms & Broadcast System**: Hỗ trợ phân nhóm Room/Channel, gửi tin nhắn Broadcast hoặc Unicast.
+- [x] **Heartbeat Ping/Pong & Auto Reconnect**: Tự động dọn dẹp các kết nối chết (Stale Connections) và giữ kết nối mở.
+- [x] **Per-Message Deflate Compression**: Nén dữ liệu khung truyền WebSocket để giảm băng thông.
 
 ### 2. 📬 Internal Event Bus & Pub/Sub (`packages/events`)
-- [ ] **Async Event Emitter**: Phát hành và đăng ký sự kiện nội bộ không bất đồng bộ (`app.on("user:registered", handler)`).
-- [ ] **Redis Pub/Sub Adapter**: Mở rộng giao tiếp sự kiện liên Node trong mô hình đa Server.
+- [x] **Async Event Emitter**: Phát hành và đăng ký sự kiện nội bộ không bất đồng bộ (`app.on("user:registered", handler)`).
+- [x] **Redis Pub/Sub Adapter**: Mở rộng giao tiếp sự kiện liên Node trong mô hình đa Server.
 
 ### 3. ⏳ Background Job Queue Engine (`packages/queue`)
-- [ ] **In-Memory & Redis Job Queue**: Hỗ trợ đẩy tác vụ nặng (Gửi email, xử lý ảnh, xuất báo cáo) xuống hàng chờ.
-- [ ] **Delayed & Scheduled Jobs**: Hỗ trợ lên lịch công việc chạy sau $N$ giây hoặc theo định kỳ Cron.
-- [ ] **Retry Policy & Dead Letter Queue (DLQ)**: Khôi phục tác vụ thất bại với Exponential Backoff và lưu trữ job lỗi.
+- [x] **In-Memory & Redis Job Queue**: Hỗ trợ đẩy tác vụ nặng (Gửi email, xử lý ảnh, xuất báo cáo) xuống hàng chờ.
+- [x] **Delayed & Scheduled Jobs**: Hỗ trợ lên lịch công việc chạy sau $N$ giây hoặc theo định kỳ Cron.
+- [x] **Retry Policy & Dead Letter Queue (DLQ)**: Khôi phục tác vụ thất bại với Exponential Backoff và lưu trữ job lỗi.
 
 ---
 

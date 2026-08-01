@@ -1,0 +1,37 @@
+// Vito Redis Pub/Sub Multi-Node Adapter (vito/packages/events/redis_pubsub.vit)
+import { RedisClient, connectRedis } from "../packages/db/redis.vit";
+
+struct RedisPubSubAdapter {
+    redisHost: string,
+    redisPort: number,
+    isSubscribed: boolean,
+    subscribedChannel: string,
+    client: RedisClient,
+
+    function init(host: string, port: number): RedisPubSubAdapter {
+        this.redisHost = host;
+        this.redisPort = port;
+        this.isSubscribed = false;
+        this.subscribedChannel = "";
+        this.client = connectRedis(host, port);
+        return this;
+    },
+
+    function publishCluster(channel: string, message: string): number {
+        print("[Redis Pub/Sub Cluster] Publishing message to channel '" + channel + "' across Vito cluster nodes.");
+        return this.client.publish(channel, message);
+    },
+
+    function subscribeChannel(channel: string): boolean {
+        this.isSubscribed = true;
+        this.subscribedChannel = channel;
+        print("[Redis Pub/Sub Cluster] Node subscribed to Redis Pub/Sub channel '" + channel + "'");
+        return true;
+    }
+}
+
+function createRedisPubSubAdapter(host: string, port: number): RedisPubSubAdapter {
+    let adapter: RedisPubSubAdapter;
+    adapter.init(host, port);
+    return adapter;
+}
