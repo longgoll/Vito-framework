@@ -10,42 +10,45 @@ hero:
     alt: Vito Framework Logo
   actions:
     - theme: brand
-      text: Get Started 🚀
+      text: Get Started
       link: /en/guide/getting-started
     - theme: alt
-      text: API Reference 📚
+      text: Playground
+      link: /playground
+    - theme: alt
+      text: API Reference
       link: /en/api/overview
     - theme: alt
-      text: View on GitHub 🐙
+      text: GitHub
       link: https://github.com/longgoll/Vito-framework
 
 features:
-  - icon: ⚡
+  - icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>'
     title: Fast HTTP Request Engine
     details: Zero-dependency parser for GET, POST, PUT, DELETE with automatic query parameters, header, and payload body extraction.
-  - icon: 🎯
+  - icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>'
     title: Dynamic Routing & Grouping
     details: Segment matching (:id), multi-level path parameters, and modular prefix grouping with app.group().
-  - icon: 🔗
+  - icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>'
     title: Rich Middleware Ecosystem
     details: Official chainable plugins for CORS, Logger, Static Files, Rate Limiting, JWT Auth, SSE, and Security Headers.
-  - icon: 🔒
+  - icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>'
     title: Native TLS 1.3 & Protocols
     details: Built-in TLS encryption, HTTP/2 multiplexing, and HTTP/3 QUIC (UDP) transport engine.
-  - icon: 🌐
+  - icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>'
     title: Edge Runtime & WASM
     details: Serverless WebAssembly adapter for Cloudflare Workers & AWS Lambda with < 1ms cold start time.
-  - icon: 🔌
+  - icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>'
     title: Real-Time WebSockets & Job Queue
     details: Full-Duplex WebSockets with Rooms, Heartbeats, Deflate compression, Async Event Bus, and Redis Job Queue with Retries & DLQ.
-  - icon: 📊
+  - icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>'
     title: Prometheus Metrics & DX Tooling
     details: Native Prometheus /metrics endpoint, W3C OpenTelemetry Tracing, ultra-fast in-memory test injector, DB isolation fixtures, and vit doctor diagnostics.
-  - icon: 🛠 Developer Tooling & CLI
+  - icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>'
+    title: Developer Tooling & CLI
     details: Hot Module Reloading (vit dev), code generators (vit g controller), project scaffolding (vit create), and single binary compilation (< 5MB).
 ---
 
 <BenchmarkVisualizer />
 
 <CodeComparison />
-

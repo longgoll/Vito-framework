@@ -1,6 +1,7 @@
 import DefaultTheme from 'vitepress/theme'
 import BenchmarkVisualizer from './components/BenchmarkVisualizer.vue'
 import CodeComparison from './components/CodeComparison.vue'
+import './custom.css'
 
 export default {
   extends: DefaultTheme,
