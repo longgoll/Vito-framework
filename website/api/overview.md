@@ -22,6 +22,9 @@ Tạo nhóm các đường dẫn với chung tiền tố URL.
 ### `app.use(middleware)`
 Thêm middleware vào pipeline xử lý request.
 
+### `app.setStrictSlash(strict: boolean)`
+Bật/tắt chế độ Strict Trailing Slash Normalization (`/users/` vs `/users`). Mặc định: `false` (Lax mode).
+
 ### `app.setNotFoundHandler(handler)`
 Thiết lập handler tùy chỉnh khi không tìm thấy route (404 Not Found).
 
@@ -30,11 +33,23 @@ Mở socket và bắt đầu lắng nghe kết nối HTTP trên cổng được 
 
 ---
 
+## ⚡ Performance Packages (`packages/pool` & `packages/router`)
+
+| Function / Helper | Package | Mô Tả |
+| :--- | :--- | :--- |
+| `createMemoryArena()` | `packages/pool/pool.vit` | Tạo đối tượng quản lý Request Memory Arena slots tái sử dụng. |
+| `createTcpBufferPool()` | `packages/pool/pool.vit` | Tạo Buffer Recycling Pool cho TCP Read/Write buffers. |
+| `zeroAllocHeaderLookup(raw, target)` | `packages/pool/pool.vit` | Trích xuất giá trị Header trực tiếp từ raw HTTP stream không cấp phát memory. |
+| `createRadixRouter(strict)` | `packages/router/router.vit` | Khởi tạo Radix Trie Router với $O(1)$ Static Route Fast Path. |
+| `normalizePath(path, strict)` | `packages/router/router.vit` | Chuẩn hóa đường dẫn URL theo chế độ Lax / Strict slash. |
+
+---
+
 ## 📥 `Request` Class
 
 | Phương Thức | Mô Tả | Ví Dụ |
 | :--- | :--- | :--- |
-| `req.param(key)` | Lấy giá trị tham số dynamic path `:key` | `req.param("id")` |
+| `req.param(key)` | Lấy giá trị tham số dynamic path `:key` hoặc `*wildcard` | `req.param("id")` |
 | `req.query(key)` | Lấy giá trị search query string `?key=val` | `req.query("page")` |
 | `req.header(key)` | Lấy giá trị HTTP request header | `req.header("Authorization")` |
 | `req.method` | Thuộc tính trả về phương thức HTTP (GET, POST...) | `req.method` |

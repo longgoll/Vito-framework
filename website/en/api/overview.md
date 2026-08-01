@@ -22,6 +22,9 @@ Groups routes under a common path prefix.
 ### `app.use(middleware)`
 Applies a middleware to the request processing pipeline.
 
+### `app.setStrictSlash(strict: boolean)`
+Enables/disables Strict Trailing Slash Normalization (`/users/` vs `/users`). Default: `false` (Lax mode).
+
 ### `app.setNotFoundHandler(handler)`
 Sets a custom handler for 404 Not Found responses.
 
@@ -30,11 +33,23 @@ Starts listening for HTTP connections on the given port.
 
 ---
 
+## ⚡ Performance Packages (`packages/pool` & `packages/router`)
+
+| Function / Helper | Package | Description |
+| :--- | :--- | :--- |
+| `createMemoryArena()` | `packages/pool/pool.vit` | Instantiates reusable Request Memory Arena slots manager. |
+| `createTcpBufferPool()` | `packages/pool/pool.vit` | Instantiates TCP Read/Write Buffer Recycling Pool. |
+| `zeroAllocHeaderLookup(raw, target)` | `packages/pool/pool.vit` | Extracts header value directly from raw HTTP stream with zero heap allocation. |
+| `createRadixRouter(strict)` | `packages/router/router.vit` | Initializes Radix Trie Router with $O(1)$ Static Route Fast Path. |
+| `normalizePath(path, strict)` | `packages/router/router.vit` | Normalizes URL path according to Lax / Strict slash rules. |
+
+---
+
 ## 📥 `Request` Class
 
 | Method | Description | Example |
 | :--- | :--- | :--- |
-| `req.param(key)` | Get dynamic path parameter `:key` | `req.param("id")` |
+| `req.param(key)` | Get dynamic path parameter `:key` or `*wildcard` | `req.param("id")` |
 | `req.query(key)` | Get search query parameter `?key=val` | `req.query("page")` |
 | `req.header(key)` | Get HTTP request header value | `req.header("Authorization")` |
 | `req.method` | Property returning the HTTP method (GET, POST...) | `req.method` |

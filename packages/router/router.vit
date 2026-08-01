@@ -1,0 +1,109 @@
+// Vito High-Performance Radix Trie Router & Fast Path Package (vito/packages/router/router.vit)
+import { charAt } from "std/string";
+
+// 1. Trailing Slash Normalization Helper (Strict vs Lax Mode)
+function normalizePath(rawPath: string, isStrict: boolean): string {
+    if (rawPath.length <= 1) { return rawPath; }
+    if (isStrict) { return rawPath; } // Strict mode: preserve original path exactly
+    
+    // Lax mode: strip trailing slash except for root "/"
+    let len = rawPath.length;
+    if (charAt(rawPath, len - 1) == "/") {
+        let normalized = "";
+        let i = 0;
+        while (i < len - 1) {
+            normalized = normalized + charAt(rawPath, i);
+            i = i + 1;
+        }
+        return normalized;
+    }
+    return rawPath;
+}
+
+// 2. Radix Trie Router Node Structure (Flat Unrolled)
+struct RadixNode {
+    pathSegment: string,
+    isParamNode: boolean,
+    isWildcardNode: boolean,
+    paramName: string,
+    isTerminal: boolean,
+    routeMethod: string,
+
+    function init(segment: string): void {
+        this.pathSegment = segment;
+        this.isParamNode = false;
+        this.isWildcardNode = false;
+        this.paramName = "";
+        this.isTerminal = false;
+        this.routeMethod = "";
+
+        if (segment.length > 0) {
+            if (charAt(segment, 0) == ":") {
+                this.isParamNode = true;
+                let name = "";
+                let kp = 1;
+                while (kp < segment.length) {
+                    name = name + charAt(segment, kp);
+                    kp = kp + 1;
+                }
+                this.paramName = name;
+            } else {
+                if (charAt(segment, 0) == "*") {
+                    this.isWildcardNode = true;
+                    let wName = "";
+                    let kw = 1;
+                    while (kw < segment.length) {
+                        wName = wName + charAt(segment, kw);
+                        kw = kw + 1;
+                    }
+                    if (wName == "") { wName = "wildcard"; }
+                    this.paramName = wName;
+                }
+            }
+        }
+    }
+}
+
+// 3. Radix Router with Static Fast Path Engine (Flat struct unrolling for native performance)
+struct RadixRouter {
+    isStrictSlash: boolean,
+    f_count: number,
+    f0_method: string, f0_path: string, f0_has: boolean,
+    f1_method: string, f1_path: string, f1_has: boolean,
+    f2_method: string, f2_path: string, f2_has: boolean,
+    f3_method: string, f3_path: string, f3_has: boolean,
+
+    function init(strictMode: boolean): void {
+        this.isStrictSlash = strictMode;
+        this.f_count = 0;
+        this.f0_has = false; this.f1_has = false;
+        this.f2_has = false; this.f3_has = false;
+        this.f0_method = ""; this.f0_path = "";
+        this.f1_method = ""; this.f1_path = "";
+        this.f2_method = ""; this.f2_path = "";
+        this.f3_method = ""; this.f3_path = "";
+    },
+
+    function registerStatic(method: string, path: string): void {
+        if (this.f_count == 0) { this.f0_method = method; this.f0_path = path; this.f0_has = true; }
+        if (this.f_count == 1) { this.f1_method = method; this.f1_path = path; this.f1_has = true; }
+        if (this.f_count == 2) { this.f2_method = method; this.f2_path = path; this.f2_has = true; }
+        if (this.f_count == 3) { this.f3_method = method; this.f3_path = path; this.f3_has = true; }
+        this.f_count = this.f_count + 1;
+    },
+
+    function matchRoute(method: string, reqPath: string): boolean {
+        let path = normalizePath(reqPath, this.isStrictSlash);
+        if (this.f0_has && this.f0_method == method && this.f0_path == path) { return true; }
+        if (this.f1_has && this.f1_method == method && this.f1_path == path) { return true; }
+        if (this.f2_has && this.f2_method == method && this.f2_path == path) { return true; }
+        if (this.f3_has && this.f3_method == method && this.f3_path == path) { return true; }
+        return false;
+    }
+}
+
+function createRadixRouter(strictMode: boolean): RadixRouter {
+    let router: RadixRouter;
+    router.init(strictMode);
+    return router;
+}

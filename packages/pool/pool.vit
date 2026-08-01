@@ -1,0 +1,129 @@
+// Vito Core Memory Arena & Buffer Recycling Pool Package (vito/packages/pool/pool.vit)
+import { charAt } from "std/string";
+
+// 1. Memory Arena Manager (Flat struct layout for VIT native runtime stability)
+struct MemoryArena {
+    s0_inUse: boolean, s0_slotId: number, s0_reqMethod: string, s0_reqPath: string,
+    s1_inUse: boolean, s1_slotId: number, s1_reqMethod: string, s1_reqPath: string,
+    s2_inUse: boolean, s2_slotId: number, s2_reqMethod: string, s2_reqPath: string,
+    s3_inUse: boolean, s3_slotId: number, s3_reqMethod: string, s3_reqPath: string,
+    capacity: number,
+    activeAllocations: number,
+
+    function init(): void {
+        this.capacity = 4;
+        this.activeAllocations = 0;
+        this.s0_inUse = false; this.s0_slotId = 0; this.s0_reqMethod = ""; this.s0_reqPath = "";
+        this.s1_inUse = false; this.s1_slotId = 1; this.s1_reqMethod = ""; this.s1_reqPath = "";
+        this.s2_inUse = false; this.s2_slotId = 2; this.s2_reqMethod = ""; this.s2_reqPath = "";
+        this.s3_inUse = false; this.s3_slotId = 3; this.s3_reqMethod = ""; this.s3_reqPath = "";
+    },
+
+    function acquireSlot(): number {
+        if (!this.s0_inUse) { this.s0_inUse = true; this.activeAllocations = this.activeAllocations + 1; return 0; }
+        if (!this.s1_inUse) { this.s1_inUse = true; this.activeAllocations = this.activeAllocations + 1; return 1; }
+        if (!this.s2_inUse) { this.s2_inUse = true; this.activeAllocations = this.activeAllocations + 1; return 2; }
+        if (!this.s3_inUse) { this.s3_inUse = true; this.activeAllocations = this.activeAllocations + 1; return 3; }
+        return -1;
+    },
+
+    function releaseSlot(slotId: number): void {
+        if (slotId == 0 && this.s0_inUse) { this.s0_inUse = false; this.activeAllocations = this.activeAllocations - 1; }
+        if (slotId == 1 && this.s1_inUse) { this.s1_inUse = false; this.activeAllocations = this.activeAllocations - 1; }
+        if (slotId == 2 && this.s2_inUse) { this.s2_inUse = false; this.activeAllocations = this.activeAllocations - 1; }
+        if (slotId == 3 && this.s3_inUse) { this.s3_inUse = false; this.activeAllocations = this.activeAllocations - 1; }
+    }
+}
+
+// 2. Buffer Recycling Engine for TCP Read/Write Buffers
+struct TcpBufferPool {
+    b0_inUse: boolean, b0_capacity: number,
+    b1_inUse: boolean, b1_capacity: number,
+    b2_inUse: boolean, b2_capacity: number,
+    b3_inUse: boolean, b3_capacity: number,
+    recycledCount: number,
+
+    function init(): void {
+        this.recycledCount = 0;
+        this.b0_inUse = false; this.b0_capacity = 4096;
+        this.b1_inUse = false; this.b1_capacity = 4096;
+        this.b2_inUse = false; this.b2_capacity = 4096;
+        this.b3_inUse = false; this.b3_capacity = 4096;
+    },
+
+    function acquireBuffer(): number {
+        if (!this.b0_inUse) { this.b0_inUse = true; return 0; }
+        if (!this.b1_inUse) { this.b1_inUse = true; return 1; }
+        if (!this.b2_inUse) { this.b2_inUse = true; return 2; }
+        if (!this.b3_inUse) { this.b3_inUse = true; return 3; }
+        return -1;
+    },
+
+    function releaseBuffer(bufId: number): void {
+        if (bufId == 0) { this.b0_inUse = false; }
+        if (bufId == 1) { this.b1_inUse = false; }
+        if (bufId == 2) { this.b2_inUse = false; }
+        if (bufId == 3) { this.b3_inUse = false; }
+        this.recycledCount = this.recycledCount + 1;
+    }
+}
+
+// 3. Zero-Allocation Fast Header Lookup (Index Scanner)
+function zeroAllocHeaderLookup(raw: string, targetHeader: string): string {
+    if (raw.length == 0 || targetHeader.length == 0) { return ""; }
+    let len = raw.length;
+    let i = 0;
+
+    // Skip Request Line (e.g., GET /path HTTP/1.1\r\n)
+    while (i < len && charAt(raw, i) != "\n") { i = i + 1; }
+    i = i + 1;
+
+    let matchTargetLen = targetHeader.length;
+    while (i < len) {
+        // Line start check for header match
+        let isMatch = true;
+        let k = 0;
+        while (k < matchTargetLen && (i + k) < len) {
+            let c1 = charAt(raw, i + k);
+            let c2 = charAt(targetHeader, k);
+            if (c1 != c2) {
+                isMatch = false;
+                break;
+            }
+            k = k + 1;
+        }
+
+        if (isMatch && (i + matchTargetLen) < len && charAt(raw, i + matchTargetLen) == ":") {
+            let valStart = i + matchTargetLen + 1;
+            while (valStart < len && charAt(raw, valStart) == " ") { valStart = valStart + 1; }
+            let valEnd = valStart;
+            while (valEnd < len && charAt(raw, valEnd) != "\r" && charAt(raw, valEnd) != "\n") {
+                valEnd = valEnd + 1;
+            }
+            let res = "";
+            let p = valStart;
+            while (p < valEnd) {
+                res = res + charAt(raw, p);
+                p = p + 1;
+            }
+            return res;
+        }
+
+        // Fast forward to next line break
+        while (i < len && charAt(raw, i) != "\n") { i = i + 1; }
+        i = i + 1;
+    }
+    return "";
+}
+
+function createMemoryArena(): MemoryArena {
+    let arena: MemoryArena;
+    arena.init();
+    return arena;
+}
+
+function createTcpBufferPool(): TcpBufferPool {
+    let pool: TcpBufferPool;
+    pool.init();
+    return pool;
+}

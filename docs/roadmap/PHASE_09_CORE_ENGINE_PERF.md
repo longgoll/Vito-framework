@@ -7,18 +7,18 @@
 ## 🎯 Danh Sách Mục Tiêu Chi Tiết
 
 ### 1. 🧬 Zero-Allocation Request Memory Pool (`vito/core/pool`)
-- [ ] **Memory Arena Allocator**: Khởi tạo vùng nhớ tái sử dụng cho từng HTTP Request để tránh cấp phát động (Heap allocation) liên tục.
-- [ ] **Buffer Recycling Engine**: Tái sử dụng TCP Read/Write Buffer qua đối tượng Pool để giảm tối đa chi phí Garbage Collection (GC) hoặc Deallocation.
-- [ ] **Header Parsing without Allocation**: Trích xuất HTTP Headers trực tiếp bằng String View / Byte Slice chỉ trỏ đến buffer có sẵn.
+- [x] **Memory Arena Allocator**: Khởi tạo vùng nhớ tái sử dụng cho từng HTTP Request để tránh cấp phát động (Heap allocation) liên tục.
+- [x] **Buffer Recycling Engine**: Tái sử dụng TCP Read/Write Buffer qua đối tượng Pool để giảm tối đa chi phí Garbage Collection (GC) hoặc Deallocation.
+- [x] **Header Parsing without Allocation**: Trích xuất HTTP Headers trực tiếp bằng String View / Byte Slice chỉ trỏ đến buffer có sẵn.
 
 ### 2. ⚡ Dynamic Radix Trie Router Enhancement (`packages/router`)
-- [ ] **Zero-Alloc Param Matcher**: Trích xuất các tham số động `:param` và `*wildcard` mà không cần khởi tạo mảng / Map mới trên mỗi request.
-- [ ] **Static Route Fast Path**: Phân tách luồng xử lý riêng cho đường dẫn tĩnh (Static Routes) với độ phức tạp $O(1)$ Hash Map Lookup.
-- [ ] **Strict & Lax Trailing Slash Normalization**: Tự động và tối ưu hóa xử lý dấu gạch chéo cuối URL (`/users` vs `/users/`).
+- [x] **Zero-Alloc Param Matcher**: Trích xuất các tham số động `:param` và `*wildcard` mà không cần khởi tạo mảng / Map mới trên mỗi request.
+- [x] **Static Route Fast Path**: Phân tách luồng xử lý riêng cho đường dẫn tĩnh (Static Routes) với độ phức tạp $O(1)$ Hash Map Lookup.
+- [x] **Strict & Lax Trailing Slash Normalization**: Tự động và tối ưu hóa xử lý dấu gạch chéo cuối URL (`/users` vs `/users/`).
 
 ### 3. 🚀 High-Speed HTTP/1.1 & HTTP/2 Parser Optimization
-- [ ] **SIMD-Accelerated Chunk & Boundary Scanner**: Tận dụng các chỉ thị SIMD để quét nhanh các ký tự ngắt dòng `\r\n\r\n` và delimiter.
-- [ ] **Stream Response Pipeline**: Tối ưu hóa pipeline phản hồi `res.send()` và `res.json()` với zero-copy buffer flushing.
+- [x] **SIMD-Accelerated Chunk & Boundary Scanner**: Tận dụng các chỉ thị SIMD để quét nhanh các ký tự ngắt dòng `\r\n\r\n` và delimiter.
+- [x] **Stream Response Pipeline**: Tối ưu hóa pipeline phản hồi `res.send()` và `res.json()` với zero-copy buffer flushing.
 
 ---
 

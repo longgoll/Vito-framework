@@ -1,6 +1,6 @@
 # Routing & Parameters 🎯
 
-Hệ thống định tuyến (Router) trong **Vito** dựa trên **Radix Trie / Segment Matcher Engine**, giúp khớp đường dẫn chính xác với tốc độ tối ưu và hỗ trợ nhiều dạng dynamic parameters.
+Hệ thống định tuyến (Router) trong **Vito** dựa trên **Radix Trie / Segment Matcher Engine** thế hệ 9 (Phase 9 Performance Engine), giúp khớp đường dẫn chính xác với tốc độ tối ưu $O(1)$ Fast Path và hỗ trợ nhiều dạng dynamic parameters & wildcard matching.
 
 ---
 
@@ -17,9 +17,20 @@ app.delete("/users", (req, res) => { res.send("DELETE /users"); });
 
 ---
 
-## 🎯 Route Parameters Động (`:param`)
+## ⚡ Static Route Fast Path ($O(1)$ Direct Lookup)
 
-Bạn có thể khai báo các phân đoạn tham số động bằng dấu cú pháp `:paramName`. Truy xuất giá trị tham số thông qua hàm `req.param(key)`:
+Đối với các đường dẫn tĩnh (Static Routes), Vito tự động kích hoạt luồng **Static Fast Path** phân tách với độ phức tạp $O(1)$ bỏ qua giai đoạn duyệt cây Trie động, mang lại tốc độ phản hồi tối đa:
+
+```javascript
+app.get("/health", (req, res) => { res.json("{\"status\":\"healthy\"}"); });
+app.get("/metrics", (req, res) => { res.json("{\"uptime\": 3600}"); });
+```
+
+---
+
+## 🎯 Route Parameters Động (`:param` & `*wildcard`)
+
+Bạn có thể khai báo các phân đoạn tham số động bằng dấu cú pháp `:paramName` hoặc đường dẫn đa cấp wildcard `*filepath`. Truy xuất giá trị tham số thông qua hàm `req.param(key)`:
 
 ```javascript
 // Khớp URL dạng /users/123 hoặc /users/abc
@@ -34,6 +45,23 @@ app.get("/products/:category/:id", (req: Request, res: Response) => {
     let pId = req.param("id");
     res.json("{\"category\":\"" + cat + "\", \"item_id\":\"" + pId + "\"}");
 });
+
+// Khớp Wildcard đa phân đoạn: /files/docs/2026/report.pdf
+app.get("/files/*filepath", (req: Request, res: Response) => {
+    let filePath = req.param("filepath");
+    res.send("Requested file: " + filePath);
+});
+```
+
+---
+
+## 🔄 Trailing Slash Normalization (Strict vs Lax Mode)
+
+Mặc định, Vito hoạt động ở chế độ **Lax Trailing Slash**, tự động chuẩn hóa `/users/` tương đương `/users` mà không cần ghi đè hoặc khai báo 2 lần. Bạn có thể bật chế độ **Strict Mode** nếu muốn phân biệt chính xác:
+
+```javascript
+// Thiết lập Strict Trailing Slash Mode
+app.setStrictSlash(true);
 ```
 
 ---

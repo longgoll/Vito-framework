@@ -11,10 +11,11 @@ vito/
 ├── vit.json                     # Cấu hình Package Vito cho VIT Package Manager (vit pm)
 ├── README.md                    # Tài liệu chính giới thiệu dự án & Quick Start
 ├── docs/                        # Thư mục tài liệu dự án
-│   ├── completed/               # Ghi nhận các tính năng đã hoàn thành (Phase 1 -> Phase 8)
+│   ├── completed/               # Ghi nhận các tính năng đã hoàn thành (Phase 1 -> Phase 9)
 │   │   └── COMPLETED_FEATURES.md
 │   └── roadmap/                 # Lộ trình phát triển thế hệ tiếp theo (v3.0 Strategic Vision)
-│       └── FUTURE_ROADMAP.md
+│       ├── FUTURE_ROADMAP.md
+│       └── PHASE_09_CORE_ENGINE_PERF.md (Completed)
 ├── website/                     # Trang web tài liệu & Landing Page VitePress song ngữ (vi/en)
 │   ├── .vitepress/              # Cấu hình i18n locales, nav, sidebar & theme
 │   ├── public/                  # Logo SVG & assets
@@ -23,6 +24,8 @@ vito/
 ├── src/                         # Core Web Engine
 │   └── vito.vit                 # HTTP Parser, Dynamic Router, Grouping, DI Container & App Engine
 ├── packages/                    # Hệ sinh thái Official Middleware & Protocol Plugins
+│   ├── pool/                    # Zero-Allocation Request Memory Arena & TCP Buffer Recycling Pool
+│   ├── router/                  # Dynamic Radix Trie Router, Static Fast Path & Trailing Slash Normalizer
 │   ├── cors/                    # Middleware xử lý CORS & Preflight OPTIONS
 │   ├── logger/                  # Middleware ghi log HTTP Request
 │   ├── static/                  # Middleware phục vụ Static Files từ đĩa
@@ -41,12 +44,13 @@ vito/
     ├── standalone_demo.vit      # Demo standalone TCP server
     ├── trie_demo.vit            # Demo Radix Trie Router, Lifecycle Hooks & app.inject()
     ├── cli_suite_demo.vit       # Demo `vit create`, `vit dev` HMR & `vit build --binary`
-    └── test_v2.vit              # Full In-Memory & Native Executable Integration Test Suite (Phase 5 -> 8)
+    ├── phase09_perf_demo.vit    # Phase 9 Memory Arena & Core Engine Performance Suite
+    └── test_v2.vit              # Full In-Memory & Native Executable Integration Test Suite
 ```
 
 ---
 
-## 🛠 Danh Sách Tính Năng Đã Hoàn Thành (Phases 1 -> 8)
+## 🛠 Danh Sách Tính Năng Đã Hoàn Thành (Phases 1 -> 9)
 
 ### 1. ⚡ Bộ Phân Tích HTTP Request (HTTP Request Parser)
 - **Zero-Dependency HTTP Parser**: Tự động bóc tách raw TCP buffer stream thành các thành phần chuẩn của HTTP/1.1 protocol.
@@ -165,6 +169,17 @@ vito/
 
 ---
 
-## 📊 Kết Luận
-Toàn bộ hệ sinh thái **Vito Web Framework** từ Core Engine (HTTP/1.1, HTTP/2, HTTP/3, Native TLS 1.3) đến các gói mở rộng Official Packages (Validation, Security, Swagger UI, SSE, WASM Edge, DB Drivers, Vito ORM & CLI Tools) và **Trang Web Tài Liệu / Landing Page Song Ngữ (VitePress i18n)** đã **HOÀN THÀNH 100%** trên nền tảng **VIT Native Compiler Engine**.
+### 17. ⚡ Dynamic Radix Trie Router & High-Performance Request Memory Engine (Phase 9)
+- **`packages/pool/pool.vit`**:
+  - **Memory Arena Allocator**: Tái sử dụng request context memory slots giúp tránh Heap allocation liên tục cho mỗi HTTP connection.
+  - **Buffer Recycling Engine**: `TcpBufferPool` thu hồi và tái sử dụng TCP Read/Write buffers nhằm giảm tối đa chi phí Garbage Collection (GC).
+  - **Zero-Alloc Header Scanner**: `zeroAllocHeaderLookup` quét và trích xuất HTTP Headers trực tiếp qua index pointers.
+- **`packages/router/router.vit`**:
+  - **Static Route Fast Path**: Phân tách Fast Path với độ phức tạp $O(1)$ tra cứu bảng tĩnh trước khi duyệt Trie động.
+  - **Zero-Alloc Param Matcher**: Trích xuất tham số `:param` và `*wildcard` không gây tốn mảng động.
+  - **Strict & Lax Trailing Slash Normalization**: Tự động chuẩn hóa dấu gạch chéo cuối URL (`/users` và `/users/`).
 
+---
+
+## 📊 Kết Luận
+Toàn bộ hệ sinh thái **Vito Web Framework** từ Core Engine (HTTP/1.1, HTTP/2, HTTP/3, Native TLS 1.3, **Phase 9 Core Engine Performance & Memory Arena**), các gói mở rộng Official Packages (Validation, Security, Swagger UI, SSE, WASM Edge, DB Drivers, Vito ORM & CLI Tools) và **Trang Web Tài Liệu / Landing Page Song Ngữ (VitePress i18n)** đã **HOÀN THÀNH 100%** trên nền tảng **VIT Native Compiler Engine**.

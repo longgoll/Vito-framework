@@ -1,6 +1,6 @@
 # Routing & Parameters 🎯
 
-The Routing system in **Vito** is built on top of a **Radix Trie / Segment Matcher Engine**, ensuring fast and precise path matching with support for dynamic parameters and route grouping.
+The Routing system in **Vito** is built on top of a **Phase 9 High-Performance Radix Trie Engine**, ensuring fast and precise path matching with $O(1)$ Static Fast Path direct lookups, dynamic parameter extraction, wildcard path matching, and configurable trailing slash normalization.
 
 ---
 
@@ -17,9 +17,20 @@ app.delete("/users", (req, res) => { res.send("DELETE /users"); });
 
 ---
 
-## 🎯 Dynamic Route Parameters (`:param`)
+## ⚡ Static Route Fast Path ($O(1)$ Direct Lookup)
 
-Dynamic route segments are specified with a colon `:` prefix. Retrieve parameter values using `req.param(key)`:
+For static routes, Vito automatically bypasses dynamic Trie traversal using an $O(1)$ **Static Fast Path** direct lookup table for peak performance:
+
+```javascript
+app.get("/health", (req, res) => { res.json("{\"status\":\"healthy\"}"); });
+app.get("/metrics", (req, res) => { res.json("{\"uptime\": 3600}"); });
+```
+
+---
+
+## 🎯 Dynamic Route Parameters (`:param` & `*wildcard`)
+
+Specify dynamic route parameters using the colon `:` prefix or wildcard multi-segment patterns `*filepath`. Retrieve parameters via `req.param(key)`:
 
 ```javascript
 // Matches /users/123 or /users/abc
@@ -34,6 +45,23 @@ app.get("/products/:category/:id", (req: Request, res: Response) => {
     let pId = req.param("id");
     res.json("{\"category\":\"" + cat + "\", \"item_id\":\"" + pId + "\"}");
 });
+
+// Matches wildcard paths: /files/docs/2026/report.pdf
+app.get("/files/*filepath", (req: Request, res: Response) => {
+    let filePath = req.param("filepath");
+    res.send("Requested file: " + filePath);
+});
+```
+
+---
+
+## 🔄 Trailing Slash Normalization (Strict vs Lax Mode)
+
+By default, Vito operates in **Lax Trailing Slash Mode**, automatically treating `/users/` identically to `/users`. You can enable **Strict Mode** if exact matching is required:
+
+```javascript
+// Enable Strict Trailing Slash Mode
+app.setStrictSlash(true);
 ```
 
 ---
