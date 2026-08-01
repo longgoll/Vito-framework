@@ -21,9 +21,9 @@ function main(): number {
         res.json("{\"message\":\"Hello, World!\"}");
     });
 
-    // 2. Test Type 2: Single Query Database (Postgres ORM)
+    // 2. Test Type 2: Single Query Database (Postgres Direct Protocol)
     app.get("/db", (req: Request, res: Response) => {
-        let randId = (Math.random() * 10000) + 1;
+        let randId = Math.floor(Math.random() * 10000) + 1;
         let world = VitoOrmPool.queryOne("SELECT id, randomNumber FROM World WHERE id = $1", [randId]);
         res.setHeader("Content-Type", "application/json");
         res.json(world);
@@ -37,10 +37,10 @@ function main(): number {
         res.json(results);
     });
 
-    // 4. Test Type 4: Fortunes (HTML Template Rendering)
+    // 4. Test Type 4: Fortunes (HTML Template Rendering & Escape)
     app.get("/fortunes", (req: Request, res: Response) => {
         let fortunes = VitoOrmPool.queryAll("SELECT id, message FROM Fortune");
-        fortunes.push({ id: 0, message: "Additional fortune added at request time." });
+        fortunes.push({ id: 0, message: "Additional fortune parsed at run time." });
         fortunes.sort((a, b) => a.message.localeCompare(b.message));
         
         let html = "<!DOCTYPE html><html><head><title>Fortunes</title></head><body><table><tr><th>id</th><th>message</th></tr>";
