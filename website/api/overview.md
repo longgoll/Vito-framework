@@ -33,6 +33,23 @@ Mở socket và bắt đầu lắng nghe kết nối HTTP trên cổng được 
 
 ---
 
+## 📊 Observability, Metrics & DX (`Phase 14`)
+
+| Hàm / Structure | Package | Mô Tả |
+| :--- | :--- | :--- |
+| `createPrometheusRegistry()` | `packages/metrics/metrics.vit` | Khởi tạo Prometheus Metrics Registry thu thập chỉ số HTTP & OS. |
+| `registry.recordRequest(method, path, status, duration)` | `packages/metrics/metrics.vit` | Ghi nhận thông số HTTP Request cho các phân vị latency (p50, p90, p99). |
+| `registry.renderPrometheusMetrics()` | `packages/metrics/metrics.vit` | Xuất chuỗi dữ liệu định dạng chuẩn Prometheus exposition format text. |
+| `extractTraceParent(header)` / `injectTraceParent` | `packages/metrics/metrics.vit` | Trích xuất và truyền dẫn OpenTelemetry (OTel) W3C `traceparent` headers. |
+| `createMockHttpEngine()` | `packages/testing/testing.vit` | Khởi tạo In-Memory Fast HTTP Injector cho Test Suite. |
+| `mockEngine.inject(app, method, path, headers, body)` | `packages/testing/testing.vit` | Giả lập HTTP Request trực tiếp trên RAM không qua TCP socket. |
+| `createTestDbFixture(name)` | `packages/testing/testing.vit` | Khởi tạo bộ nạp dữ liệu mẫu cho Test Suite. |
+| `fixture.beginIsolationTransaction()` / `rollbackIsolationTransaction` | `packages/testing/testing.vit` | Tự động ROLLBACK CSDL sau mỗi test case để duy trì trạng thái sạch. |
+| `createVitCodeGenerator()` | `packages/cli/cli.vit` | Sinh mã nguồn mẫu cho Controller, Service, Middleware, Model, Migration. |
+| `createVitDoctor()` | `packages/cli/cli.vit` | Thực thi chẩn đoán môi trường phát triển và kiểm tra tài nguyên hệ thống. |
+
+---
+
 ## 🔒 Auth & Security Suite Packages (`packages/auth/`)
 
 | Function / Struct | Package | Mô Tả |
@@ -127,4 +144,3 @@ Mở socket và bắt đầu lắng nghe kết nối HTTP trên cổng được 
 | `createJobQueue(driver)` | `packages/queue/queue.vit` | Khởi tạo Background Job Queue (Driver: `"memory"` hoặc `"redis"`). |
 | `jobQueue.scheduleJob(job, delayMs)` | `packages/queue/queue.vit` | Đẩy job vào hàng chờ hoãn thi hành theo thời gian thiết lập. |
 | `jobQueue.processNextJob(shouldFail, reason)` | `packages/queue/queue.vit` | Xử lý job tiếp theo, hỗ trợ Exponential Backoff Retry & DLQ. |
-

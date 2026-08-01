@@ -38,8 +38,11 @@ features:
   - icon: 🔌
     title: Real-Time WebSockets & Job Queue
     details: Full-Duplex WebSockets với Rooms, Heartbeat, Deflate compression, Async Event Bus và Hàng chờ công việc Redis với Exponential Backoff Retry & DLQ.
+  - icon: 📊
+    title: Prometheus Metrics & DX Tooling
+    details: Xuất chỉ số Prometheus (/metrics), W3C OpenTelemetry Tracing, Test Injector in-memory siêu tốc, DB Isolation Fixtures và lệnh diagnostic vit doctor.
   - icon: 🛠 Bộ Công Cụ CLI Tích Hợp
-    details: Hỗ trợ Hot Reloading (vit dev), tạo dự án mẫu (vit create) và đóng gói 1 file thực thi (< 5MB).
+    details: Hỗ trợ Hot Reloading (vit dev), sinh code tự động (vit g controller), tạo dự án mẫu (vit create) và đóng gói 1 file thực thi (< 5MB).
 ---
 
 <div class="code-showcase" style="margin-top: 3rem; text-align: center;">

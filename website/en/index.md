@@ -35,8 +35,14 @@ features:
   - icon: 🌐
     title: Edge Runtime & WASM
     details: Serverless WebAssembly adapter for Cloudflare Workers & AWS Lambda with < 1ms cold start time.
+  - icon: 🔌
+    title: Real-Time WebSockets & Job Queue
+    details: Full-Duplex WebSockets with Rooms, Heartbeats, Deflate compression, Async Event Bus, and Redis Job Queue with Retries & DLQ.
+  - icon: 📊
+    title: Prometheus Metrics & DX Tooling
+    details: Native Prometheus /metrics endpoint, W3C OpenTelemetry Tracing, ultra-fast in-memory test injector, DB isolation fixtures, and vit doctor diagnostics.
   - icon: 🛠 Developer Tooling & CLI
-    details: Hot Module Reloading (vit dev), project scaffolding (vit create), and single binary compilation (< 5MB).
+    details: Hot Module Reloading (vit dev), code generators (vit g controller), project scaffolding (vit create), and single binary compilation (< 5MB).
 ---
 
 <div class="code-showcase" style="margin-top: 3rem; text-align: center;">

@@ -22,6 +22,7 @@ export default defineConfig({
           { text: 'CSDL & ORM', link: '/guide/database-orm' },
           { text: 'Auth & Bảo Mật', link: '/guide/auth-security' },
           { text: 'Realtime & Jobs', link: '/guide/realtime-jobs' },
+          { text: 'Metrics & DX', link: '/guide/observability-dx' },
           { text: 'CLI', link: '/guide/cli' },
           { text: 'API Reference', link: '/api/overview' }
         ],
@@ -35,6 +36,7 @@ export default defineConfig({
               { text: 'Quản Lý CSDL & Vito ORM', link: '/guide/database-orm' },
               { text: 'Xác Thực & Bảo Mật (Auth)', link: '/guide/auth-security' },
               { text: 'Realtime & Job Queue ⚡', link: '/guide/realtime-jobs' },
+              { text: 'Giám Sát Metrics & DX 📊', link: '/guide/observability-dx' },
               { text: 'CLI & Công Cụ Phát Triển', link: '/guide/cli' }
             ]
           },
@@ -45,6 +47,7 @@ export default defineConfig({
               { text: 'Database Pool & Vito ORM', link: '/guide/database-orm' },
               { text: 'Auth & Security Suite', link: '/guide/auth-security' },
               { text: 'Realtime WebSockets & Jobs', link: '/guide/realtime-jobs' },
+              { text: 'Observability & DX Tooling', link: '/guide/observability-dx' },
               { text: 'Tra Cứu API Reference', link: '/api/overview' }
             ]
           }
@@ -67,6 +70,7 @@ export default defineConfig({
           { text: 'Database & ORM', link: '/en/guide/database-orm' },
           { text: 'Auth & Security', link: '/en/guide/auth-security' },
           { text: 'Realtime & Jobs', link: '/en/guide/realtime-jobs' },
+          { text: 'Metrics & DX', link: '/en/guide/observability-dx' },
           { text: 'CLI', link: '/en/guide/cli' },
           { text: 'API Reference', link: '/en/api/overview' }
         ],
@@ -80,6 +84,7 @@ export default defineConfig({
               { text: 'Database & Vito ORM', link: '/en/guide/database-orm' },
               { text: 'Auth & Security Suite', link: '/en/guide/auth-security' },
               { text: 'Realtime & Job Queue ⚡', link: '/en/guide/realtime-jobs' },
+              { text: 'Observability & DX 📊', link: '/en/guide/observability-dx' },
               { text: 'CLI & Developer Tooling', link: '/en/guide/cli' }
             ]
           },
@@ -90,6 +95,7 @@ export default defineConfig({
               { text: 'Database Pool & Vito ORM', link: '/en/guide/database-orm' },
               { text: 'Auth & Security Suite', link: '/en/guide/auth-security' },
               { text: 'Realtime WebSockets & Jobs', link: '/en/guide/realtime-jobs' },
+              { text: 'Observability & DX Tooling', link: '/en/guide/observability-dx' },
               { text: 'API Reference', link: '/en/api/overview' }
             ]
           }
