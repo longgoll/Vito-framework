@@ -4,30 +4,34 @@
 
 ---
 
-## 🛠 Cài Đặt
+## 🛠 Cài Đặt 1 Dòng Lệnh (1-Line Quick Install)
+
+Cài đặt trọn bộ **Vit Compiler Engine** và **Vito CLI** chỉ với 1 dòng lệnh duy nhất:
+
+::: code-group
+
+```bash [Linux / macOS]
+curl -fsSL https://vit.dev/install.sh | bash
+```
+
+```powershell [Windows (PowerShell)]
+iwr https://vit.dev/install.ps1 -useb | iex
+```
+
+:::
 
 ### 1. Yêu cầu tiền đề
-- **VIT Compiler Engine**: Phiên bản 1.0 trở lên.
-- **VIT Package Manager (`vit pm`)**: Công cụ quản lý gói chính thức.
+- **VIT Compiler Engine**: Đã tích hợp sẵn khi chạy installer.
+- **Hệ điều hành hỗ trợ**: Windows (AMD64 / AVX2), Linux (x86_64 / arm64), macOS (Apple Silicon / Intel).
 
-### 2. Thêm Vito vào dự án
-Thêm `vito` vào file cấu hình `vit.json` của dự án:
+### 2. Tạo dự án mẫu trong 5 giây
+Sử dụng bộ công cụ `vito CLI` chính thức:
 
-```json
-{
-  "name": "my-web-app",
-  "version": "1.0.0",
-  "dependencies": {
-    "vito": "^2.0.0"
-  }
-}
-```
-
-Hoặc sử dụng CLI:
 ```bash
-vit create my-web-app
+vito create my-web-app
 cd my-web-app
 ```
+
 
 ---
 

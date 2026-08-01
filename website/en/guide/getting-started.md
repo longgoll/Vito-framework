@@ -4,30 +4,34 @@
 
 ---
 
-## 🛠 Installation
+## 🛠 1-Line Quick Installation
+
+Install the complete **Vit Compiler Engine** and **Vito CLI** with a single command:
+
+::: code-group
+
+```bash [Linux / macOS]
+curl -fsSL https://vit.dev/install.sh | bash
+```
+
+```powershell [Windows (PowerShell)]
+iwr https://vit.dev/install.ps1 -useb | iex
+```
+
+:::
 
 ### 1. Prerequisites
-- **VIT Compiler Engine**: Version 1.0 or higher.
-- **VIT Package Manager (`vit pm`)**: Official package manager tool.
+- **VIT Compiler Engine**: Bundled automatically by the installer.
+- **Supported OS**: Windows (AMD64 / AVX2), Linux (x86_64 / arm64), macOS (Apple Silicon / Intel).
 
-### 2. Adding Vito to your project
-Add `vito` to your project's `vit.json` configuration file:
+### 2. Scaffold a Project in 5 Seconds
+Using the official `vito CLI`:
 
-```json
-{
-  "name": "my-web-app",
-  "version": "1.0.0",
-  "dependencies": {
-    "vito": "^2.0.0"
-  }
-}
-```
-
-Or scaffold via CLI:
 ```bash
-vit create my-web-app
+vito create my-web-app
 cd my-web-app
 ```
+
 
 ---
 

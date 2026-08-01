@@ -48,8 +48,6 @@ To ensure absolute credibility when publishing benchmarks to the system programm
 
 ---
 
----
-
 ## 4. Empirical Benchmark Results (Live Execution)
 
 | Benchmark Test | Language / Setup | Time (ms) | Speedup vs Go | Dynamic Input / Setup Notes |
@@ -99,11 +97,3 @@ To run real head-to-head benchmarks on an internal Linux/Windows bare-metal serv
    ```bash
    wrk -t16 -c1000 -d30s http://127.0.0.1:8888/
    ```
-
----
-
-## 7. Conclusion & Future Roadmap
-
-The empirical benchmarks demonstrate that Vit's Arena memory model, SIMD structural indexing, Fixed Slab Allocator, and LLVM IR codegen achieve world-class systems performance outpacing C++20, Rust, and Go across both CPU-bound and high-concurrency network tasks.
-
-

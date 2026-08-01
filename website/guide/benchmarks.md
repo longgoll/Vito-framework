@@ -2,7 +2,18 @@
 
 Báo cáo chính thức kiểm thử hiệu năng độc lập, minh bạch và có khả năng tái lập 100% giữa **Vit/Vito Framework** so với **C++20 (GCC -O3 LTO)**, **Rust (rustc opt-level=3 fat LTO)**, và **Go (gc 1.22)**.
 
+<div class="download-paper-banner" style="margin: 1.5rem 0; padding: 1.2rem; background: linear-gradient(135deg, rgba(100, 108, 255, 0.15), rgba(16, 185, 129, 0.15)); border: 1px solid var(--vp-c-brand-1); border-radius: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+  <div>
+    <h4 style="margin: 0 0 0.25rem 0; font-size: 1.1rem; color: var(--vp-c-text-1);">📄 Technical White Paper (Full 100% Transparent Report)</h4>
+    <p style="margin: 0; font-size: 0.88rem; color: var(--vp-c-text-2);">Đọc bản báo cáo kỹ thuật đầy đủ với phân tích sơ đồ bộ nhớ C100K Slab, SIMD IR và công thức tái lập bare-metal.</p>
+  </div>
+  <a href="/BENCHMARK_WHITE_PAPER.md" target="_blank" style="padding: 0.6rem 1.2rem; background: var(--vp-c-brand-1); color: #fff; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(100, 108, 255, 0.4);">
+    📥 Tải / Xem White Paper (.MD / PDF)
+  </a>
+</div>
+
 ---
+
 
 ## 1. ⚡ Bảng Kết Quả Thực Nghiệm TOP 1 (Live Execution)
 

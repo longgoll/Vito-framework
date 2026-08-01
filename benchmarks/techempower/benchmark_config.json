@@ -1,31 +1,26 @@
 {
   "framework": "vito",
-  "tests": [
-    {
-      "name": "vito-plaintext",
+  "tests": {
+    "default": {
+      "json_url": "/json",
+      "db_url": "/db",
+      "query_url": "/queries?queries=",
+      "fortune_url": "/fortunes",
+      "update_url": "/updates?queries=",
       "plaintext_url": "/plaintext",
       "port": 8080,
       "approach": "Realistic",
       "classification": "Fullstack",
-      "database": "None",
+      "database": "Postgres",
+      "framework": "vito",
+      "language": "vit",
       "orm": "Raw",
+      "platform": "Vit Engine Native (LLVM)",
+      "webserver": "Vito Native HTTP/1.1 (io_uring)",
       "os": "Linux",
-      "programming_language": "Vito",
-      "webserver": "None",
-      "versus": "vito"
-    },
-    {
-      "name": "vito-json",
-      "json_url": "/json",
-      "port": 8080,
-      "approach": "Realistic",
-      "classification": "Fullstack",
-      "database": "None",
-      "orm": "Raw",
-      "os": "Linux",
-      "programming_language": "Vito",
-      "webserver": "None",
-      "versus": "vito"
+      "database_os": "Linux",
+      "display_name": "vito",
+      "notes": "Vito Web Framework with Zero-Alloc C100K Slab Allocator, AVX2 SIMD JSON, and Kernel Bypass Event Loop."
     }
-  ]
+  }
 }

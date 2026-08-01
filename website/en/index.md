@@ -45,43 +45,7 @@ features:
     details: Hot Module Reloading (vit dev), code generators (vit g controller), project scaffolding (vit create), and single binary compilation (< 5MB).
 ---
 
-<div class="code-showcase" style="margin-top: 3rem; text-align: center;">
+<BenchmarkVisualizer />
 
-## Expressive & Intuitive Syntax 🚀
+<CodeComparison />
 
-Building high-performance Web Applications has never been so clean and pleasant in the **VIT** ecosystem.
-
-```javascript
-import { createApp, Request, Response } from "vito/src/vito.vit";
-import { loggerMiddleware } from "vito/packages/logger/logger.vit";
-import { corsMiddleware } from "vito/packages/cors/cors.vit";
-
-function main(): number {
-    let app = createApp();
-
-    // 1. Register Global Middlewares
-    app.use(corsMiddleware);
-    app.use(loggerMiddleware);
-
-    // 2. Dynamic Route Parameter (/users/:id)
-    app.get("/users/:id", (req: Request, res: Response) => {
-        let userId = req.param("id");
-        res.json("{\"status\":\"ok\", \"user_id\":\"" + userId + "\"}");
-    });
-
-    // 3. Route Grouping (/api/v1)
-    app.group("/api/v1", (v1) => {
-        v1.get("/products/:category/:id", (req: Request, res: Response) => {
-            let cat = req.param("category");
-            let pId = req.param("id");
-            res.json("{\"category\":\"" + cat + "\",\"id\":\"" + pId + "\"}");
-        });
-    });
-
-    // 4. Start HTTP Server
-    app.listen(8888);
-    return 0;
-}
-```
-
-</div>

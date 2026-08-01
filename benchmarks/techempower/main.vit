@@ -1,27 +1,71 @@
-// TechEmpower Benchmark Implementation in Vito
-import { HttpServer, Request, Response } from "std/http";
+// Official TechEmpower Benchmark Round 23 Implementation in Vito Framework
+import { createApp, Request, Response } from "vito/src/vito.vit";
+import { VitoOrmPool } from "vito/packages/orm/orm.vit";
 
-function main(): void {
-    let server: HttpServer;
-    print("[TechEmpower Benchmark] Starting Vito server on port 8080...");
-
-    server.listen(8080, (path: string, req: Request, res: Response) => {
-        if (path == "/plaintext") {
-            res.send("Hello, World!");
-        } else if (path == "/json") {
-            res.json("{\"message\":\"Hello, World!\"}");
-        } else if (path == "/db") {
-            res.json("{\"id\":1,\"randomNumber\":42}");
-        } else if (path == "/queries") {
-            res.json("[{\"id\":1,\"randomNumber\":42},{\"id\":2,\"randomNumber\":99}]");
-        } else if (path == "/fortunes") {
-            res.send("<!DOCTYPE html><html><head><title>Fortunes</title></head><body><table><tr><th>id</th><th>message</th></tr><tr><td>1</td><td>Fortune message</td></tr></table></body></html>");
-        } else if (path == "/updates") {
-            res.json("[{\"id\":1,\"randomNumber\":123}]");
-        } else {
-            res.sendStatus(404, "Not Found");
-        }
-    });
+struct World {
+    id: number;
+    randomNumber: number;
 }
 
-main();
+struct Fortune {
+    id: number;
+    message: string;
+}
+
+function main(): number {
+    let app = createApp();
+
+    // 1. Test Type 1: JSON Serialization
+    app.get("/json", (req: Request, res: Response) => {
+        res.setHeader("Content-Type", "application/json");
+        res.json("{\"message\":\"Hello, World!\"}");
+    });
+
+    // 2. Test Type 2: Single Query Database (Postgres ORM)
+    app.get("/db", (req: Request, res: Response) => {
+        let randId = (Math.random() * 10000) + 1;
+        let world = VitoOrmPool.queryOne("SELECT id, randomNumber FROM World WHERE id = $1", [randId]);
+        res.setHeader("Content-Type", "application/json");
+        res.json(world);
+    });
+
+    // 3. Test Type 3: Multiple Queries
+    app.get("/queries", (req: Request, res: Response) => {
+        let count = req.queryInt("queries", 1, 500);
+        let results = VitoOrmPool.queryBatch("SELECT id, randomNumber FROM World WHERE id = $1", count);
+        res.setHeader("Content-Type", "application/json");
+        res.json(results);
+    });
+
+    // 4. Test Type 4: Fortunes (HTML Template Rendering)
+    app.get("/fortunes", (req: Request, res: Response) => {
+        let fortunes = VitoOrmPool.queryAll("SELECT id, message FROM Fortune");
+        fortunes.push({ id: 0, message: "Additional fortune added at request time." });
+        fortunes.sort((a, b) => a.message.localeCompare(b.message));
+        
+        let html = "<!DOCTYPE html><html><head><title>Fortunes</title></head><body><table><tr><th>id</th><th>message</th></tr>";
+        for (let f of fortunes) {
+            html += "<tr><td>" + f.id + "</td><td>" + res.escapeHtml(f.message) + "</td></tr>";
+        }
+        html += "</table></body></html>";
+        res.setHeader("Content-Type", "text/html; charset=utf-8");
+        res.send(html);
+    });
+
+    // 5. Test Type 5: Database Updates
+    app.get("/updates", (req: Request, res: Response) => {
+        let count = req.queryInt("queries", 1, 500);
+        let updatedRows = VitoOrmPool.updateBatch("UPDATE World SET randomNumber = $1 WHERE id = $2", count);
+        res.setHeader("Content-Type", "application/json");
+        res.json(updatedRows);
+    });
+
+    // 6. Test Type 6: Plaintext High-Throughput
+    app.get("/plaintext", (req: Request, res: Response) => {
+        res.setHeader("Content-Type", "text/plain");
+        res.send("Hello, World!");
+    });
+
+    app.listen(8080);
+    return 0;
+}
