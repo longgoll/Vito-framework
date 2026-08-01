@@ -17,6 +17,7 @@ export default defineConfig({
         nav: [
           { text: 'Trang chủ', link: '/' },
           { text: 'Hướng dẫn', link: '/guide/getting-started' },
+          { text: 'Benchmark 🏆', link: '/guide/benchmarks' },
           { text: 'Routing', link: '/guide/routing' },
           { text: 'Middleware', link: '/guide/middleware' },
           { text: 'CSDL & ORM', link: '/guide/database-orm' },
@@ -31,6 +32,7 @@ export default defineConfig({
             text: '📖 Giới Thiệu',
             items: [
               { text: 'Bắt Đầu', link: '/guide/getting-started' },
+              { text: 'Báo Cáo Benchmark 🏆', link: '/guide/benchmarks' },
               { text: 'Định Tuyến & Parameters', link: '/guide/routing' },
               { text: 'Hệ Thống Middleware', link: '/guide/middleware' },
               { text: 'Quản Lý CSDL & Vito ORM', link: '/guide/database-orm' },
@@ -43,6 +45,7 @@ export default defineConfig({
           {
             text: '📦 Hệ Sinh Thái',
             items: [
+              { text: 'Báo Cáo Benchmark 🏆', link: '/guide/benchmarks' },
               { text: 'Tổng Quan Middleware', link: '/guide/middleware' },
               { text: 'Database Pool & Vito ORM', link: '/guide/database-orm' },
               { text: 'Auth & Security Suite', link: '/guide/auth-security' },
@@ -65,6 +68,7 @@ export default defineConfig({
         nav: [
           { text: 'Home', link: '/en/' },
           { text: 'Guide', link: '/en/guide/getting-started' },
+          { text: 'Benchmark 🏆', link: '/en/guide/benchmarks' },
           { text: 'Routing', link: '/en/guide/routing' },
           { text: 'Middleware', link: '/en/guide/middleware' },
           { text: 'Database & ORM', link: '/en/guide/database-orm' },
@@ -79,6 +83,7 @@ export default defineConfig({
             text: '📖 Introduction',
             items: [
               { text: 'Getting Started', link: '/en/guide/getting-started' },
+              { text: 'Benchmark Report 🏆', link: '/en/guide/benchmarks' },
               { text: 'Routing & Parameters', link: '/en/guide/routing' },
               { text: 'Middleware System', link: '/en/guide/middleware' },
               { text: 'Database & Vito ORM', link: '/en/guide/database-orm' },
@@ -91,6 +96,7 @@ export default defineConfig({
           {
             text: '📦 Ecosystem',
             items: [
+              { text: 'Benchmark Report 🏆', link: '/en/guide/benchmarks' },
               { text: 'Official Middlewares', link: '/en/guide/middleware' },
               { text: 'Database Pool & Vito ORM', link: '/en/guide/database-orm' },
               { text: 'Auth & Security Suite', link: '/en/guide/auth-security' },
