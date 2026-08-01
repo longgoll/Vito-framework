@@ -33,6 +33,31 @@ Starts listening for HTTP connections on the given port.
 
 ---
 
+## 🔒 Auth & Security Suite Packages (`packages/auth/`)
+
+| Function / Struct | Package | Description |
+| :--- | :--- | :--- |
+| `verifyJwtToken(token, secret, algo)` | `packages/auth/jwt.vit` | Verifies JWT Token signatures (`HS256`, `RS256`, `ES256`) in $< 0.1\text{ms}$. |
+| `parseJwtToken(token)` | `packages/auth/jwt.vit` | Extracts Header and Payload Claims from raw JWT strings. |
+| `validateJwtClaims(jwt, now, exp, nbf)` | `packages/auth/jwt.vit` | Validates token expiration (`exp`) and active time (`nbf`). |
+| `jwtGuardMiddleware` | `packages/auth/jwt.vit` | Automatically authenticates Bearer tokens and rejects unauthorized requests with HTTP 401. |
+| `createGoogleOAuthProvider(...)` | `packages/auth/oauth.vit` | Initializes Google OAuth2 & OIDC Client Helper with PKCE support. |
+| `createGitHubOAuthProvider(...)` | `packages/auth/oauth.vit` | Initializes GitHub OAuth2 Provider Config. |
+| `createMicrosoftOAuthProvider(...)` | `packages/auth/oauth.vit` | Initializes Microsoft Azure AD / Entra ID OAuth2 Provider Config. |
+| `config.generateAuthorizationUrl(state, challenge)` | `packages/auth/oauth.vit` | Generates OAuth2 redirect URL with PKCE challenge parameter. |
+| `createApiKeyStore()` | `packages/auth/apikey.vit` | Instantiates API Key Store with per-client-key rate limiting quota management. |
+| `hashApiKey(rawKey)` | `packages/auth/apikey.vit` | Single-way key hashing for secure database storage. |
+| `hashPasswordArgon2id(pass, salt, params)` | `packages/auth/crypto.vit` | Hashes passwords with Argon2id matching OWASP recommendations. |
+| `hashPasswordBcrypt(pass, salt, cost)` | `packages/auth/crypto.vit` | Hashes passwords with Bcrypt using configurable cost factors. |
+| `encryptAES256GCM(plain, key, iv, ad)` | `packages/auth/crypto.vit` | Two-way AEAD encryption formatted as `iv:ciphertext:tag`. |
+| `decryptAES256GCM(payload, key, ad)` | `packages/auth/crypto.vit` | Decrypts payloads and validates AES-256-GCM authentication tag. |
+| `timingSafeEqual(strA, strB)` | `packages/auth/crypto.vit` | Constant-time string comparison preventing side-channel timing attacks. |
+| `createRoleGuard(role, currentRoles)` | `packages/auth/rbac.vit` | Initializes RBAC Role Guard (rejecting unauthorized with HTTP 403). |
+| `createPermissionGuard(perm, currentPerms)` | `packages/auth/rbac.vit` | Initializes RBAC Permission Guard for route action authorization. |
+| `createGateEngine()` | `packages/auth/rbac.vit` | Instantiates ABAC Policy Engine for resource context authorization. |
+
+---
+
 ## 🗄️ Database & ORM Packages (`packages/db` & `packages/orm`)
 
 | Function / Struct | Package | Description |

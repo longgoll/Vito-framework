@@ -1,0 +1,8 @@
+// Vito Native Authentication & Security Suite Index (vito/packages/auth/auth.vit)
+import { JwtToken, parseJwtToken, verifyJwtToken, validateJwtClaims, jwtGuardMiddleware } from "./jwt.vit";
+import { OAuth2Config, UserInfo, createGoogleOAuthProvider, createGitHubOAuthProvider, createMicrosoftOAuthProvider, generateAuthorizationUrl, buildTokenExchangeRequest, parseUserInfoPayload } from "./oauth.vit";
+import { ApiKeyItem, ApiKeyStore, ApiKeyGuard, createApiKeyStore, createApiKeyGuard, hashApiKey, generateApiKey } from "./apikey.vit";
+import { Argon2Params, CipherPayload, createDefaultArgon2Params, hashPasswordArgon2id, verifyPasswordArgon2id, hashPasswordBcrypt, verifyPasswordBcrypt, encryptAES256GCM, decryptAES256GCM, formatCiphertextString, parseCiphertextString, timingSafeEqual } from "./crypto.vit";
+import { UserContext, GateContext, GateEngine, RoleGuard, PermissionGuard, createGateEngine, createRoleGuard, createPermissionGuard, hasRole, hasPermission } from "./rbac.vit";
+
+// Master Export Wrapper for Auth Suite

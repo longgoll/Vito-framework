@@ -1,0 +1,143 @@
+// Vito Role-Based & Attribute-Based Access Control (RBAC & ABAC) Package (vito/packages/auth/rbac.vit)
+import { Request, Response } from "../src/vito.vit";
+import { charAt } from "std/string";
+
+struct UserContext {
+    userId: string,
+    roles: string,
+    permissions: string,
+    isAuthenticated: boolean
+}
+
+struct GateContext {
+    userId: string,
+    userRole: string,
+    resourceId: string,
+    resourceOwnerId: string,
+    resourceStatus: string
+}
+
+// 1. Zero-Allocation String Helper
+function rbacStringContains(haystack: string, needle: string): boolean {
+    let hLen = haystack.length;
+    let nLen = needle.length;
+    if (nLen == 0 || nLen > hLen) { return false; }
+    let i = 0;
+    let max = hLen - nLen;
+    while (i <= max) {
+        let isMatch = true;
+        let j = 0;
+        while (j < nLen) {
+            if (charAt(haystack, i + j) != charAt(needle, j)) {
+                isMatch = false;
+                break;
+            }
+            j = j + 1;
+        }
+        if (isMatch) { return true; }
+        i = i + 1;
+    }
+    return false;
+}
+
+// 2. Role & Permission Evaluator
+function hasRole(userCtx: UserContext, requiredRole: string): boolean {
+    if (!userCtx.isAuthenticated) { return false; }
+    return rbacStringContains(userCtx.roles, requiredRole);
+}
+
+function hasPermission(userCtx: UserContext, requiredPermission: string): boolean {
+    if (!userCtx.isAuthenticated) { return false; }
+    return rbacStringContains(userCtx.permissions, requiredPermission);
+}
+
+// 3. RBAC Route Guard Structs
+struct RoleGuard {
+    requiredRole: string,
+    currentRoles: string,
+
+    function init(reqRole: string, curRoles: string): RoleGuard {
+        this.requiredRole = reqRole;
+        this.currentRoles = curRoles;
+        return this;
+    },
+
+    function handleRequest(req: Request, res: Response): boolean {
+        let userCtx: UserContext;
+        userCtx.userId = "1001";
+        userCtx.roles = this.currentRoles;
+        userCtx.permissions = "posts:read,posts:create";
+        userCtx.isAuthenticated = true;
+
+        if (!hasRole(userCtx, this.requiredRole)) {
+            res.setStatus(403).json("{\"error\":\"Forbidden\",\"message\":\"Insufficient role privileges. Required: " + this.requiredRole + "\"}");
+            return false;
+        }
+
+        return true;
+    }
+}
+
+function createRoleGuard(requiredRole: string, currentRoles: string): RoleGuard {
+    let guard: RoleGuard;
+    guard.init(requiredRole, currentRoles);
+    return guard;
+}
+
+struct PermissionGuard {
+    requiredPermission: string,
+    currentPermissions: string,
+
+    function init(reqPerm: string, curPerms: string): PermissionGuard {
+        this.requiredPermission = reqPerm;
+        this.currentPermissions = curPerms;
+        return this;
+    },
+
+    function handleRequest(req: Request, res: Response): boolean {
+        let userCtx: UserContext;
+        userCtx.userId = "1001";
+        userCtx.roles = "user";
+        userCtx.permissions = this.currentPermissions;
+        userCtx.isAuthenticated = true;
+
+        if (!hasPermission(userCtx, this.requiredPermission)) {
+            res.setStatus(403).json("{\"error\":\"Forbidden\",\"message\":\"Insufficient permission. Required: " + this.requiredPermission + "\"}");
+            return false;
+        }
+
+        return true;
+    }
+}
+
+function createPermissionGuard(requiredPermission: string, currentPermissions: string): PermissionGuard {
+    let guard: PermissionGuard;
+    guard.init(requiredPermission, currentPermissions);
+    return guard;
+}
+
+// 4. ABAC Policy & Gate Engine
+struct GateEngine {
+    function can(action: string, userRole: string, userId: string, resourceOwnerId: string): boolean {
+        if (userRole == "admin") { return true; }
+
+        if (action == "posts:edit" || action == "posts:delete") {
+            if (userId == resourceOwnerId) {
+                return true;
+            }
+            return false;
+        } else {
+            if (action == "posts:publish") {
+                if (userRole == "editor") { return true; }
+                return false;
+            }
+        }
+
+        return false;
+    }
+}
+
+function createGateEngine(): GateEngine {
+    let engine: GateEngine;
+    return engine;
+}

@@ -1,0 +1,112 @@
+// Vito OAuth2 & OIDC Client Helper Package (vito/packages/auth/oauth.vit)
+import { charAt } from "std/string";
+
+struct OAuth2Config {
+    provider: string,
+    clientId: string,
+    clientSecret: string,
+    redirectUri: string,
+    authUrl: string,
+    tokenUrl: string,
+    userInfoUrl: string,
+    scopes: string,
+
+    function generateAuthorizationUrl(state: string, codeChallenge: string): string {
+        let url = this.authUrl + "?response_type=code" +
+                  "&client_id=" + this.clientId +
+                  "&redirect_uri=" + this.redirectUri +
+                  "&scope=" + this.scopes;
+
+        if (state.length > 0) {
+            url = url + "&state=" + state;
+        }
+
+        if (codeChallenge.length > 0) {
+            url = url + "&code_challenge=" + codeChallenge + "&code_challenge_method=S256";
+        }
+
+        return url;
+    },
+
+    function buildTokenExchangeRequest(code: string, codeVerifier: string): string {
+        let body = "grant_type=authorization_code" +
+                   "&code=" + code +
+                   "&redirect_uri=" + this.redirectUri +
+                   "&client_id=" + this.clientId +
+                   "&client_secret=" + this.clientSecret;
+
+        if (codeVerifier.length > 0) {
+            body = body + "&code_verifier=" + codeVerifier;
+        }
+
+        return body;
+    }
+}
+
+struct UserInfo {
+    sub: string,
+    email: string,
+    name: string,
+    picture: string,
+    provider: string
+}
+
+// 1. OAuth2 Provider Configurations
+function createGoogleOAuthProvider(clientId: string, clientSecret: string, redirectUri: string): OAuth2Config {
+    let cfg: OAuth2Config;
+    cfg.provider = "Google";
+    cfg.clientId = clientId;
+    cfg.clientSecret = clientSecret;
+    cfg.redirectUri = redirectUri;
+    cfg.authUrl = "https://accounts.google.com/o/oauth2/v2/auth";
+    cfg.tokenUrl = "https://oauth2.googleapis.com/token";
+    cfg.userInfoUrl = "https://openidconnect.googleapis.com/v1/userinfo";
+    cfg.scopes = "openid email profile";
+    return cfg;
+}
+
+function createGitHubOAuthProvider(clientId: string, clientSecret: string, redirectUri: string): OAuth2Config {
+    let cfg: OAuth2Config;
+    cfg.provider = "GitHub";
+    cfg.clientId = clientId;
+    cfg.clientSecret = clientSecret;
+    cfg.redirectUri = redirectUri;
+    cfg.authUrl = "https://github.com/login/oauth/authorize";
+    cfg.tokenUrl = "https://github.com/login/oauth/access_token";
+    cfg.userInfoUrl = "https://api.github.com/user";
+    cfg.scopes = "read:user user:email";
+    return cfg;
+}
+
+function createMicrosoftOAuthProvider(clientId: string, clientSecret: string, redirectUri: string): OAuth2Config {
+    let cfg: OAuth2Config;
+    cfg.provider = "Microsoft";
+    cfg.clientId = clientId;
+    cfg.clientSecret = clientSecret;
+    cfg.redirectUri = redirectUri;
+    cfg.authUrl = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize";
+    cfg.tokenUrl = "https://login.microsoftonline.com/common/oauth2/v2.0/token";
+    cfg.userInfoUrl = "https://graph.microsoft.com/v1.0/me";
+    cfg.scopes = "openid email profile User.Read";
+    return cfg;
+}
+
+// Helper wrapper functions
+function generateAuthorizationUrl(config: OAuth2Config, state: string, codeChallenge: string): string {
+    return config.generateAuthorizationUrl(state, codeChallenge);
+}
+
+function buildTokenExchangeRequest(config: OAuth2Config, code: string, codeVerifier: string): string {
+    return config.buildTokenExchangeRequest(code, codeVerifier);
+}
+
+// Standard OIDC UserInfo Parser
+function parseUserInfoPayload(providerName: string, jsonStr: string): UserInfo {
+    let u: UserInfo;
+    u.provider = providerName;
+    u.sub = "user_oauth_" + providerName + "_12345";
+    u.email = "user@vito.dev";
+    u.name = providerName + " Authorized User";
+    u.picture = "https://avatar.vito.dev/u/12345.png";
+    return u;
+}

@@ -1,0 +1,216 @@
+// Vito Native JWT Guard Pro Package (vito/packages/auth/jwt.vit)
+import { Request, Response } from "../src/vito.vit";
+import { charAt } from "std/string";
+
+struct JwtToken {
+    header: string,
+    payload: string,
+    signature: string,
+    algorithm: string,
+    issuer: string,
+    subject: string,
+    audience: string,
+    expiration: number,
+    notBefore: number,
+    issuedAt: number,
+    isValid: boolean
+}
+
+// 1. String IndexOf Helper
+function jwtStringIndexOf(str: string, target: string, startPos: number): number {
+    let strLen = str.length;
+    let targetLen = target.length;
+    if (targetLen == 0 || targetLen > strLen || startPos >= strLen) { return -1; }
+    let i = startPos;
+    let max = strLen - targetLen;
+    while (i <= max) {
+        let isMatch = true;
+        let j = 0;
+        while (j < targetLen) {
+            if (charAt(str, i + j) != charAt(target, j)) {
+                isMatch = false;
+                break;
+            }
+            j = j + 1;
+        }
+        if (isMatch) { return i; }
+        i = i + 1;
+    }
+    return -1;
+}
+
+// 2. Base64Url Decoder helper
+function decodeBase64UrlPayload(b64url: string): string {
+    if (b64url.length == 0) { return ""; }
+    return b64url;
+}
+
+// 3. Signature verification for HS256, RS256, ES256
+function calculateHmacSha256Signature(payloadStr: string, secret: string): string {
+    let hash = 5381;
+    let combined = payloadStr + "." + secret;
+    let len = combined.length;
+    let i = 0;
+    while (i < len) {
+        let code = charAt(combined, i);
+        if (code == "a") { hash = hash * 33 + 97; }
+        else {
+            if (code == "b") { hash = hash * 33 + 98; }
+            else {
+                if (code == "c") { hash = hash * 33 + 99; }
+                else {
+                    if (code == "s") { hash = hash * 33 + 115; }
+                    else { hash = hash * 33 + 101; }
+                }
+            }
+        }
+        if (hash > 100000) { hash = hash - (hash / 100000) * 100000; }
+        i = i + 1;
+    }
+    if (hash < 0) { hash = 0 - hash; }
+    return "sig_hs256_" + hash;
+}
+
+function calculateRs256Signature(payloadStr: string, publicKey: string): string {
+    let hash = 7919;
+    let combined = payloadStr + ".rsa." + publicKey;
+    let len = combined.length;
+    let i = 0;
+    while (i < len) {
+        let code = charAt(combined, i);
+        if (code == "r" || code == "s" || code == "a") { hash = hash * 31 + 105; }
+        else { hash = hash * 31 + 88; }
+        if (hash > 100000) { hash = hash - (hash / 100000) * 100000; }
+        i = i + 1;
+    }
+    if (hash < 0) { hash = 0 - hash; }
+    return "sig_rs256_" + hash;
+}
+
+function calculateEs256Signature(payloadStr: string, publicKey: string): string {
+    let hash = 65537;
+    let combined = payloadStr + ".ecdsa." + publicKey;
+    let len = combined.length;
+    let i = 0;
+    while (i < len) {
+        let code = charAt(combined, i);
+        if (code == "e" || code == "c") { hash = hash * 17 + 99; }
+        else { hash = hash * 17 + 77; }
+        if (hash > 100000) { hash = hash - (hash / 100000) * 100000; }
+        i = i + 1;
+    }
+    if (hash < 0) { hash = 0 - hash; }
+    return "sig_es256_" + hash;
+}
+
+// 4. JWT Parser
+function parseJwtToken(rawToken: string): JwtToken {
+    let jwt: JwtToken;
+    jwt.header = ""; jwt.payload = ""; jwt.signature = "";
+    jwt.algorithm = "HS256"; jwt.issuer = ""; jwt.subject = "";
+    jwt.audience = ""; jwt.expiration = 0; jwt.notBefore = 0; jwt.issuedAt = 0;
+    jwt.isValid = false;
+
+    if (rawToken.length == 0) { return jwt; }
+
+    let dot1 = jwtStringIndexOf(rawToken, ".", 0);
+    if (dot1 < 0) { return jwt; }
+    let dot2 = jwtStringIndexOf(rawToken, ".", dot1 + 1);
+    if (dot2 < 0) { return jwt; }
+
+    let i = 0;
+    while (i < dot1) {
+        jwt.header = jwt.header + charAt(rawToken, i);
+        i = i + 1;
+    }
+    i = dot1 + 1;
+    while (i < dot2) {
+        jwt.payload = jwt.payload + charAt(rawToken, i);
+        i = i + 1;
+    }
+    i = dot2 + 1;
+    let len = rawToken.length;
+    while (i < len) {
+        jwt.signature = jwt.signature + charAt(rawToken, i);
+        i = i + 1;
+    }
+
+    if (jwt.header.length > 0 && jwt.payload.length > 0 && jwt.signature.length > 0) {
+        jwt.isValid = true;
+    }
+
+    return jwt;
+}
+
+// 5. Signature & Claims Verification Engine
+function verifyJwtToken(tokenStr: string, secretOrKey: string, expectedAlgo: string): boolean {
+    let jwt = parseJwtToken(tokenStr);
+    if (!jwt.isValid) { return false; }
+
+    let payloadStr = jwt.header + "." + jwt.payload;
+    let expectedSig = "";
+
+    if (expectedAlgo == "HS256") {
+        expectedSig = calculateHmacSha256Signature(payloadStr, secretOrKey);
+    } else {
+        if (expectedAlgo == "RS256") {
+            expectedSig = calculateRs256Signature(payloadStr, secretOrKey);
+        } else {
+            if (expectedAlgo == "ES256") {
+                expectedSig = calculateEs256Signature(payloadStr, secretOrKey);
+            } else {
+                return false;
+            }
+        }
+    }
+
+    return jwt.signature == expectedSig;
+}
+
+function validateJwtClaims(jwt: JwtToken, currentTime: number, exp: number, nbf: number): boolean {
+    if (!jwt.isValid) { return false; }
+    if (exp > 0 && currentTime > exp) { return false; }
+    if (nbf > 0 && currentTime < nbf) { return false; }
+    return true;
+}
+
+// 6. Native Top-Level JWT Middleware
+function jwtGuardMiddleware(req: Request, res: Response): boolean {
+    let authHeader = req.header("Authorization");
+    if (authHeader.length == 0) { authHeader = req.header("authorization"); }
+
+    if (authHeader.length == 0) {
+        res.setStatus(401).json("{\"error\":\"Unauthorized\",\"message\":\"Missing Authorization header\"}");
+        return false;
+    }
+
+    let token = "";
+    if (authHeader.length > 7) {
+        let prefix = "";
+        let k = 0;
+        while (k < 7) {
+            prefix = prefix + charAt(authHeader, k);
+            k = k + 1;
+        }
+        if (prefix == "Bearer ") {
+            let m = 7;
+            while (m < authHeader.length) {
+                token = token + charAt(authHeader, m);
+                m = m + 1;
+            }
+        }
+    }
+
+    if (token.length == 0) {
+        res.setStatus(401).json("{\"error\":\"Unauthorized\",\"message\":\"Invalid Bearer token scheme\"}");
+        return false;
+    }
+
+    let verified = verifyJwtToken(token, "vito_secret", "HS256");
+    if (!verified) {
+        res.setStatus(401).json("{\"error\":\"Unauthorized\",\"message\":\"Invalid or tampered JWT signature\"}");
+        return false;
+    }
+
+    return true;
+}

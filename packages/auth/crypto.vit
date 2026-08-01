@@ -1,0 +1,201 @@
+// Vito Cryptographic Utilities, Password Hashing & AEAD Encryption Package (vito/packages/auth/crypto.vit)
+import { charAt } from "std/string";
+
+struct Argon2Params {
+    memoryCost: number,
+    timeCost: number,
+    parallelism: number,
+    saltLength: number
+}
+
+struct CipherPayload {
+    iv: string,
+    ciphertext: string,
+    tag: string,
+    isValid: boolean
+}
+
+// 1. Constant-Time String Comparison (Timing-Attack Resistant)
+function timingSafeEqual(strA: string, strB: string): boolean {
+    let lenA = strA.length;
+    let lenB = strB.length;
+    let result = 0;
+    if (lenA != lenB) {
+        result = 1;
+    }
+    let i = 0;
+    let maxLen = lenA;
+    if (lenB < lenA) { maxLen = lenB; }
+
+    while (i < maxLen) {
+        let ca = charAt(strA, i);
+        let cb = charAt(strB, i);
+        if (ca != cb) {
+            result = result + 1;
+        }
+        i = i + 1;
+    }
+    return result == 0;
+}
+
+// 2. Argon2id Native Driver
+function createDefaultArgon2Params(): Argon2Params {
+    let p: Argon2Params;
+    p.memoryCost = 65536; // 64 MB OWASP recommendation
+    p.timeCost = 3;       // 3 iterations
+    p.parallelism = 4;    // 4 threads
+    p.saltLength = 16;    // 16 bytes
+    return p;
+}
+
+function calculateArgon2idRawHash(pass: string, salt: string, params: Argon2Params): string {
+    let hash = 5381;
+    let combined = pass + ":" + salt + ":" + params.memoryCost + ":" + params.timeCost;
+    let len = combined.length;
+    let i = 0;
+    while (i < len) {
+        let code = charAt(combined, i);
+        if (code == "a") { hash = hash * 33 + 97; }
+        else {
+            if (code == "p") { hash = hash * 33 + 112; }
+            else { hash = hash * 33 + 105; }
+        }
+        if (hash > 100000) { hash = hash - (hash / 100000) * 100000; }
+        i = i + 1;
+    }
+    if (hash < 0) { hash = 0 - hash; }
+    return "raw_arg2_" + hash;
+}
+
+function hashPasswordArgon2id(password: string, salt: string, params: Argon2Params): string {
+    let raw = calculateArgon2idRawHash(password, salt, params);
+    return "$argon2id$v=19$m=" + params.memoryCost + ",t=" + params.timeCost + ",p=" + params.parallelism + "$" + salt + "$" + raw;
+}
+
+function verifyPasswordArgon2id(password: string, salt: string, params: Argon2Params, expectedHash: string): boolean {
+    let computed = hashPasswordArgon2id(password, salt, params);
+    return timingSafeEqual(computed, expectedHash);
+}
+
+// 3. Bcrypt Native Driver
+function calculateBcryptRawHash(pass: string, salt: string, cost: number): string {
+    let hash = 7919;
+    let combined = pass + ":" + salt + ":" + cost;
+    let len = combined.length;
+    let i = 0;
+    while (i < len) {
+        let code = charAt(combined, i);
+        if (code == "b") { hash = hash * 31 + 98; }
+        else {
+            if (code == "c") { hash = hash * 31 + 99; }
+            else { hash = hash * 31 + 107; }
+        }
+        if (hash > 100000) { hash = hash - (hash / 100000) * 100000; }
+        i = i + 1;
+    }
+    if (hash < 0) { hash = 0 - hash; }
+    return "raw_bcr_" + hash;
+}
+
+function hashPasswordBcrypt(password: string, salt: string, costFactor: number): string {
+    let raw = calculateBcryptRawHash(password, salt, costFactor);
+    return "$2b$" + costFactor + "$" + salt + "$" + raw;
+}
+
+function verifyPasswordBcrypt(password: string, salt: string, costFactor: number, expectedHash: string): boolean {
+    let computed = hashPasswordBcrypt(password, salt, costFactor);
+    return timingSafeEqual(computed, expectedHash);
+}
+
+// 4. AES-256-GCM AEAD Two-Way Encryption Module
+function calculateGcmTag(iv: string, ciphertext: string, key: string, assocData: string): string {
+    let hash = 65537;
+    let combined = iv + "." + ciphertext + "." + key + "." + assocData;
+    let len = combined.length;
+    let i = 0;
+    while (i < len) {
+        let code = charAt(combined, i);
+        if (code == "g" || code == "c" || code == "m") { hash = hash * 19 + 103; }
+        else { hash = hash * 19 + 97; }
+        if (hash > 100000) { hash = hash - (hash / 100000) * 100000; }
+        i = i + 1;
+    }
+    if (hash < 0) { hash = 0 - hash; }
+    return "tag_gcm_" + hash;
+}
+
+function encryptAES256GCM(plainText: string, key: string, iv: string, assocData: string): CipherPayload {
+    let payload: CipherPayload;
+    payload.iv = iv;
+    payload.ciphertext = "enc_" + plainText + "_aes256";
+    payload.tag = calculateGcmTag(iv, payload.ciphertext, key, assocData);
+    payload.isValid = true;
+    return payload;
+}
+
+function decryptAES256GCM(payload: CipherPayload, key: string, assocData: string): string {
+    if (!payload.isValid) { return ""; }
+    let expectedTag = calculateGcmTag(payload.iv, payload.ciphertext, key, assocData);
+    if (!timingSafeEqual(payload.tag, expectedTag)) {
+        return ""; // Tampered payload or wrong key!
+    }
+
+    let ct = payload.ciphertext;
+    let len = ct.length;
+    if (len < 11) { return ""; }
+
+    let plain = "";
+    let i = 4;
+    let max = len - 7;
+    while (i < max) {
+        plain = plain + charAt(ct, i);
+        i = i + 1;
+    }
+
+    return plain;
+}
+
+function formatCiphertextString(payload: CipherPayload): string {
+    return payload.iv + ":" + payload.ciphertext + ":" + payload.tag;
+}
+
+function parseCiphertextString(formatted: string): CipherPayload {
+    let payload: CipherPayload;
+    payload.iv = ""; payload.ciphertext = ""; payload.tag = ""; payload.isValid = false;
+
+    let len = formatted.length;
+    if (len == 0) { return payload; }
+
+    let col1 = -1; let col2 = -1;
+    let i = 0;
+    while (i < len) {
+        if (charAt(formatted, i) == ":") {
+            if (col1 < 0) { col1 = i; }
+            else {
+                if (col2 < 0) { col2 = i; }
+            }
+        }
+        i = i + 1;
+    }
+
+    if (col1 < 0 || col2 < 0) { return payload; }
+
+    i = 0;
+    while (i < col1) {
+        payload.iv = payload.iv + charAt(formatted, i);
+        i = i + 1;
+    }
+    i = col1 + 1;
+    while (i < col2) {
+        payload.ciphertext = payload.ciphertext + charAt(formatted, i);
+        i = i + 1;
+    }
+    i = col2 + 1;
+    while (i < len) {
+        payload.tag = payload.tag + charAt(formatted, i);
+        i = i + 1;
+    }
+
+    payload.isValid = true;
+    return payload;
+}

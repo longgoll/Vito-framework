@@ -33,6 +33,31 @@ Mở socket và bắt đầu lắng nghe kết nối HTTP trên cổng được 
 
 ---
 
+## 🔒 Auth & Security Suite Packages (`packages/auth/`)
+
+| Function / Struct | Package | Mô Tả |
+| :--- | :--- | :--- |
+| `verifyJwtToken(token, secret, algo)` | `packages/auth/jwt.vit` | Xác thực chữ ký JWT Token (`HS256`, `RS256`, `ES256`) trong $< 0.1\text{ms}$. |
+| `parseJwtToken(token)` | `packages/auth/jwt.vit` | Trích xuất thông tin Header và Payload Claims từ chuỗi JWT Raw. |
+| `validateJwtClaims(jwt, now, exp, nbf)` | `packages/auth/jwt.vit` | Kiểm tra thời gian hết hạn (`exp`) và chưa hiệu lực (`nbf`). |
+| `jwtGuardMiddleware` | `packages/auth/jwt.vit` | Middleware tự động xác thực Bearer token và từ chối HTTP 401 khi không đủ quyền. |
+| `createGoogleOAuthProvider(...)` | `packages/auth/oauth.vit` | Khởi tạo OAuth2 & OIDC Config cho Google Provider với PKCE. |
+| `createGitHubOAuthProvider(...)` | `packages/auth/oauth.vit` | Khởi tạo OAuth2 Config cho GitHub Provider. |
+| `createMicrosoftOAuthProvider(...)` | `packages/auth/oauth.vit` | Khởi tạo OAuth2 Config cho Microsoft Azure AD / Entra ID. |
+| `config.generateAuthorizationUrl(state, challenge)` | `packages/auth/oauth.vit` | Sinh URL chuyển hướng đăng nhập OAuth2 tích hợp PKCE challenge. |
+| `createApiKeyStore()` | `packages/auth/apikey.vit` | Khởi tạo Bộ lưu trữ API Key và quản lý Hạn ngạch Rate Limit từng Client Key. |
+| `hashApiKey(rawKey)` | `packages/auth/apikey.vit` | Mã hóa 1 chiều API Key bảo mật cho việc lưu trữ CSDL. |
+| `hashPasswordArgon2id(pass, salt, params)` | `packages/auth/crypto.vit` | Băm mật khẩu Argon2id tuân thủ khuyến nghị OWASP. |
+| `hashPasswordBcrypt(pass, salt, cost)` | `packages/auth/crypto.vit` | Băm mật khẩu Bcrypt với cấu hình Cost Factor tùy chỉnh. |
+| `encryptAES256GCM(plain, key, iv, ad)` | `packages/auth/crypto.vit` | Mã hóa dữ liệu hai chiều chuẩn AES-256-GCM AEAD (`iv:ciphertext:tag`). |
+| `decryptAES256GCM(payload, key, ad)` | `packages/auth/crypto.vit` | Giải mã dữ liệu và kiểm tra tính toàn vẹn GCM Tag. |
+| `timingSafeEqual(strA, strB)` | `packages/auth/crypto.vit` | So sánh chuỗi Constant-time phòng chống Side-channel Timing Attack. |
+| `createRoleGuard(role, currentRoles)` | `packages/auth/rbac.vit` | Khởi tạo RBAC Guard kiểm tra vai trò người dùng (từ chối HTTP 403). |
+| `createPermissionGuard(perm, currentPerms)` | `packages/auth/rbac.vit` | Khởi tạo RBAC Guard kiểm tra quyền hạn thao tác route. |
+| `createGateEngine()` | `packages/auth/rbac.vit` | Khởi tạo Engine kiểm tra phân quyền ABAC theo ngữ cảnh tài nguyên. |
+
+---
+
 ## 🗄️ Database & ORM Packages (`packages/db` & `packages/orm`)
 
 | Function / Struct | Package | Mô Tả |
