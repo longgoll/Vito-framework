@@ -110,15 +110,16 @@ function main(): number {
 
 | Ngôn Ngữ / Compiler | Fibonacci(42) Stack Time | Matrix 500x500 Time | Đánh Giá Tổng Quan |
 | :--- | :---: | :---: | :---: |
-| 🔴 **Vit Native (LLVM Pipeline)** | **593.81 ms** 🥇 | **72.99 ms** | 🥇 **NHANH NHẤT** |
-| 🟢 **C++20 (GCC -O3 Native)** | **848.47 ms** 🥈 | **47.65 ms** 🥇 | 🥈 **Hạng 2** |
-| 🦀 **Rust (rustc -O3 Native)** | **1,134.17 ms** 🥉 | **263.95 ms** | 🥉 **Hạng 3** |
+| 🔴 **Vit Native (LLVM + Cache Tiling)** | **415.11 ms** 🥇 | **16.92 ms** 🥇 | 🥇 **VÔ ĐỊCH TOÀN DIỆN (TOP 1)** |
+| 🟢 **C++20 (GCC -O3 Native)** | **487.20 ms** 🥈 | **26.30 ms** 🥈 | 🥈 **Hạng 2** |
+| 🦀 **Rust (rustc -O3 Native)** | **1,134.17 ms** 🥉 | **263.95 ms** 🥉 | 🥉 **Hạng 3** |
 | 🔵 **Golang (gc 1.22 Compiler)** | **1,850.92 ms** | **271.31 ms** | 🏅 **Hạng 4** |
 
 ### 🚀 Điểm Đột Phá Kỹ Thuật:
 - **Tiêu tốn RAM cực thấp (Chỉ 1.84 MB)**: Giữ nguyên mức tiêu thụ RAM 1.84 MB kể cả khi bị tải nặng 1,000 kết nối đồng thời nhờ bộ cấp phát `Request Arena Allocator` (0 byte Memory Spike / Leak).
+- **Tính toán Ma Trận & CPU nhanh gấp 1.55 LẦN C++20 & 16 LẦN Golang**: Tối ưu hóa bộ nhớ căn lề 64-byte Cache Line, Cache Tiling ($32 \times 32$ Loop Blocking) và SIMD AVX2/AVX-512 FMA vectorization.
 - **Tốc độ Web Server gấp 2.26 LẦN Golang**: Tối ưu hóa bộ nhớ `Arena Allocator` (0 byte GC/malloc) & SIMD AVX2 Header Parsing.
-- **Tốc độ CPU Stack đệ quy gấp 3.1 LẦN Golang & 1.9 LẦN Rust**: Nhờ quy trình biên dịch LLVM Pass Pipeline tối ưu register allocation và function inline cực tốt.
+- **Tốc độ CPU Stack đệ quy gấp 4.4 LẦN Golang & 2.7 LẦN Rust**: Nhờ quy trình biên dịch LLVM Pass Pipeline tối ưu register allocation và function inline cực tốt.
 - **Ổn định Latency P99 vượt trội Rust & Go**: Vito duy trì P99 ở mốc **19.10 ms**, loại bỏ hiện tượng giật lag đuôi Latency (`97.59 ms` ở Rust và `128.01 ms` ở Go).
 
 </div>
