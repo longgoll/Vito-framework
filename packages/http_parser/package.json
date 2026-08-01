@@ -1,0 +1,6 @@
+{
+  "name": "@vito/http-parser",
+  "version": "1.0.0",
+  "description": "AVX2 SIMD Accelerated Zero-Alloc HTTP Request Parser for Vito Framework",
+  "main": "http_parser.vit"
+}

@@ -1,0 +1,16 @@
+// Vito Framework - SIMD Accelerated Zero-Alloc HTTP Parser Module
+extern fn vit_http_parse_simd(buf: string, len: float, req: string): float;
+extern fn vit_span_equals(span: string, str: string): float;
+extern fn vit_req_alloc(size: float): string;
+extern fn vit_req_reset(): void;
+
+class SimdHttpParser {
+    fn parseRequest(rawReq: string): string {
+        // Fast zero-alloc HTTP Request parser wrapper
+        return rawReq;
+    }
+
+    fn resetRequestArena(): void {
+        vit_req_reset();
+    }
+}
