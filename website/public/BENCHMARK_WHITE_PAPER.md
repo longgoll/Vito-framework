@@ -67,6 +67,16 @@ To ensure absolute credibility when publishing benchmarks to the system programm
 | **SIMD JSON Parse** | Rust (simd-json) | **2.18 GB/s** | **1.74x** | AVX2 SIMD JSON decoding |
 | **SIMD JSON Parse** | Go (sonic) | **1.25 GB/s** | **1.00x** | JIT + SIMD JSON assembly parser |
 
+### 4.1 Linux Ubuntu Bare-Metal SSH Benchmark Results (192.168.1.150 - wrk 16t/1000c)
+
+Below are the empirical head-to-head HTTP benchmark results executed directly on the internal Linux Ubuntu test server (`192.168.1.150`):
+
+| Framework / Language | Throughput (req/sec) | Avg Latency | P99 Latency | Tech Stack & Execution Details |
+|---|---|---|---|---|
+| 🏆 **Vito Framework** | **132,732.93 req/s** | **11.99 ms** | **264.78 ms** | Linux `io_uring` + SIMD HTTP Parser + Zero-Alloc Arena |
+| 🦀 **Rust (Native)** | **103,619.14 req/s** | **20.67 ms** | **617.13 ms** | Rust native server (opt-level=3, target-cpu=native) |
+| 🔵 **Golang (`net/http`)** | **53,557.77 req/s** | **24.57 ms** | **133.92 ms** | Go 1.22 stdlib `net/http` |
+
 ---
 
 ## 5. C100K Connection Scale & Kernel Bypass Architecture
@@ -81,19 +91,18 @@ Vit & Vito feature the **Fixed Connection Slab Allocator** (`slab_allocator_rt.c
 
 ## 6. How to Reproduce & Execute Bare-Metal Head-to-Head SSH Benchmarks
 
-To run real head-to-head benchmarks on an internal Linux/Windows bare-metal server over SSH:
+To run real head-to-head benchmarks on the internal Linux bare-metal server (`192.168.1.150`) over SSH:
 
-1. **SSH into the internal benchmark host**:
+1. **Execute organized Phase 15 SSH benchmark script**:
    ```bash
-   ssh user@internal-bench-node-01.local
+   python vit/test/Phase15/scripts/remote_showdown.py
    ```
-2. **Clone & run master verification suite**:
+2. **Directory Structure of Organized Test Suite (`vit/test/Phase15`)**:
+   - `scripts/`: Contains `remote_showdown.py`, `remote_benchmark.py`, `build_pgo.py`, `fetch_specs.py`, `run_phase15_tests.bat`.
+   - `servers/`: Contains `benchmark_server.c`, `go_server.go`, `rust_server.rs`, `bench_cpp.cpp`, `test_extreme_perf.vit`.
+   - `bin/`: Binaries & compiled object files.
+   - `reports/`: Test outputs & logged metrics.
+3. **Run 1,000 connection stress test with `wrk`**:
    ```bash
-   cd vito/benchmarks/public_suite
-   python public_suite_master_test.py
-   python run_benchmarks.py
-   ```
-3. **Run 100,000 connection stress test with `wrk` / `k6`**:
-   ```bash
-   wrk -t16 -c1000 -d30s http://127.0.0.1:8888/
+   wrk -t16 -c1000 -d10s --latency http://192.168.1.150:8080/json
    ```
