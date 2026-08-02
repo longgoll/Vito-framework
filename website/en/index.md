@@ -49,6 +49,34 @@ features:
     details: Hot Module Reloading (vit dev), code generators (vit g controller), project scaffolding (vit create), and single binary compilation (< 5MB).
 ---
 
+<div class="strategic-pillars" style="margin: 2.5rem 0; padding: 2rem; background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(99, 102, 241, 0.08)); border: 1px solid var(--vp-c-brand-1); border-radius: 16px;">
+<h2 style="margin-top: 0; text-align: center; font-size: 1.8rem; font-weight: 800; background: linear-gradient(120deg, #10b981, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">🚀 4 Strategic Pillars of Vito</h2>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+
+<div style="padding: 1.2rem; background: var(--vp-c-bg-soft); border-radius: 12px; border: 1px solid var(--vp-c-divider);">
+  <h3 style="margin-top: 0; color: var(--vp-c-brand-1);">⚡ 1. LLVM Native Benchmark</h3>
+  <p style="font-size: 0.95rem; color: var(--vp-c-text-2); margin-bottom: 0;">Direct LLVM Native Machine Code compilation. Completely eliminates GC pauses & V8 runtime overhead, outperforming Node.js (Express/Fastify), Go (Gin), and approaching C++20.</p>
+</div>
+
+<div style="padding: 1.2rem; background: var(--vp-c-bg-soft); border-radius: 12px; border: 1px solid var(--vp-c-divider);">
+  <h3 style="margin-top: 0; color: #8b5cf6;">🤖 2. AI-Native Token Streaming</h3>
+  <p style="font-size: 0.95rem; color: var(--vp-c-text-2); margin-bottom: 0;">Built-in <code>vito/sse</code> package with specialized Server-Sent Events helpers for OpenAI, Claude, and Local LLM token streaming out-of-the-box.</p>
+</div>
+
+<div style="padding: 1.2rem; background: var(--vp-c-bg-soft); border-radius: 12px; border: 1px solid var(--vp-c-divider);">
+  <h3 style="margin-top: 0; color: #3b82f6;">🛡️ 3. Auto Swagger UI & OpenAPI</h3>
+  <p style="font-size: 0.95rem; color: var(--vp-c-text-2); margin-bottom: 0;">Automatically generates <code>/openapi.json</code> spec and interactive Swagger UI at <code>/docs</code> directly from route definitions without manual annotations.</p>
+</div>
+
+<div style="padding: 1.2rem; background: var(--vp-c-bg-soft); border-radius: 12px; border: 1px solid var(--vp-c-divider);">
+  <h3 style="margin-top: 0; color: #f59e0b;">📦 4. Batteries-Included Ecosystem</h3>
+  <p style="font-size: 0.95rem; color: var(--vp-c-text-2); margin-bottom: 0;">Ships with 27 official packages (<code>vito/orm</code>, <code>vito/auth</code>, <code>vito/upload</code>, <code>vito/websocket</code>...). Zero dependency rot and unified code quality.</p>
+</div>
+
+</div>
+</div>
+
 <BenchmarkVisualizer />
 
 <CodeComparison />

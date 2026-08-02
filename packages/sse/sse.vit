@@ -1,11 +1,40 @@
-// Vito Server-Sent Events (SSE) Package (vito/packages/sse/sse.vit)
+// Vito Server-Sent Events (SSE) & LLM Token Streaming Package (vito/packages/sse/sse.vit)
 import { Response } from "../../src/vito.vit";
 
+struct SseStream {
+    res: Response,
+
+    function initHeader(): void {
+        this.res.setHeader("Content-Type", "text/event-stream");
+        this.res.setHeader("Cache-Control", "no-cache");
+        this.res.setHeader("Connection", "keep-alive");
+        this.res.setHeader("Access-Control-Allow-Origin", "*");
+    },
+
+    function sendEvent(eventName: string, dataPayload: string): void {
+        let frame = "event: " + eventName + "\r\ndata: " + dataPayload + "\r\n\r\n";
+        this.res.send(frame);
+    },
+
+    function streamToken(token: string): void {
+        let frame = "data: {\"token\":\"" + token + "\"}\r\n\r\n";
+        this.res.send(frame);
+    },
+
+    function sendDone(): void {
+        let frame = "event: done\r\ndata: [DONE]\r\n\r\n";
+        this.res.send(frame);
+    }
+}
+
+function createSseStream(res: Response): SseStream {
+    let sse: SseStream;
+    sse.res = res;
+    sse.initHeader();
+    return sse;
+}
+
 function sendSseEvent(res: Response, eventName: string, dataPayload: string): void {
-    res.setHeader("Content-Type", "text/event-stream");
-    res.setHeader("Cache-Control", "no-cache");
-    res.setHeader("Connection", "keep-alive");
-    
-    let frame = "event: " + eventName + "\r\ndata: " + dataPayload + "\r\n\r\n";
-    res.send(frame);
+    let sse = createSseStream(res);
+    sse.sendEvent(eventName, dataPayload);
 }

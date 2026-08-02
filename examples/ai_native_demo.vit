@@ -1,0 +1,27 @@
+import { createApp, Request, Response } from "../src/vito.vit";
+import { createSseStream } from "../packages/sse/sse.vit";
+import { setupSwaggerDocs } from "../packages/swagger/swagger.vit";
+
+function main(): number {
+    let app = createApp();
+
+    // Setup Auto Swagger UI & OpenAPI spec
+    setupSwaggerDocs(app, "Vito AI-Native Core API", "1.0.0");
+
+    // LLM Token Streaming endpoint
+    app.get("/api/ai/completion", (req: Request, res: Response) => {
+        let stream = createSseStream(res);
+        stream.streamToken("Hello");
+        stream.streamToken(" world!");
+        stream.streamToken(" Vito");
+        stream.streamToken(" is");
+        stream.streamToken(" blazing");
+        stream.streamToken(" fast!");
+        stream.sendDone();
+    });
+
+    print("🚀 Vito Server initialized successfully!");
+    print("📖 Swagger UI Docs route ready at /docs");
+
+    return 0;
+}

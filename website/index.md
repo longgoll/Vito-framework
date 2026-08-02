@@ -49,6 +49,34 @@ features:
     details: Hỗ trợ Hot Reloading (vit dev), sinh code tự động (vit g controller), tạo dự án mẫu (vit create) và đóng gói 1 file thực thi (< 5MB).
 ---
 
+<div class="strategic-pillars" style="margin: 2.5rem 0; padding: 2rem; background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(99, 102, 241, 0.08)); border: 1px solid var(--vp-c-brand-1); border-radius: 16px;">
+<h2 style="margin-top: 0; text-align: center; font-size: 1.8rem; font-weight: 800; background: linear-gradient(120deg, #10b981, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">🚀 Chiết Lý Thiết Kế 4 Trụ Cột Vượt Trỗi</h2>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+
+<div style="padding: 1.2rem; background: var(--vp-c-bg-soft); border-radius: 12px; border: 1px solid var(--vp-c-divider);">
+  <h3 style="margin-top: 0; color: var(--vp-c-brand-1);">⚡ 1. LLVM Native Benchmark</h3>
+  <p style="font-size: 0.95rem; color: var(--vp-c-text-2); margin-bottom: 0;">Biên dịch trực tiếp sang LLVM Native Machine Code. Triệt tiêu hoàn toàn GC Pause & V8 overhead, vượt qua Node.js (Express/Fastify), Go (Gin) và tiệm cận C++20.</p>
+</div>
+
+<div style="padding: 1.2rem; background: var(--vp-c-bg-soft); border-radius: 12px; border: 1px solid var(--vp-c-divider);">
+  <h3 style="margin-top: 0; color: #8b5cf6;">🤖 2. AI-Native Token Streaming</h3>
+  <p style="font-size: 0.95rem; color: var(--vp-c-text-2); margin-bottom: 0;">Tích hợp sẵn package <code>vito/sse</code> với helper Server-Sent Events chuyên dụng cho OpenAI, Claude, và Local LLM. Token streaming out-of-the-box không cần setup thủ công.</p>
+</div>
+
+<div style="padding: 1.2rem; background: var(--vp-c-bg-soft); border-radius: 12px; border: 1px solid var(--vp-c-divider);">
+  <h3 style="margin-top: 0; color: #3b82f6;">🛡️ 3. Auto Swagger UI & OpenAPI</h3>
+  <p style="font-size: 0.95rem; color: var(--vp-c-text-2); margin-bottom: 0;">Tự động khởi tạo endpoint <code>/openapi.json</code> và giao diện tra cứu Swagger UI <code>/docs</code> trực tiếp từ API schema mà không cần viết annotation thủ công.</p>
+</div>
+
+<div style="padding: 1.2rem; background: var(--vp-c-bg-soft); border-radius: 12px; border: 1px solid var(--vp-c-divider);">
+  <h3 style="margin-top: 0; color: #f59e0b;">📦 4. Batteries-Included Ecosystem</h3>
+  <p style="font-size: 0.95rem; color: var(--vp-c-text-2); margin-bottom: 0;">Đóng gói 27 packages chính chủ (<code>vito/orm</code>, <code>vito/auth</code>, <code>vito/upload</code>, <code>vito/websocket</code>...). Không lo nợ kỹ thuật hay dependency rot như Express.</p>
+</div>
+
+</div>
+</div>
+
 <BenchmarkVisualizer />
 
 <CodeComparison />
