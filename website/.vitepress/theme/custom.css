@@ -276,3 +276,70 @@
   max-width: 100%;
 }
 
+/* Ensure table container scrolls smoothly on mobile */
+.vp-doc .table-wrapper,
+.vp-doc table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile Responsive Optimization */
+@media (max-width: 768px) {
+  .vp-doc h1 {
+    font-size: 1.75rem;
+    line-height: 1.25;
+    margin-bottom: 1rem;
+  }
+
+  .vp-doc h2 {
+    font-size: 1.35rem;
+    padding-top: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .pipeline-flow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+
+  .pipeline-step {
+    justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .pipeline-arrow {
+    transform: rotate(90deg);
+    margin: 0.2rem 0;
+  }
+
+  .card-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .guide-step-card {
+    padding: 1rem;
+  }
+
+  .callout-box {
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .vp-doc h1 {
+    font-size: 1.5rem;
+  }
+
+  .pipeline-step {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+  }
+}
+
