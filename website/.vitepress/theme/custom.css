@@ -230,3 +230,36 @@
   font-weight: 700;
   color: var(--vp-c-text-1);
 }
+
+/* Custom Sleek Scrollbar (Prevents clunky browser scrollbars) */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--vp-c-divider, #cbd5e1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--vp-c-brand-1, #6366f1);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6366f1;
+}
+
+/* Ensure doc code blocks don't force page horizontal scroll */
+.vp-doc pre {
+  max-width: 100%;
+}
+

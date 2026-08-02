@@ -1,121 +1,100 @@
 <template>
-  <div class="quick-start-flow">
-    <div class="flow-nav">
-      <button 
+  <div class="vertical-timeline-flow">
+    <div class="timeline-container">
+      <div 
         v-for="(step, index) in steps" 
         :key="index"
-        :class="['flow-tab', { active: currentStep === index }]"
-        @click="currentStep = index"
+        class="timeline-step"
       >
-        <span class="step-num">{{ index + 1 }}</span>
-        <span class="step-label">{{ step.shortTitle }}</span>
-      </button>
-    </div>
-
-    <div class="flow-content">
-      <div class="step-info">
-        <h3 class="step-heading">
-          <span class="icon">{{ activeStep.icon }}</span>
-          {{ activeStep.title }}
-        </h3>
-        <p class="step-desc">{{ activeStep.description }}</p>
-      </div>
-
-      <div class="step-body">
-        <div class="code-header">
-          <span class="file-name">{{ activeStep.fileName }}</span>
-          <span class="badge">{{ activeStep.tag }}</span>
+        <!-- Vertical dashed line & Node marker -->
+        <div class="timeline-track">
+          <div class="step-node">
+            <span>{{ index + 1 }}</span>
+          </div>
+          <div v-if="index < steps.length - 1" class="dashed-line"></div>
         </div>
-        <pre class="code-preview"><code>{{ activeStep.code }}</code></pre>
-      </div>
 
-      <div v-if="activeStep.terminalOutput" class="terminal-box">
-        <div class="terminal-header">
-          <span class="dot red"></span>
-          <span class="dot yellow"></span>
-          <span class="dot green"></span>
-          <span class="term-title">Terminal Output</span>
+        <!-- Step content block -->
+        <div class="step-content">
+          <div class="step-header">
+            <span class="step-tag">Bước {{ index + 1 }}</span>
+            <h3 class="step-title">{{ step.title }}</h3>
+            <p class="step-desc">{{ step.description }}</p>
+          </div>
+
+          <!-- Code Box -->
+          <div class="code-box">
+            <div class="code-header">
+              <span class="file-name">{{ step.fileName }}</span>
+              <span class="tag-badge">{{ step.tag }}</span>
+            </div>
+            <pre class="code-preview"><code>{{ step.code }}</code></pre>
+          </div>
+
+          <!-- Terminal Output Box -->
+          <div v-if="step.terminalOutput" class="terminal-box">
+            <div class="terminal-header">
+              <div class="window-dots">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+              </div>
+              <span class="term-title">Terminal Console Output</span>
+            </div>
+            <pre class="term-body"><code>{{ step.terminalOutput }}</code></pre>
+          </div>
         </div>
-        <pre class="term-body"><code>{{ activeStep.terminalOutput }}</code></pre>
-      </div>
-
-      <div class="flow-actions">
-        <button 
-          v-if="currentStep > 0" 
-          class="btn-prev"
-          @click="currentStep--"
-        >
-          ← Bước Trước
-        </button>
-        <div class="spacer"></div>
-        <button 
-          v-if="currentStep < steps.length - 1" 
-          class="btn-next"
-          @click="currentStep++"
-        >
-          Bước Tiếp Theo →
-        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-
-const currentStep = ref(0)
-
 const steps = [
   {
-    shortTitle: 'Cài Đặt',
-    icon: '⚡',
-    title: '1. Cài Đặt Toolchain Vito (1-Line Install)',
-    description: 'Chạy duy nhất 1 câu lệnh để cài đặt bộ dịch Vit Compiler Engine & Vito CLI tự động cấu hình PATH.',
+    title: 'Cài Đặt Toolchain Vito (1-Line Install)',
+    description: 'Chạy câu lệnh dưới đây để tự động tải và cấu hình bộ dịch Vit Compiler Engine & Vito CLI.',
     fileName: 'Terminal (PowerShell / Bash)',
-    tag: 'CLI Command',
-    code: `# Windows PowerShell:
+    tag: 'Install Command',
+    code: `# Windows PowerShell (PowerShell 5.1+ / Core):
 iwr -useb https://raw.githubusercontent.com/longgoll/vit/main/install.ps1 | iex
 
 # Linux / macOS:
 curl -fsSL https://raw.githubusercontent.com/longgoll/vit/main/install.sh | bash`,
     terminalOutput: `[✓] Downloading Vit Compiler Engine v2.0.0...
-[✓] Installing Vito CLI to PATH...
-[✓] Clang/LLVM toolchain verified.
+[✓] Installing Vito CLI binary to PATH...
+[✓] Clang/LLVM toolchain runtime verified.
 ⚡ Vito Toolchain is ready! Run 'vit setup' to verify.`
   },
   {
-    shortTitle: 'Khởi Tạo',
-    icon: '📦',
-    title: '2. Khởi Tạo Dự Án Mới (vit init)',
-    description: 'Dùng lệnh vit init để tự động tạo cấu trúc thư mục chuẩn và file main.vit.',
+    title: 'Khởi Tạo Dự Án Mới (vit init)',
+    description: 'Tự động tạo cấu trúc thư mục tiêu chuẩn, file cấu hình vit.json và entrypoint main.vit.',
     fileName: 'Terminal',
     tag: 'Project Setup',
     code: `vit init my-web-app
 cd my-web-app`,
-    terminalOutput: `✨ Created project my-web-app/
-├── vit.json          (App Config)
-└── src/main.vit      (Entrypoint)
+    terminalOutput: `✨ Created project directory my-web-app/
+├── vit.json          (App Infrastructure Config)
+└── src/main.vit      (Application Entrypoint)
 
-🚀 Done! Run 'cd my-web-app' and 'vit dev' to start developing.`
+🚀 Project ready! Run 'cd my-web-app' and 'vit dev' to start developing.`
   },
   {
-    shortTitle: 'Viết Code',
-    icon: '💻',
-    title: '3. Viết HTTP Server (src/main.vit)',
-    description: 'Viết Web Server với cú pháp cực kỳ đơn giản, mạch lạc và hỗ trợ TypeScript/VIT Native.',
+    title: 'Viết Code HTTP Server (src/main.vit)',
+    description: 'Xây dựng Web API với cú pháp vô cùng đơn giản, mạch lạc và chạy trực tiếp trên VIT Native Engine.',
     fileName: 'src/main.vit',
-    tag: 'VIT Language Code',
+    tag: 'VIT Code',
     code: `import { Vito, Request, Response } from "vito";
 
 function main(): number {
     let app = Vito.new();
 
-    // 1. Route HTML
+    // 1. Route trả về Web UI HTML
     app.get("/", (req: Request, res: Response) => {
         res.html("<h1>Welcome to Vito Web Framework! 🚀</h1>");
     });
 
-    // 2. Route JSON API
+    // 2. Route JSON REST API
     app.get("/api/health", (req: Request, res: Response) => {
         res.json({ status: "UP", engine: "Vit Native Engine", uptime: "ok" });
     });
@@ -127,10 +106,8 @@ function main(): number {
     terminalOutput: null
   },
   {
-    shortTitle: 'Chạy App',
-    icon: '🔥',
-    title: '4. Khởi Chạy Live-Reload (vit dev)',
-    description: 'Chạy dev server với tính năng Hot-Reloading tự động biên dịch lại cực nhanh mỗi khi bạn lưu file.',
+    title: 'Khởi Chạy Dev Server (vit dev)',
+    description: 'Chạy dev server với tính năng Live-Reloading tự động biên dịch lại cực nhanh mỗi khi bạn lưu file.',
     fileName: 'Terminal',
     tag: 'Live Reloading',
     code: `vit dev`,
@@ -140,154 +117,169 @@ function main(): number {
 [Watcher] Ready for file changes.`
   }
 ]
-
-const activeStep = computed(() => steps[currentStep.value])
 </script>
 
 <style scoped>
-.quick-start-flow {
+.vertical-timeline-flow {
+  margin: 2rem 0;
+}
+
+.timeline-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.timeline-step {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 1.25rem;
+  position: relative;
+}
+
+/* Vertical Dashed Line Track */
+.timeline-track {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.step-node {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--vp-c-brand-1, #6366f1);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  z-index: 2;
+}
+
+.dashed-line {
+  width: 0;
+  flex: 1;
+  border-left: 2px dashed var(--vp-c-brand-1, #6366f1);
+  opacity: 0.4;
+  margin-top: 8px;
+  margin-bottom: -1.5rem;
+}
+
+/* Step Content Card */
+.step-content {
   background: var(--vp-c-bg-soft, #f8fafc);
   border: 1px solid var(--vp-c-divider, #e2e8f0);
-  border-radius: 16px;
-  overflow: hidden;
-  margin: 2rem 0;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+  border-radius: 14px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
 }
 
-.flow-nav {
-  display: flex;
-  background: var(--vp-c-bg-alt, #f1f5f9);
-  border-bottom: 1px solid var(--vp-c-divider, #e2e8f0);
+.step-header {
+  margin-bottom: 1rem;
 }
 
-.flow-tab {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  padding: 0.9rem 0.5rem;
-  background: transparent;
-  border: none;
-  border-bottom: 3px solid transparent;
-  color: var(--vp-c-text-2, #64748b);
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.flow-tab:hover {
-  color: var(--vp-c-text-1, #0f172a);
-  background: rgba(0, 0, 0, 0.03);
-}
-
-.flow-tab.active {
-  color: var(--vp-c-brand-1, #4f46e5);
-  border-bottom-color: var(--vp-c-brand-1, #4f46e5);
-  background: var(--vp-c-bg-soft, #ffffff);
-}
-
-.step-num {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--vp-c-divider, #cbd5e1);
-  color: var(--vp-c-text-2, #475569);
+.step-tag {
+  display: inline-block;
   font-size: 0.75rem;
   font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  color: var(--vp-c-brand-1, #6366f1);
+  background: var(--vp-c-brand-soft, rgba(99, 102, 241, 0.12));
+  padding: 0.15rem 0.55rem;
+  border-radius: 4px;
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-.flow-tab.active .step-num {
-  background: var(--vp-c-brand-1, #4f46e5);
-  color: #ffffff;
-}
-
-.flow-content {
-  padding: 1.5rem;
-}
-
-.step-heading {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.15rem;
-  font-weight: 700;
+.step-title {
+  margin: 0 0 0.4rem 0;
+  font-size: 1.2rem;
+  font-weight: 800;
   color: var(--vp-c-text-1, #0f172a);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
 }
 
 .step-desc {
-  margin: 0 0 1.25rem 0;
+  margin: 0;
+  font-size: 0.92rem;
   color: var(--vp-c-text-2, #475569);
-  font-size: 0.95rem;
   line-height: 1.5;
+}
+
+/* Code Box */
+.code-box {
+  background: #0f172a;
+  border-radius: 10px;
+  border: 1px solid #1e293b;
+  overflow: hidden;
+  margin-top: 1rem;
 }
 
 .code-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 0.55rem 1rem;
   background: #1e293b;
-  padding: 0.6rem 1rem;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-  border: 1px solid #334155;
-  border-bottom: none;
+  border-bottom: 1px solid #334155;
 }
 
 .file-name {
   font-family: var(--vp-font-family-mono, monospace);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: #38bdf8;
   font-weight: 600;
 }
 
-.badge {
+.tag-badge {
   font-size: 0.7rem;
-  padding: 0.15rem 0.5rem;
+  padding: 0.12rem 0.45rem;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   color: #94a3b8;
 }
 
 .code-preview {
-  margin: 0 0 1.25rem 0;
-  padding: 1.25rem;
-  background: #0f172a;
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
-  border: 1px solid #334155;
+  margin: 0;
+  padding: 1.1rem 1.25rem;
   font-family: var(--vp-font-family-mono, monospace);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: #f8fafc;
-  overflow-x: auto;
   line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: #0f172a;
 }
 
+/* Terminal Box */
 .terminal-box {
   background: #090d16;
   border: 1px solid #1e293b;
   border-radius: 10px;
   overflow: hidden;
-  margin-bottom: 1.25rem;
+  margin-top: 0.85rem;
 }
 
 .terminal-header {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 0.5rem 0.8rem;
+  gap: 8px;
+  padding: 0.45rem 0.8rem;
   background: #1e293b;
   border-bottom: 1px solid #334155;
 }
 
+.window-dots {
+  display: flex;
+  gap: 5px;
+}
+
 .dot {
-  width: 10px;
-  height: 10px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
 }
 .dot.red { background: #ef4444; }
@@ -295,8 +287,7 @@ const activeStep = computed(() => steps[currentStep.value])
 .dot.green { background: #10b981; }
 
 .term-title {
-  margin-left: 8px;
-  font-size: 0.75rem;
+  font-size: 0.73rem;
   color: #94a3b8;
   font-family: var(--vp-font-family-mono, monospace);
   font-weight: 600;
@@ -304,51 +295,25 @@ const activeStep = computed(() => steps[currentStep.value])
 
 .term-body {
   margin: 0;
-  padding: 1rem;
+  padding: 0.9rem 1.1rem;
   font-family: var(--vp-font-family-mono, monospace);
-  font-size: 0.85rem;
+  font-size: 0.83rem;
   color: #34d399;
-  line-height: 1.6;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
   background: #090d16;
 }
 
-.flow-actions {
-  display: flex;
-  align-items: center;
-  margin-top: 1rem;
-}
-
-.spacer { flex: 1; }
-
-.btn-next, .btn-prev {
-  padding: 0.65rem 1.3rem;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-next {
-  background: #4f46e5;
-  color: #ffffff;
-  border: none;
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-}
-
-.btn-next:hover {
-  background: #4338ca;
-  transform: translateX(2px);
-}
-
-.btn-prev {
-  background: transparent;
-  color: var(--vp-c-text-2, #475569);
-  border: 1px solid var(--vp-c-divider, #cbd5e1);
-}
-
-.btn-prev:hover {
-  color: var(--vp-c-text-1, #0f172a);
-  border-color: var(--vp-c-text-2, #64748b);
+@media (max-width: 640px) {
+  .timeline-step {
+    grid-template-columns: 32px 1fr;
+    gap: 0.75rem;
+  }
+  .step-node {
+    width: 28px;
+    height: 28px;
+    font-size: 0.82rem;
+  }
 }
 </style>

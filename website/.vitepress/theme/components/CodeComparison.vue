@@ -1,28 +1,33 @@
 <template>
   <div class="code-comparison">
     <div class="comparison-header">
-      <h3>💡 Expressive Syntax Across Ecosystems</h3>
-      <p class="subtitle">See how Vito maintains the clean simplicity of Express while outperforming C++ and Rust.</p>
+      <h3 class="comparison-title">💡 Cú Pháp Mạch Lạc - Hiệu Năng Vượt Trỗi</h3>
+      <p class="subtitle">So sánh cú pháp Vito với Express, Gin và Actix-Web khi định tuyến API & gom nhóm route.</p>
       
+      <!-- Responsive Wrapped Tab Buttons -->
       <div class="tabs-list">
         <button
           v-for="tab in tabs"
           :key="tab.id"
-          :class="{ active: activeTab === tab.id }"
+          :class="['tab-btn', { active: activeTab === tab.id }]"
           @click="activeTab = tab.id"
         >
-          <span>{{ tab.icon }}</span>
-          <span>{{ tab.label }}</span>
-          <span v-if="tab.badge" class="tab-badge">{{ tab.badge }}</span>
+          <span class="tab-icon">{{ tab.icon }}</span>
+          <span class="tab-label">{{ tab.label }}</span>
         </button>
       </div>
     </div>
 
+    <!-- Code Preview Card -->
     <div class="code-body">
       <div class="code-meta">
-        <div class="lang-tag">{{ currentTab.lang }}</div>
-        <div class="perf-stat">
-          <span>⚡ {{ currentTab.throughput }}</span> | <span>💾 {{ currentTab.ram }}</span>
+        <div class="lang-info">
+          <span class="lang-tag">{{ currentTab.lang }}</span>
+          <span class="fw-fullname">{{ currentTab.label }}</span>
+        </div>
+        <div class="perf-stats">
+          <span class="stat-badge throughput">⚡ {{ currentTab.throughput }}</span>
+          <span class="stat-badge ram">💾 {{ currentTab.ram }}</span>
         </div>
       </div>
       <pre class="code-block"><code>{{ currentTab.code }}</code></pre>
@@ -40,7 +45,6 @@ const tabs = [
     id: 'vito',
     label: 'Vito (VIT Native)',
     icon: '🔴',
-    badge: '245K req/s • 18MB RAM',
     lang: 'vit',
     throughput: '245,100 req/s',
     ram: '18.69 MB RAM (100k conns)',
@@ -71,7 +75,6 @@ function main(): number {
     id: 'express',
     label: 'Node.js (Express)',
     icon: '🟨',
-    badge: '38K req/s • 320MB RAM',
     lang: 'javascript',
     throughput: '38,500 req/s',
     ram: '320.10 MB RAM (100k conns)',
@@ -94,7 +97,6 @@ app.listen(8888);`
     id: 'gin',
     label: 'Golang (Gin)',
     icon: '🔵',
-    badge: '94K req/s • 254MB RAM',
     lang: 'go',
     throughput: '94,200 req/s',
     ram: '254.80 MB RAM (100k conns)',
@@ -123,7 +125,6 @@ func main() {
     id: 'actix',
     label: 'Rust (Actix-Web)',
     icon: '🦀',
-    badge: '188K req/s • 185MB RAM',
     lang: 'rust',
     throughput: '188,300 req/s',
     ram: '185.40 MB RAM (100k conns)',
@@ -162,67 +163,59 @@ const currentTab = computed(() => {
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
 }
 
-.comparison-header h3 {
+.comparison-title {
   margin: 0;
   font-size: 1.25rem;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--vp-c-text-1, #0f172a);
 }
 
 .subtitle {
-  margin: 0.25rem 0 1rem 0;
-  font-size: 0.88rem;
+  margin: 0.25rem 0 1.25rem 0;
+  font-size: 0.9rem;
   color: var(--vp-c-text-2, #475569);
 }
 
+/* Wrapped Tabs (No horizontal scrolling) */
 .tabs-list {
   display: flex;
-  gap: 0.5rem;
-  overflow-x: auto;
-  padding-bottom: 0.5rem;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid var(--vp-c-divider, #cbd5e1);
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
 }
 
-.tabs-list button {
+.tab-btn {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.55rem 0.9rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  border-radius: 8px;
+  gap: 0.5rem;
+  padding: 0.55rem 1rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  border-radius: 10px;
   border: 1px solid var(--vp-c-divider, #cbd5e1);
   background: var(--vp-c-bg-alt, #ffffff);
   color: var(--vp-c-text-1, #0f172a);
   cursor: pointer;
-  white-space: nowrap;
   transition: all 0.2s ease;
 }
 
-.tabs-list button:hover {
-  background: var(--vp-c-brand-soft, rgba(79, 70, 229, 0.1));
-  border-color: var(--vp-c-brand-1, #4f46e5);
+.tab-btn:hover {
+  background: var(--vp-c-brand-soft, rgba(99, 102, 241, 0.08));
+  border-color: var(--vp-c-brand-1, #6366f1);
+  transform: translateY(-1px);
 }
 
-.tabs-list button.active {
-  background: #4f46e5;
-  border-color: #4f46e5;
+.tab-btn.active {
+  background: var(--vp-c-brand-1, #6366f1);
+  border-color: var(--vp-c-brand-1, #6366f1);
   color: #ffffff;
-}
-
-.tab-badge {
-  font-size: 0.72rem;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 0.15rem 0.45rem;
-  border-radius: 4px;
-  color: inherit;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
 }
 
 .code-body {
   background: #0f172a;
-  border-radius: 10px;
-  border: 1px solid #334155;
+  border-radius: 12px;
+  border: 1px solid #1e293b;
   overflow: hidden;
 }
 
@@ -230,23 +223,59 @@ const currentTab = computed(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
   background: #1e293b;
-  font-size: 0.8rem;
-  color: #94a3b8;
   border-bottom: 1px solid #334155;
+}
+
+.lang-info {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
 }
 
 .lang-tag {
   text-transform: uppercase;
   font-weight: 800;
-  letter-spacing: 0.5px;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
   color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
 }
 
-.perf-stat span {
+.fw-fullname {
+  font-size: 0.85rem;
   font-weight: 700;
+  color: #e2e8f0;
+}
+
+.perf-stats {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stat-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+}
+
+.stat-badge.throughput {
+  background: rgba(16, 185, 129, 0.15);
   color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.stat-badge.ram {
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
+  border: 1px solid rgba(99, 102, 241, 0.3);
 }
 
 .code-block {
@@ -256,7 +285,8 @@ const currentTab = computed(() => {
   font-size: 0.9rem;
   line-height: 1.6;
   color: #f8fafc;
-  overflow-x: auto;
   background: #0f172a;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 </style>

@@ -26,16 +26,18 @@ export default defineConfig({
         nav: [
           { text: 'Trang chủ', link: '/' },
           { text: 'Hướng dẫn', link: '/guide/getting-started' },
+          { text: 'Thư Viện Chuẩn (STD)', link: '/guide/std-packages' },
           {
             text: 'Tính Năng & Mô-đun',
             items: [
-              { text: '🎯 Định Tuyến (Routing)', link: '/guide/routing' },
-              { text: '🧱 Hệ Thống Middleware', link: '/guide/middleware' },
-              { text: '🗄️ CSDL & Vito ORM', link: '/guide/database-orm' },
-              { text: '🔒 Xác Thực & Bảo Mật', link: '/guide/auth-security' },
-              { text: '⚡ Realtime & Jobs', link: '/guide/realtime-jobs' },
-              { text: '📊 Metrics & DX', link: '/guide/observability-dx' },
-              { text: '🛠️ Bộ Công Cụ CLI', link: '/guide/cli' }
+              { text: 'Thư Viện Chuẩn & Packages', link: '/guide/std-packages' },
+              { text: 'Định Tuyến (Routing)', link: '/guide/routing' },
+              { text: 'Hệ Thống Middleware', link: '/guide/middleware' },
+              { text: 'Vito ORM & CSDL', link: '/guide/database-orm' },
+              { text: 'Xác Thực & Bảo Mật', link: '/guide/auth-security' },
+              { text: 'Realtime & Jobs', link: '/guide/realtime-jobs' },
+              { text: 'Metrics & Observability', link: '/guide/observability-dx' },
+              { text: 'Bộ Công Cụ CLI', link: '/guide/cli' }
             ]
           },
           { text: 'Benchmark', link: '/guide/benchmarks' },
@@ -44,33 +46,39 @@ export default defineConfig({
         ],
         sidebar: [
           {
-            text: '🚀 Bắt Đầu (Getting Started)',
+            text: 'Bắt Đầu',
             items: [
-              { text: 'Khởi Đầu Siêu Tốc (Quick Start)', link: '/guide/getting-started' },
-              { text: 'Báo Cáo Benchmark Hiệu Năng', link: '/guide/benchmarks' }
+              { text: 'Khởi Đầu Siêu Tốc', link: '/guide/getting-started' },
+              { text: 'Thư Viện Chuẩn & Packages', link: '/guide/std-packages' },
+              { text: 'Benchmark Hiệu Năng', link: '/guide/benchmarks' }
             ]
           },
           {
-            text: '🧱 Cốt Lõi Framework (Core)',
+            text: 'Cốt Lõi Framework',
             items: [
               { text: 'Định Tuyến & Route Params', link: '/guide/routing' },
               { text: 'Hệ Thống Middleware', link: '/guide/middleware' },
-              { text: 'CLI & Công Cụ Phát Triển', link: '/guide/cli' }
+              { text: 'Vito CLI & Dev Tools', link: '/guide/cli' }
             ]
           },
           {
-            text: '🗄️ Dữ Liệu & Bảo Mật (Data & Auth)',
+            text: 'Dữ Liệu & Bảo Mật',
             items: [
-              { text: 'Quản Lý CSDL & Vito ORM', link: '/guide/database-orm' },
+              { text: 'Vito ORM & CSDL', link: '/guide/database-orm' },
               { text: 'Xác Thực & Bảo Mật (Auth)', link: '/guide/auth-security' }
             ]
           },
           {
-            text: '⚡ Tính Năng Nâng Cao (Advanced)',
+            text: 'Tính Năng Nâng Cao',
             items: [
               { text: 'Realtime WebSockets & Jobs', link: '/guide/realtime-jobs' },
-              { text: 'Giám Sát Metrics & DX', link: '/guide/observability-dx' },
-              { text: 'Tra Cứu API Reference', link: '/api/overview' }
+              { text: 'Metrics & Observability', link: '/guide/observability-dx' }
+            ]
+          },
+          {
+            text: 'API Reference',
+            items: [
+              { text: 'Tổng Quan API', link: '/api/overview' }
             ]
           }
         ]
@@ -87,16 +95,18 @@ export default defineConfig({
         nav: [
           { text: 'Home', link: '/en/' },
           { text: 'Guide', link: '/en/guide/getting-started' },
+          { text: 'Standard Library (STD)', link: '/en/guide/std-packages' },
           {
             text: 'Features & Modules',
             items: [
-              { text: '🎯 Routing System', link: '/en/guide/routing' },
-              { text: '🧱 Middleware System', link: '/en/guide/middleware' },
-              { text: '🗄️ Database & Vito ORM', link: '/en/guide/database-orm' },
-              { text: '🔒 Auth & Security', link: '/en/guide/auth-security' },
-              { text: '⚡ Realtime & Job Queue', link: '/en/guide/realtime-jobs' },
-              { text: '📊 Metrics & DX Observability', link: '/en/guide/observability-dx' },
-              { text: '🛠️ CLI Tooling', link: '/en/guide/cli' }
+              { text: 'Standard Library & Packages', link: '/en/guide/std-packages' },
+              { text: 'Routing System', link: '/en/guide/routing' },
+              { text: 'Middleware System', link: '/en/guide/middleware' },
+              { text: 'Database & Vito ORM', link: '/en/guide/database-orm' },
+              { text: 'Auth & Security Suite', link: '/en/guide/auth-security' },
+              { text: 'Realtime & Job Queue', link: '/en/guide/realtime-jobs' },
+              { text: 'Metrics & Observability', link: '/en/guide/observability-dx' },
+              { text: 'CLI Tooling', link: '/en/guide/cli' }
             ]
           },
           { text: 'Benchmark', link: '/en/guide/benchmarks' },
@@ -105,33 +115,39 @@ export default defineConfig({
         ],
         sidebar: [
           {
-            text: '🚀 Getting Started',
+            text: 'Getting Started',
             items: [
               { text: 'Quick Start Guide', link: '/en/guide/getting-started' },
-              { text: 'Performance Benchmark', link: '/en/guide/benchmarks' }
+              { text: 'Standard Library & Packages', link: '/en/guide/std-packages' },
+              { text: 'Performance Benchmarks', link: '/en/guide/benchmarks' }
             ]
           },
           {
-            text: '🧱 Framework Core',
+            text: 'Core Framework',
             items: [
               { text: 'Routing & Parameters', link: '/en/guide/routing' },
               { text: 'Middleware System', link: '/en/guide/middleware' },
-              { text: 'CLI & Dev Tools', link: '/en/guide/cli' }
+              { text: 'Vito CLI Tooling', link: '/en/guide/cli' }
             ]
           },
           {
-            text: '🗄️ Data & Security',
+            text: 'Data & Security',
             items: [
-              { text: 'Database & Vito ORM', link: '/en/guide/database-orm' },
+              { text: 'Vito ORM & Database', link: '/en/guide/database-orm' },
               { text: 'Auth & Security Suite', link: '/en/guide/auth-security' }
             ]
           },
           {
-            text: '⚡ Advanced Features',
+            text: 'Advanced Features',
             items: [
-              { text: 'Realtime WebSockets & Jobs', link: '/en/guide/realtime-jobs' },
-              { text: 'Observability & DX', link: '/en/guide/observability-dx' },
-              { text: 'API Reference', link: '/en/api/overview' }
+              { text: 'WebSockets & Job Queue', link: '/en/guide/realtime-jobs' },
+              { text: 'Metrics & Observability', link: '/en/guide/observability-dx' }
+            ]
+          },
+          {
+            text: 'API Reference',
+            items: [
+              { text: 'API Overview', link: '/en/api/overview' }
             ]
           }
         ]

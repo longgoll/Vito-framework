@@ -9,7 +9,7 @@
         </p>
       </div>
 
-      <!-- Segmented Workload Picker -->
+      <!-- Segmented Workload Picker (Flex Wrapped) -->
       <div class="segmented-control workload-picker">
         <button
           v-for="wl in workloads"
@@ -41,7 +41,7 @@
       </div>
     </div>
 
-    <!-- Metric Filter Tabs -->
+    <!-- Metric Filter Tabs (Flex Wrapped) -->
     <div class="metric-tabs">
       <button
         v-for="m in metrics"
@@ -194,7 +194,7 @@ function getMetricUnit(metric) {
   background: var(--vp-c-bg-soft);
   border: 1px solid var(--vp-c-divider);
   border-radius: 16px;
-  padding: 2rem;
+  padding: 1.5rem;
   margin: 2.5rem 0;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
@@ -210,8 +210,8 @@ function getMetricUnit(metric) {
 
 .chart-title {
   margin: 0;
-  font-size: 1.35rem;
-  font-weight: 700;
+  font-size: 1.25rem;
+  font-weight: 800;
   color: var(--vp-c-text-1);
 }
 
@@ -221,9 +221,11 @@ function getMetricUnit(metric) {
   color: var(--vp-c-text-2);
 }
 
-/* Segmented Controls */
+/* Segmented Controls (Flex Wrap Enabled) */
 .segmented-control {
   display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
   background: var(--vp-c-bg-alt);
   padding: 4px;
   border-radius: 10px;
@@ -251,7 +253,8 @@ function getMetricUnit(metric) {
 /* Highlight Stat Banner */
 .stat-highlight {
   display: flex;
-  align-items: baseline;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 1rem;
   padding: 1rem 1.25rem;
   background: var(--vp-c-bg-alt);
@@ -261,7 +264,7 @@ function getMetricUnit(metric) {
 }
 
 .stat-value {
-  font-size: 2rem;
+  font-size: 1.8rem;
   font-weight: 800;
   letter-spacing: -0.03em;
   color: var(--vp-c-text-1);
@@ -284,9 +287,10 @@ function getMetricUnit(metric) {
   border: 1px solid var(--vp-c-divider);
 }
 
-/* Metric Tabs */
+/* Metric Tabs (Flex Wrapped) */
 .metric-tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
   border-bottom: 1px solid var(--vp-c-divider);
