@@ -1,90 +1,159 @@
-# Observability Metrics, OTel Tracing & DX Tooling 📊
+# Developer Experience (DX) & Observability Suite 📊
 
-**Vito Framework** features native real-time system observability (**Prometheus Metrics Exporter & OpenTelemetry Tracing**) alongside an ultra-fast in-memory testing framework and developer CLI tools (**CLI Generators & System Diagnostics**).
+**Vito Framework** includes a built-in **Developer Experience Suite** for smooth development, automatic input validation (**Schema Validation**), request lifecycle management (**Lifecycle Hooks**), **OpenAPI 3.0 & Swagger UI** doc generation, Client SDK generators, **Prometheus** metrics, and **OpenTelemetry** tracing.
 
 ---
 
-## 📈 Prometheus Metrics Exporter (`packages/metrics`)
+## 🛡️ 1. Schema Validation Engine (`packages/validation`)
 
-The `packages/metrics/metrics.vit` module exposes a native `/metrics` endpoint compliant with standard Prometheus text exposition format, directly consumable by Prometheus scrapers and Grafana Dashboards.
-
-### Collected Metrics:
-- **HTTP Request Counters**: `http_requests_total{method="GET|POST", status="200|404|500"}`
-- **Latency Summary Quantiles**: `http_request_duration_seconds` (p50, p90, p99 quantiles).
-- **Process Memory & CPU**: `process_cpu_seconds_total` & `process_resident_memory_bytes`.
-
-### Usage Example:
+Validates data types and constraints of Request Query & Params with zero-copy memory layout. Automatically returns HTTP `422 Unprocessable Entity` when data is invalid:
 
 ```typescript
-import { createPrometheusRegistry } from "vito/packages/metrics/metrics.vit";
+import { SchemaValidator } from "packages/validation/validation.vit";
 
-let metricsRegistry = createPrometheusRegistry();
+let validator: SchemaValidator;
+validator.init();
+validator.addStringRule("name");
+validator.addEmailRule("email");
 
-// Record HTTP Request metrics
-metricsRegistry.recordRequest("GET", "/api/v1/users", 200, 3);
-metricsRegistry.recordRequest("POST", "/api/v1/users", 200, 12);
+app.get("/api/v1/users", (req: Request, res: Response) => {
+    // Automatically validates req.query or req.param
+    if (!validator.validateRequest(req, res)) {
+        return; // Automatically returns 422 JSON on failure
+    }
 
-// Register /metrics endpoint middleware
-app.use((req, res) => metricsRegistry.handleMetricsEndpoint(req, res));
+    res.json("{\"status\":\"success\",\"message\":\"Request validated!\"}");
+});
 ```
 
 ---
 
-## 🔗 OpenTelemetry (OTel) Tracing Integration
+## 🔄 2. Request Lifecycle Hooks & Custom Error Handlers (`vito.vit`)
 
-Vito supports W3C Trace Context headers (`traceparent`) to seamlessly correlate logs and trace spans across distributed microservices.
+Vito supports flexible interceptor points throughout the lifecycle of every HTTP Request:
+
+<div class="card-grid">
+  <div class="feature-mini-card">
+    <div class="icon">⚓</div>
+    <h4>beforeHandle Hook</h4>
+    <p>Runs before entering the main handler. Allows Auth checks, header injection, or early request blocking.</p>
+  </div>
+
+  <div class="feature-mini-card">
+    <div class="icon">✨</div>
+    <h4>afterHandle Hook</h4>
+    <p>Runs immediately after a successful handler response for logging or adding response metadata.</p>
+  </div>
+
+  <div class="feature-mini-card">
+    <div class="icon">🚨</div>
+    <h4>onError Hook</h4>
+    <p>Centrally catches and handles all exceptions raised during request processing.</p>
+  </div>
+</div>
 
 ```typescript
-import { extractTraceParent, injectTraceParent } from "vito/packages/metrics/metrics.vit";
+// 1. Pre-execution hook
+app.beforeHandle((req: Request, res: Response) => {
+    res.setHeader("X-Powered-By", "Vito-Native-Engine");
+    return true; // Return true to continue the processing chain
+});
 
-// Extract Trace ID & Span ID from incoming request headers
-let traceCtx = extractTraceParent(req.header("traceparent"));
+// 2. Post-execution hook
+app.afterHandle((req: Request, res: Response) => {
+    print("Request executed successfully: " + req.path);
+});
 
-// Inject Trace context into downstream requests
-let outgoingHeader = injectTraceParent(traceCtx);
+// 3. Global Error Handler
+app.onError((req: Request, res: Response) => {
+    res.setStatus(500.0).json("{\"error\":\"Internal Error\",\"path\":\"" + req.path + "\"}");
+});
 ```
 
 ---
 
-## 🧪 Testing Framework & In-Memory Injector (`packages/testing`)
+## 📖 3. Dynamic OpenAPI 3.0 Spec & Swagger UI Generator (`packages/swagger`)
 
-The `packages/testing/testing.vit` package enables ultra-fast mock HTTP request execution directly in memory without binding real OS TCP sockets.
-
-### Fast Simulation with `app.inject()`:
-- Full support for Request Body, Headers, Query Strings, and Cookies.
-- **Passes DoD Target**: Executes 100+ mock test cases in $< 1$ second.
-
-### DB Test Fixture & Isolation:
-- Automatic `SAVEPOINT` and `ROLLBACK` after each test execution to guarantee clean database isolation.
+Automatically initializes and serves OpenAPI 3.0 docs at `/openapi.json` and interactive Swagger UI at `/docs`:
 
 ```typescript
-import { createMockHttpEngine, createTestDbFixture } from "vito/packages/testing/testing.vit";
+import { OpenAPISpec } from "packages/swagger/swagger.vit";
 
-let mockEngine = createMockHttpEngine();
-let res = mockEngine.inject(app, "GET", "/healthz", "Accept: application/json", "");
+let spec: OpenAPISpec;
+spec.init("Vito Payment Gateway API", "v1.0.0");
 
-print("HTTP Status: " + res.statusCode);
-print("Response Body: " + res.json());
+// Register endpoint documentation
+spec.addRouteDoc("/api/v1/users", "get", "List all registered users with validation");
+spec.addRouteDoc("/api/v1/products", "post", "Create new product item");
 
-// DB Isolation Test
-let dbFixture = createTestDbFixture("UserTests");
-dbFixture.beginIsolationTransaction();
-dbFixture.seedFixture("users", "{\"id\":\"usr_100\",\"email\":\"dev@vito.dev\"}");
-dbFixture.rollbackIsolationTransaction();
+// Serve OpenAPI 3.0 JSON spec
+app.get("/openapi.json", (req: Request, res: Response) => {
+    res.json(spec.generateJSON());
+});
 ```
 
 ---
 
-## 🛠 CLI Code Generators & Diagnostics (`packages/cli`)
+## 📦 4. Type-Safe Client SDK Code Generator (`packages/cli`)
 
-The `vit` CLI provides scaffolding code generators (`vit generate`) and interactive system diagnostics (`vit doctor`).
+Automatically generates type-safe Client SDK source code from backend config via the CLI toolkit:
 
-### Boilerplate Generator (`vit generate` / `vit g`):
-- `vit g controller User`: Generates Controller structure.
-- `vit g service User`: Generates Service business logic.
-- `vit g middleware Auth`: Generates Custom Middleware.
-- `vit g model User`: Generates Vito ORM Model.
-- `vit g migration CreateUsers`: Generates SQL Migration template.
+```typescript
+import { VitCodeGenerator } from "packages/cli/cli.vit";
 
-### Interactive Diagnostics (`vit doctor`):
-Runs comprehensive checks verifying compiler environment, database connectivity, memory/CPU allocation, and package integrity.
+let cliGen: VitCodeGenerator;
+cliGen.generatedCount = 0.0;
+
+// Generate Client SDK to communicate with the Vito App
+let sdkCode = cliGen.generateEdenClient("VitoUserApp");
+print(sdkCode);
+```
+
+**Auto-generated Client SDK sample:**
+```typescript
+import { fetchUrl } from "std/http";
+
+struct VitoUserAppClient {
+    baseUrl: string,
+    function init(url: string): VitoUserAppClient {
+        this.baseUrl = url;
+        return this;
+    },
+    function getStatus(): string {
+        return fetchUrl(this.baseUrl + "/api/v1/status");
+    },
+    function getUser(id: string): string {
+        return fetchUrl(this.baseUrl + "/users/" + id);
+    }
+}
+```
+
+---
+
+## 📊 5. Prometheus Metrics & OpenTelemetry Exporter (`packages/metrics`)
+
+Monitor real-time operational metrics and export Prometheus data at `/metrics`:
+
+```typescript
+import { createPrometheusRegistry } from "packages/metrics/metrics.vit";
+
+let metrics = createPrometheusRegistry();
+metrics.recordRequest("GET", "/api/v1/users", 200.0, 1.25);
+
+app.get("/metrics", (req: Request, res: Response) => {
+    res.send(metrics.renderPrometheusMetrics());
+});
+```
+
+---
+
+## 🩺 6. Kubernetes Probes & Graceful Shutdown (`packages/health`)
+
+Ensures the application is fully compatible with Orchestration environments (Kubernetes, Docker Swarm):
+
+```typescript
+import { createTestDbFixture } from "packages/testing/testing.vit";
+
+let db = createTestDbFixture("vito_production_db");
+db.beginIsolationTransaction();
+```

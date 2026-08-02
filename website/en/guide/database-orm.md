@@ -1,131 +1,130 @@
-# Database Connection Pool & Vito ORM 🗄️
+# Database Management & Vito ORM Enterprise 🗄️
 
-**Vito Framework** provides an Enterprise-ready Database Connection Pooling and ORM suite out of the box, featuring dynamic pooling, safe transaction management, and automated schema migrations.
+**Vito Framework** includes an enterprise-grade Database Manager and **Vito ORM** with automatic Connection Pooling, 100% ACID Atomic Transactions, Savepoints, and Schema Auto-Migrations.
 
 ---
 
-## 🏊 Connection Pool Manager (`packages/db/db_pool.vit`)
+## 🏊 1. Connection Pool Manager (`packages/db/db_pool.vit`)
 
-The Connection Pool Manager automatically manages database connection lifecycles, optimizes query performance, and auto-recovers broken connections.
+Intelligent database connection lifecycle management with automatic reconnection and hardware resource optimization.
 
-### Key Features:
-- **Dynamic Connection Pooling**: Dynamically scales connections to PostgreSQL, SQLite, or MySQL according to workload, constrained by `minConnections` and `maxConnections`.
-- **Fast Auto-Reconnect (< 100ms)**: Automatically detects broken network connections and silently restores them.
-- **Idle Connection Cleanup**: Automatically releases idle connections exceeding the `idleTimeoutMs` threshold.
+<div class="card-grid">
+  <div class="feature-mini-card">
+    <div class="icon">⚡</div>
+    <h4>Dynamic Connection Pooling</h4>
+    <p>Automatically scales connections based on real load between `minConnections` and `maxConnections`.</p>
+  </div>
 
-### Example Usage:
+  <div class="feature-mini-card">
+    <div class="icon">🔄</div>
+    <h4>Fast Auto-Reconnect (< 100ms)</h4>
+    <p>Automatically detects network disruption and silently re-establishes connections.</p>
+  </div>
+
+  <div class="feature-mini-card">
+    <div class="icon">🧹</div>
+    <h4>Idle Connection Eviction</h4>
+    <p>Reclaims idle connections exceeding the `idleTimeoutMs` threshold to free RAM.</p>
+  </div>
+</div>
 
 ```typescript
 import { createConnectionPool } from "vito/packages/db/db_pool.vit";
 
-// Create Connection Pool for PostgreSQL
+// Initialize Connection Pool for PostgreSQL
 let pool = createConnectionPool(
     "PostgreSQL",
-    "postgresql://vito_admin:secret@localhost:5432/vito_prod",
-    2, // minConnections
-    10 // maxConnections
+    "postgresql://admin:secret@localhost:5432/vito_db",
+    2,  // minConnections
+    10  // maxConnections
 );
 
-// Acquire connection from Pool
+// Borrow a connection from the Pool
 let connId = pool.acquireConnection();
 
-// Release connection back to Pool when done
+// Release the connection back to the Pool
 pool.releaseConnection(connId, 1000);
-
-// Auto-check connection health and restore broken links (< 100ms)
-let restoredCount = pool.checkHealthAndReconnect();
-
-// Reclaim idle connections
-pool.reclaimIdleConnections(5000);
 ```
 
 ---
 
-## 🔄 Transaction Management Engine (`packages/orm/transaction.vit`)
+## 🔄 2. Transaction Management & Savepoints (`packages/orm/transaction.vit`)
 
-Supports atomic database transactions ensuring **100% ACID integrity** and Savepoints for nested transaction blocks.
+Guarantees absolute data integrity (**100% ACID**) for financial and banking operations:
 
-### Example Usage & ACID Rollback:
+::: code-group
 
-```typescript
+```typescript [1. Atomic Commit / Rollback]
 import { beginTransaction } from "vito/packages/orm/transaction.vit";
 
-// 1. Successful Transaction (COMMIT)
+// Start a Transaction
 let tx = beginTransaction(1001);
-tx.execute("INSERT INTO users (name, email) VALUES ('Alice', 'alice@vito.dev')");
-tx.execute("UPDATE account_balances SET amount = amount - 500 WHERE user_id = 10");
-tx.commit(); // Safely commit operations
 
-// 2. Failed Transaction (Automatic ROLLBACK)
-let tx2 = beginTransaction(1002);
-tx2.execute("INSERT INTO orders (id, total) VALUES (501, 1200)");
-// When an error occurs:
-tx2.rollback(); // Discards all staged queries cleanly (100% ACID integrity)
+try {
+    tx.execute("UPDATE accounts SET balance = balance - 500 WHERE id = 10");
+    tx.execute("UPDATE accounts SET balance = balance + 500 WHERE id = 20");
+    
+    // Safe commit if no errors occurred
+    tx.commit();
+} catch (e) {
+    // Automatic 100% Rollback on error
+    tx.rollback();
+}
 ```
 
-### Nested Transactions & Savepoints:
+```typescript [2. Nested Savepoints]
+let tx = beginTransaction(1002);
+tx.execute("INSERT INTO orders (id, user_id) VALUES (501, 12)");
 
-```typescript
-let tx3 = beginTransaction(1003);
-tx3.execute("INSERT INTO audit_logs (action) VALUES ('CHECKOUT')");
+// Create a Savepoint
+tx.createSavepoint("sp_order_created");
 
-// Create Savepoint
-tx3.createSavepoint("sp_audit_done");
+// Try applying a discount code
+tx.execute("UPDATE coupons SET used = true WHERE code = 'PROMO50'");
 
-// Perform sub-queries
-tx3.execute("UPDATE coupons SET used = true WHERE code = 'DISCOUNT50'");
+// If the coupon step fails, rollback only to the Savepoint instead of cancelling the order
+tx.rollbackToSavepoint("sp_order_created");
 
-// Roll back only to Savepoint on error without aborting entire transaction
-tx3.rollbackToSavepoint("sp_audit_done");
-
-tx3.commit();
+tx.commit(); // Order is still saved safely!
 ```
+
+:::
 
 ---
 
-## 📜 Migration Runner & Database Seeder (`packages/orm/migration.vit`)
+## 📜 3. Schema Migration & Seeder (`packages/orm/migration.vit`)
 
-Manages database schema version history (Up/Down Migrations) and populates mock data for Dev & Staging environments.
+Manage table schema change history (Up/Down Migrations) and sample data seeding tools:
 
-### 1. Schema Migration Engine
+::: code-group
 
-```typescript
-import { createMigrationRunner, createSchemaDiffGenerator } from "vito/packages/orm/migration.vit";
+```typescript [1. Schema Migration Runner]
+import { createMigrationRunner } from "vito/packages/orm/migration.vit";
 
 let migrator = createMigrationRunner();
 
-// Register migration
+// Register a Migration
 migrator.registerMigration(
-    "20260801_001",
+    "20260802_001",
     "create_users_table",
-    "CREATE TABLE users (id SERIAL PRIMARY KEY, username VARCHAR(50));",
+    "CREATE TABLE users (id SERIAL PRIMARY KEY, username VARCHAR(50), email VARCHAR(100));",
     "DROP TABLE users;"
 );
 
-// Execute Up Migration (Tracks version history in `schema_migrations`)
+// Run schema upgrade
 migrator.runUp();
-
-// Rollback migration
-migrator.runDown();
 ```
 
-### 2. Schema Diff Generator
-
-```typescript
-let diffGen = createSchemaDiffGenerator();
-let diffSql = diffGen.generateDiffSql("Product", "products", "", "id INT, title VARCHAR(100), price NUMERIC");
-// Returns SQL: CREATE TABLE products (id INT, title VARCHAR(100), price NUMERIC);
-```
-
-### 3. Database Seeder
-
-```typescript
+```typescript [2. Database Seeder]
 import { createDatabaseSeeder } from "vito/packages/orm/migration.vit";
 
 let seeder = createDatabaseSeeder();
-seeder.addSeed("users", '{"username":"vito_admin","email":"admin@vito.dev"}');
-seeder.addSeed("products", '{"title":"Vito Enterprise Server","price":999}');
 
-// Populate database
+seeder.addSeed("users", JSON.stringify({ username: "admin", role: "SuperAdmin" }));
+seeder.addSeed("products", JSON.stringify({ name: "Vito Enterprise", price: 999 }));
+
+// Execute seeding
 seeder.runSeeder();
 ```
+
+:::

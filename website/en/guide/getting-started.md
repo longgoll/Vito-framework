@@ -1,99 +1,103 @@
-# Getting Started with Vito 🚀
+# Quick Start Guide 🚀
 
-**Vito** is a high-performance, lightweight, and extensible Web Framework designed for the **VIT** programming language. The framework provides an excellent Developer Experience (DX) similar to Express, Fastify, or Hono in the JS ecosystem, running natively on top of the **VIT Compiler Runtime**.
+Welcome to **Vito Framework** — high-performance, lightweight, and feature-rich Web Framework tailored for the **VIT** programming language.
 
----
-
-## 🛠 1-Line Quick Installation
-
-Install the complete **Vit Compiler Engine** and **Vito CLI** with a single command:
-
-::: code-group
-
-```bash [Linux / macOS]
-curl -fsSL https://vit.dev/install.sh | bash
-```
-
-```powershell [Windows (PowerShell)]
-iwr https://vit.dev/install.ps1 -useb | iex
-```
-
+::: tip 💡 Interactive Learning Experience
+Use the 4-step interactive flow below to practice installation, coding, and running your Vito Web Server in **3 minutes**!
 :::
 
-### 1. Prerequisites
-- **VIT Compiler Engine**: Bundled automatically by the installer.
-- **Supported OS**: Windows (AMD64 / AVX2), Linux (x86_64 / arm64), macOS (Apple Silicon / Intel).
-
-### 2. Scaffold a Project in 5 Seconds
-Using the official `vito CLI`:
-
-```bash
-vito create my-web-app
-cd my-web-app
-```
-
+<QuickStartFlow />
 
 ---
 
-## ⚡ Creating Your First HTTP Server
+## ⚡ Key Features of Vito Framework
 
-Create a `main.vit` file with the following contents:
+<div class="card-grid">
+  <div class="feature-mini-card">
+    <div class="icon">🚀</div>
+    <h4>Native Speed</h4>
+    <p>Runs directly on the VIT Native Engine with Async I/O threading achieving 245K+ req/s.</p>
+  </div>
 
-```javascript
-import { createApp, Request, Response } from "vito/src/vito.vit";
+  <div class="feature-mini-card">
+    <div class="icon">🧩</div>
+    <h4>Expressive DX</h4>
+    <p>Familiar syntax close to Express / Fastify / Hono for instant developer adoption.</p>
+  </div>
+
+  <div class="feature-mini-card">
+    <div class="icon">🔥</div>
+    <h4>Zero-Config Live Reload</h4>
+    <p>Compiles and automatically reloads the server within milliseconds upon saving files.</p>
+  </div>
+
+  <div class="feature-mini-card">
+    <div class="icon">🛠️</div>
+    <h4>Integrated CLI Tooling</h4>
+    <p>Provides handy commands for project scaffolding (`vit init`), setup (`vit setup`), and building (`vit build`).</p>
+  </div>
+</div>
+
+---
+
+## 💻 Sample Project Source Code (`src/main.vit`)
+
+Below is the complete structure of a production-ready Web API application written in **Vito**:
+
+```typescript
+import { Vito, Request, Response } from "vito";
 
 function main(): number {
     // 1. Initialize Vito App Engine
-    let app = createApp();
+    let app = Vito.new();
 
-    // 2. Define simple GET Route
+    // 2. Define HTML GET Route
     app.get("/", (req: Request, res: Response) => {
-        res.html("<h1>Welcome to Vito Web Framework! 🚀</h1>");
+        res.html("""
+            <!DOCTYPE html>
+            <html>
+            <head><title>Vito Web Server</title></head>
+            <body style="font-family: sans-serif; text-align: center; padding: 50px;">
+                <h1>⚡ Welcome to Vito Web Framework!</h1>
+                <p>Native speed, zero overhead, modern DX.</p>
+            </body>
+            </html>
+        """);
     });
 
-    // 3. Respond with JSON API
-    app.get("/api/health", (req: Request, res: Response) => {
-        res.json("{\"status\":\"UP\", \"uptime\":\"ok\"}");
+    // 3. Define JSON API Health Check
+    app.get("/api/v1/health", (req: Request, res: Response) => {
+        res.json({
+            status: "UP",
+            engine: "Vit Native Phase 9",
+            uptime_seconds: 3600
+        });
     });
 
-    // 4. Listen on port 8888
-    app.listen(8888);
+    // 4. Listen on port 3000
+    app.listen(3000);
+    print("⚡ Vito HTTP Server is listening at http://localhost:3000");
     return 0;
 }
 ```
 
 ---
 
-## 🚀 Running the Application
+## 🛠 CLI Developer Cheat Sheet
 
-Use the `vit CLI` to start the application in development mode with **Hot Module Reloading (HMR)**:
-
-```bash
-vit dev
-```
-
-Visit `http://localhost:8888` in your browser to see your server in action! 🎉
+| CLI Command | Action | Use Case |
+| :--- | :--- | :--- |
+| `vit setup` | Verify PATH environment & LLVM Toolchain | Run once after installation |
+| `vit init <app-name>` | Automatically scaffold a standard Vito project | Initialize a new project |
+| `vit dev` | Run development server with auto Live-Reload | Use during development |
+| `vit build` | Package into optimized Native Binary | Use for production deployment |
 
 ---
 
-## 🏗 Repository Structure (Monorepo)
+## 🧩 Next Steps
 
-Vito monorepo is structured as follows:
+Now you're ready to dive deeper into the Vito Framework ecosystem:
 
-```text
-vito/
-├── vit.json            # Vito Package Config
-├── src/                # Core HTTP Server Engine & Parser
-│   └── vito.vit
-├── packages/           # Official Middlewares & Extensions
-│   ├── cors/           # CORS Middleware
-│   ├── logger/         # Request Logger
-│   ├── static/         # Static File Server
-│   ├── validation/     # Schema Validator (HTTP 422)
-│   ├── security/       # Rate Limiting & Auth Guard
-│   ├── swagger/        # Swagger UI & OpenAPI Generator
-│   ├── sse/            # Server-Sent Events for AI/LLM Streaming
-│   ├── db/ & orm/      # Native DB Drivers & Vito ORM
-│   └── edge/           # Cloud Edge Runtime WASM Adapter
-└── examples/           # Real-world Example Apps
-```
+- 🎯 **[Routing & Route Params](/en/guide/routing)**: Learn how to handle URL Dynamic Parameters, Query Strings, and Route Grouping.
+- 🧱 **[Middleware System](/en/guide/middleware)**: Build Logger, CORS, Rate Limiting, and Auth Guard.
+- ⚡ **[Live Browser Playground](/playground)**: Experience writing and executing Vito code right inside your browser with WebAssembly!

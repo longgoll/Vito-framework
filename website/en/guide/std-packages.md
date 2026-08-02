@@ -1,12 +1,12 @@
 # Standard Library (STD) & Official Packages 📦
 
-This document provides a **comprehensive guide**, API Function Signatures, primitive types, and practical code examples for all **24 Modules in the VIT Standard Library (`vit/std`)** as well as official **Vito Framework Packages**.
+This document provides a **comprehensive guide**, API Signatures, data types, and real-world code examples for all **24 Modules of the VIT Standard Library (`vit/std`)** and the **official Vito Framework packages**.
 
 ---
 
-## 📚 1. Detailed Guide for 24 VIT Standard Library Modules (`std`)
+## 📚 1. Detailed List of 24 VIT Standard Library Modules (`std`)
 
-All modules in `std` are machine-code optimized via **LLVM**, with Automatic Reference Counting (ARC) memory cleanup and C/C++ tier execution performance.
+All `std` modules are optimized at the machine code level via **LLVM**, support automatic ARC memory allocation, and achieve execution performance on par with C/C++.
 
 ---
 
@@ -19,16 +19,16 @@ import {
 } from "std/fs";
 ```
 
-| Function | Return Type | Description |
+| Function Name | Return Type | Description |
 | :--- | :--- | :--- |
-| `readFile(path: string)` | `string` | Read entire text file content as a UTF-8 string. |
-| `writeFile(path: string, content: string)` | `boolean` | Write content to file, overwriting existing data or creating a new file. |
-| `appendFile(path: string, content: string)`| `boolean` | Append text data to the end of a file. |
-| `exists(path: string)` | `boolean` | Check if a file or directory exists. |
-| `removeFile(path: string)` | `boolean` | Remove file from disk. |
-| `fileSize(path: string)` | `number` | Get file size in bytes. |
-| `createDir(path: string)` | `boolean` | Create a new directory. |
-| `readDir(path: string)` | `string` | Read directory entries. |
+| `readFile(path: string)` | `string` | Reads the entire content of a text file as a UTF-8 string. |
+| `writeFile(path: string, content: string)` | `boolean` | Overwrites content into a file. Auto-creates if not found. |
+| `appendFile(path: string, content: string)`| `boolean` | Appends data to the end of a file. |
+| `exists(path: string)` | `boolean` | Checks if a file or directory exists. |
+| `removeFile(path: string)` | `boolean` | Deletes a file from disk. |
+| `fileSize(path: string)` | `number` | Returns the file size in bytes. |
+| `createDir(path: string)` | `boolean` | Creates a new directory. |
+| `readDir(path: string)` | `string` | Reads the list of files in a directory. |
 
 #### Code Example:
 ```typescript
@@ -43,7 +43,7 @@ if (isExist) {
 
 ---
 
-### 🛣️ 1.2. Path Utilities Module (`std/path`)
+### 🛣️ 1.2. File Path Module (`std/path`)
 
 ```typescript
 import { pathJoin, pathBasename, pathExtname, pathDirname } from "std/path";
@@ -76,9 +76,9 @@ let jsonBool: string = stringifyBoolean(true); // "true"
 
 ---
 
-### 📦 1.4. Collections & Data Structures (`std/collections`)
+### 📦 1.4. Collections / Data Structures Module (`std/collections`)
 
-Provides high-speed **HashMap** and **Set** implementations.
+Provides ultra-fast **HashMap** and **Set** data structures.
 
 ```typescript
 import { HashMap, Set } from "std/collections";
@@ -86,7 +86,7 @@ import { HashMap, Set } from "std/collections";
 
 #### API Reference & Code Example:
 ```typescript
-// 1. HashMap Usage
+// 1. Using HashMap
 let map = HashMap {};
 map.init();
 map.set("user_1", "Alice");
@@ -98,9 +98,9 @@ if (map.has("user_1")) {
 }
 println("Map size: " + map.size());
 map.remove("user_2");
-map.free(); // Free allocated memory
+map.free(); // Free hashmap memory
 
-// 2. Set Usage
+// 2. Using Set
 let set = Set {};
 set.init();
 set.add("admin");
@@ -142,7 +142,7 @@ let monthName: string = datetime_month_name(8); // "August"
 
 ### 📋 1.6. Structured Logging Module (`std/log`)
 
-Leveled logging with ANSI color coding and key-value fields.
+Hierarchical logging with ANSI color output and structured format.
 
 ```typescript
 import { 
@@ -154,7 +154,7 @@ import {
 
 #### API Reference & Code Example:
 ```typescript
-log_set_level(1); // Minimum log level: LOG_DEBUG
+log_set_level(1); // Set minimum log level (LOG_DEBUG)
 
 log_section("SERVER INITIALIZATION");
 log_info("Starting Vito HTTP Server on port 8080...");
@@ -168,7 +168,7 @@ log_error("Failed to connect to Redis queue");
 
 ---
 
-### 🔒 1.7. Cryptography & Encoding (`std/crypto` & `std/encoding`)
+### 🔒 1.7. Crypto & Encoding Module (`std/crypto` & `std/encoding`)
 
 ```typescript
 import { sha256, md5 } from "std/crypto";
@@ -177,7 +177,7 @@ import { base64Encode, base64Decode, urlEncode, urlDecode } from "std/encoding";
 
 #### API Reference & Code Example:
 ```typescript
-// Hashing
+// Hash strings
 let hashSha: string = sha256("my_secret_password");
 let hashMd5: string = md5("hello_world");
 
@@ -227,7 +227,7 @@ let combined: string = join(words, "-");
 
 ---
 
-### 🖥️ 1.10. Input / Output Module (`std/io`)
+### 🖥️ 1.10. Standard I/O Module (`std/io`)
 
 ```typescript
 import { print, println, readLine } from "std/io";
@@ -274,12 +274,12 @@ function testSuite() {
     describe("Core Logic Suite");
 
     let val = 50;
-    assertEq(val, 50, "Value must be 50");
-    assertNe(val, 100, "Value must not be 100");
-    assertGt(val, 10, "Value > 10");
-    assertLt(val, 100, "Value < 100");
-    assertTrue(val > 0, "Value > 0");
-    assertFalse(val < 0, "Value must not be negative");
+    assertEq(val, 50, "Val must be 50");
+    assertNe(val, 100, "Val is not 100");
+    assertGt(val, 10, "Val > 10");
+    assertLt(val, 100, "Val < 100");
+    assertTrue(val > 0, "Val > 0");
+    assertFalse(val < 0, "Val must not be negative");
     assertEqual("Vit", "Vit", "Strings match");
 }
 
@@ -291,7 +291,7 @@ function main() {
 
 ---
 
-### 🧵 1.13. Threads & Concurrency (`std/thread` & `std/async`)
+### 🧵 1.13. Multithreading & Async Module (`std/thread` & `std/async`)
 
 ```typescript
 import { Thread, Channel } from "std/thread";
@@ -332,7 +332,7 @@ while (true) {
 
 ---
 
-## 🛠️ 2. Core Vito Framework Packages (`vito/packages`)
+## 🛠️ 2. Vito Framework Core Packages (`vito/packages`)
 
 ---
 

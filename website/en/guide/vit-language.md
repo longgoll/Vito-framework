@@ -1,42 +1,42 @@
-# The VIT Programming Language
+# VIT Programming Language (VIT Language)
 
-**VIT** is a modern, high-performance compiled programming language designed with expressive syntax, strong static typing, and automatic memory management (ARC).
+**VIT** is a modern compiled language with extremely high performance, designed with an expressive syntax, a powerful Strong Static Typing system, and automatic memory management via ARC (Automatic Reference Counting).
 
-Vit powers the entire core ecosystem of the **Vito** web framework.
+Vit is the core foundation used to build the **Vito** web framework ecosystem.
 
 ---
 
-## ⚡ 1. Quick Start
+## ⚡ 1. Rapid Start
 
 ### Installing the Vit Compiler
 
-To compile and execute Vit source files (`.vit`), install the `vit` compiler CLI:
+To run Vit source programs (`.vit`), you need the `vit` compiler:
 
 ```bash
-# Windows (PowerShell)
+# Download and install automatically on Windows (PowerShell)
 iwr -useb https://vit-lang.org/install.ps1 | iex
 
-# Linux / macOS
+# Download and install on Linux/macOS
 curl -fsSL https://vit-lang.org/install.sh | sh
 ```
 
-Verify your installation:
+Verify version after installation:
 ```bash
 vit --version
 ```
 
 ---
 
-## 📝 2. Variables & Primitive Types
+## 📝 2. Variables & Data Types
 
-Vit supports both explicit type annotations and type inference.
+Vit supports automatic Type Inference as well as explicit type declarations.
 
-### Primitive Types
+### Primitive Data Types
 
 ```vit
-// Mutable variables with let, constants with const
+// Define variables with let (mutable) and const (constant)
 let age: number = 25;
-let pi = 3.14159;            // Inferred as 'number'
+let pi = 3.14159;            // Auto-inferred type 'number'
 let isProduction: boolean = true;
 let greeting: string = "Hello Vit Ecosystem!";
 
@@ -46,7 +46,7 @@ const MAX_CONNECTIONS = 10000;
 
 ### Arrays
 
-Arrays in Vit are dynamically resized and automatically managed:
+Arrays in Vit have flexible size and are automatically memory-managed:
 
 ```vit
 let numbers: number[] = [10, 20, 30, 40];
@@ -60,20 +60,20 @@ let totalLen = numbers.length;
 
 ## 🏗️ 3. Structs & Methods
 
-Vit allows grouping data into structs and attaching methods.
+Vit allows grouping data using `struct` and defining associated methods.
 
 ```vit
 struct Point {
     x: number,
     y: number,
 
-    // Struct Method
+    // Method belonging to the Struct
     function distance(): number {
         return sqrt(this.x * this.x + this.y * this.y);
     }
 }
 
-// Instantiation
+// Instantiate the Struct
 let p = Point { x: 3.0, y: 4.0 };
 let dist = p.distance(); // Result: 5.0
 ```
@@ -82,7 +82,7 @@ let dist = p.distance(); // Result: 5.0
 
 ## 🔀 4. Enums, Tagged Unions & Pattern Matching (`match`)
 
-Vit provides expressive pattern matching with `match` and tagged unions.
+Vit strongly supports safe programming with `enum` types and `match` pattern matching.
 
 ```vit
 enum Status {
@@ -96,12 +96,12 @@ enum Option<T> {
     None
 }
 
-// Pattern matching expression
+// Match expression pattern matching
 function checkStatus(s: Status): string {
     return match (s) {
-        Status.Pending => "Pending execution",
+        Status.Pending => "Awaiting processing",
         Status.Active => "Currently active",
-        Status.Completed => "Completed successfully"
+        Status.Completed => "Completed"
     };
 }
 ```
@@ -110,7 +110,7 @@ function checkStatus(s: Status): string {
 
 ## 🎯 5. Functional Programming & Arrow Functions (Lambdas)
 
-Functions in Vit are First-Class Citizens.
+Vit treats Functions as First-Class Citizens. You can easily use Lambda functions and advanced array processing methods.
 
 ```vit
 // Arrow Function
@@ -118,19 +118,20 @@ let double = (x: number): number => x * 2.0;
 
 let values: number[] = [1, 2, 3, 4, 5];
 
-// Higher-order array methods: map, filter, forEach
+// Higher-order methods: map, filter, forEach
 let doubledValues = values.map((n: number) => n * 2);
 let evenValues = values.filter((n: number) => n % 2 == 0);
 ```
 
 ---
 
-## 🚀 6. Asynchronous Programming (`async` / `await`)
+## 🚀 6. Async Programming (`async` / `await`)
 
-Vit features lightweight concurrency backed by an event loop and worker thread pool.
+Vit integrates an ultra-lightweight Concurrency mechanism based on a high-performance Event Loop and Thread Pool.
 
 ```vit
 async function fetchData(url: string): string {
+    // Execute async HTTP request
     let response = await http.get(url);
     return response.body;
 }
@@ -145,23 +146,23 @@ async function main() {
 
 ## 🛡️ 7. Automatic Memory Management (ARC)
 
-Vit operates **without a Garbage Collector (GC)**, avoiding Stop-the-World pauses.
+Vit **does not use a Garbage Collector (GC)** that causes Stop-the-World pauses.
 
-The Vit compiler automatically inserts **Automatic Reference Counting (ARC)** instructions alongside an **LLVM Escape Analysis Pass**.
-- Heap objects are freed immediately when variables fall out of scope.
-- Stack allocations are prioritized over Heap allocations.
-- Delivers native execution speed comparable to C/C++ and Rust.
+Instead, the Vit compiler analyzes data flow and inserts **Automatic Reference Counting (ARC)** instructions combined with an **LLVM Escape Analysis Pass**. As a result:
+- Heap memory is freed immediately when a variable goes out of scope.
+- Stack allocation (`alloca`) is optimized over Heap for local objects.
+- Achieves execution speed comparable to C/C++ and Rust.
 
 ---
 
 ## 🔗 8. C FFI (Foreign Function Interface)
 
-Vit natively calls C libraries without overhead:
+Vit can directly call native C libraries with zero intermediate overhead.
 
 ```vit
-// External C function declaration
+// Declare external C functions
 extern function sqrt(x: number): number;
 extern function clock(): number;
 
-let result = sqrt(16.0); // Direct C call
+let result = sqrt(16.0); // Calls native C function directly
 ```

@@ -1,106 +1,98 @@
-# WebSockets & Background Job Queues ⚡
+# Realtime WebSockets & Job Queue ⚡
 
-**Vito Framework** provides a production-grade full-duplex real-time communication engine (**Production-Grade WebSockets Engine**) and a high-throughput background job queue system (**Background Job Queues & Async Event Bus**).
+Bi-directional real-time communication infrastructure (**WebSockets Server Engine**), **SSE AI Streaming**, and background job queue system (**Background Job Queues**) that allows Vito to handle large-scale workloads smoothly.
 
 ---
 
-## 🔌 Production-Grade WebSocket Engine (`packages/websocket`)
+## 🔌 1. Enterprise WebSocket Engine (`packages/websocket`)
 
-The `packages/websocket/websocket.vit` module provides high-concurrency WebSocket connection handling, channel room broadcasting, connection keep-alive management, and per-message frame compression.
+Ultra-low latency bidirectional data transfer, supporting 50,000+ simultaneous open connections with RAM cost < 500MB:
 
-### Key Features:
-- **High Concurrency**: Supports over 50,000+ concurrent open connections with low memory footprint ($< 500MB$ RAM).
-- **Rooms & Broadcast**: Partition connections into Rooms/Channels, with support for system-wide Broadcast, Room Broadcast, and Unicast messages.
-- **Heartbeat Ping/Pong & Stale Eviction**: Automatically issues periodic PING frames and evicts stale or disconnected client connections.
-- **Per-Message Deflate Compression**: Compresses frame payloads to minimize network bandwidth consumption.
+<div class="card-grid">
+  <div class="feature-mini-card">
+    <div class="icon">📡</div>
+    <h4>Room & Broadcast Engine</h4>
+    <p>Groups connections into separate Rooms / Channels and broadcasts to a specific room or globally.</p>
+  </div>
 
-### Usage Example:
+  <div class="feature-mini-card">
+    <div class="icon">💓</div>
+    <h4>Heartbeat Ping/Pong</h4>
+    <p>Automatically detects and evicts silently dropped or timed-out connections.</p>
+  </div>
+
+  <div class="feature-mini-card">
+    <div class="icon">📦</div>
+    <h4>Per-Message Deflate</h4>
+    <p>Transparently compresses WebSocket frames to minimize bandwidth usage for large messages.</p>
+  </div>
+</div>
 
 ```typescript
-import { createWebSocketServer, compressFrame, decompressFrame } from "vito/packages/websocket/websocket.vit";
+import { createWebSocketServer } from "vito/packages/websocket/websocket.vit";
 
-// 1. Initialize WebSocket Server (Port 8080, Max 50,000 connections)
+// Initialize WebSocket Server on port 8080 (capacity 50,000 conns)
 let wsServer = createWebSocketServer(8080, 50000);
 
-// 2. Accept inbound connections
+// Accept connection from clients
 let client1 = wsServer.acceptConnection("192.168.1.10");
 let client2 = wsServer.acceptConnection("192.168.1.11");
 
-// 3. Room Management & Broadcast
-let chatRoom: WebSocketRoom;
-chatRoom.init("room_vip_lounge");
-chatRoom.addClient(client1.id);
-chatRoom.addClient(client2.id);
-
-wsServer.broadcastToRoom(chatRoom, "{\"event\":\"chat:msg\",\"text\":\"Welcome to VIP Room!\"}");
-
-// 4. Heartbeat check & stale connection cleanup
-wsServer.checkHeartbeats(client1, 1700000010);
+// Broadcast message to a Room
+wsServer.broadcastToRoom("room_vip", JSON.stringify({ event: "trade:update", price: 95400 }));
 ```
 
 ---
 
-## 📬 Internal Async Event Bus & Redis Pub/Sub (`packages/events`)
+## 🌊 2. Server-Sent Events (SSE) for AI Streaming (`packages/sse`)
 
-Decouple internal business logic without stalling or blocking the main HTTP request life cycle.
-
-### Key Features:
-- **Async Event Emitter** (`packages/events/event_bus.vit`): Register and emit non-blocking asynchronous events (`app.on("user:registered", handler)`).
-- **Redis Pub/Sub Cluster Adapter** (`packages/events/redis_pubsub.vit`): Expand event broadcasting across multiple server nodes in a distributed cluster.
-
-### Usage Example:
+Specifically designed for AI/LLM applications that need to stream individual text tokens to the client:
 
 ```typescript
-import { createEventBus } from "vito/packages/events/event_bus.vit";
-import { createRedisPubSubAdapter } from "vito/packages/events/redis_pubsub.vit";
+import { createSSEResponse } from "vito/packages/sse/sse.vit";
 
-// 1. Register & Dispatch Internal Events
-let eventBus = createEventBus();
-eventBus.on("user:registered", "SendWelcomeEmailHandler");
-eventBus.on("user:registered", "AuditLoggerHandler");
+app.get("/api/v1/chat/stream", (req: Request, res: Response) => {
+    let sse = createSSEResponse(res);
 
-// Emit event asynchronously
-eventBus.emitAsync("user:registered", "{\"userId\":\"usr_999\"}");
-
-// 2. Cross-Node Redis Pub/Sub
-let redisPubSub = createRedisPubSubAdapter("127.0.0.1", 6379);
-redisPubSub.subscribeChannel("vito:cluster:events");
-redisPubSub.publishCluster("vito:cluster:events", "{\"event\":\"cache:purge\"}");
+    // Stream individual AI data tokens
+    sse.sendEvent("token", JSON.stringify({ text: "Hello " }));
+    sse.sendEvent("token", JSON.stringify({ text: "from " }));
+    sse.sendEvent("token", JSON.stringify({ text: "Vito!" }));
+    
+    sse.close();
+});
 ```
 
 ---
 
-## ⏳ Background Job Queue Engine (`packages/queue`)
+## ⏳ 3. Background Job Queue Engine (`packages/queue`)
 
-The `packages/queue/queue.vit` module offloads heavy tasks (batch emails, image manipulation, report exports) to asynchronous background workers.
+Offload heavy tasks (video processing, bulk emails, Excel exports) to background job queues for asynchronous processing:
 
-### Key Features:
-- **Multi-Driver Support**: In-memory `Memory` driver for local single-node apps and `Redis` driver for production cluster environments.
-- **Delayed & Scheduled Jobs**: Support executing jobs after a configured time delay (`scheduleJob`).
-- **Exponential Backoff Retry**: Automatically retry failed tasks using exponential backoff ($1s, 2s, 4s, ...$).
-- **Dead Letter Queue (DLQ)**: Isolate and inspect permanently failed jobs after exceeding `maxRetries`.
+::: code-group
 
-### Usage Example:
-
-```typescript
+```typescript [1. Push Job to Queue]
 import { createJobQueue, Job } from "vito/packages/queue/queue.vit";
 
-// 1. Initialize Redis Job Queue
+// Initialize Redis Job Queue
 let jobQueue = createJobQueue("redis");
 
-// 2. Push job to queue
+// Create an email sending Job
 let emailJob: Job;
-emailJob.init("job_email_001", "email:send", "{\"to\":\"dev@vito.dev\"}");
-jobQueue.pushJob(emailJob);
+emailJob.init("job_101", "email:send", JSON.stringify({ to: "user@vito.dev" }));
 
-// 3. Schedule delayed job (5000ms delay)
+// Push job to the queue
+jobQueue.pushJob(emailJob);
+```
+
+```typescript [2. Delayed Job & Dead Letter Queue (DLQ)]
+// Schedule a delayed Job (5000ms delay)
 let reportJob: Job;
-reportJob.init("job_report_002", "report:export", "{\"format\":\"pdf\"}");
+reportJob.init("job_102", "report:export", JSON.stringify({ format: "pdf" }));
 jobQueue.scheduleJob(reportJob, 5000);
 
-// 4. Worker execution & DLQ fallback
-jobQueue.processNextJob(false, ""); // Success
-
-// Retry failed job -> Moves to DLQ upon exceeding maxRetries
-jobQueue.processNextJob(true, "Email Microservice Timeout");
+// When a Job fails beyond maxRetries, it is automatically moved to the Dead Letter Queue (DLQ)
+jobQueue.processNextJob(true, "Failed to connect to SMTP Server");
 ```
+
+:::
