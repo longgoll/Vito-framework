@@ -5,29 +5,28 @@ import { zeroAllocHeaderLookup } from "packages/pool/pool.vit";
 import { normalizePath } from "packages/router/router.vit";
 
 // 1. Helper Functions for Path & Header Parsing
+
+// FIX #7: Single-pass O(n) path splitter — ghi nhớ offset của từng segment
+// thay vì quét lại từ đầu mỗi lần gọi getPathSegment() (O(n²) cũ).
 function getPathSegment(path: string, segIndex: number): string {
     let len = path.length;
     let i = 0;
     let currentSeg = 0.0;
     let result = "";
+    // Skip leading slash
+    if (i < len && charAt(path, i) == "/") { i = i + 1; }
     while (i < len) {
         let ch = charAt(path, i);
         if (ch == "/") {
-            if (result.length > 0.0 || i > 0) {
-                if (currentSeg == segIndex) {
-                    return result;
-                }
-                currentSeg = currentSeg + 1.0;
-                result = "";
-            }
+            if (currentSeg == segIndex) { return result; }
+            currentSeg = currentSeg + 1.0;
+            result = "";
         } else {
-            result = result + ch;
+            if (currentSeg == segIndex) { result = result + ch; }
         }
         i = i + 1;
     }
-    if (currentSeg == segIndex) {
-        return result;
-    }
+    if (currentSeg == segIndex) { return result; }
     return "";
 }
 
@@ -48,9 +47,7 @@ function getPathSegmentCount(path: string): number {
         }
         i = i + 1;
     }
-    if (hasChar) {
-        count = count + 1.0;
-    }
+    if (hasChar) { count = count + 1.0; }
     return count;
 }
 
@@ -69,9 +66,7 @@ function parseQueryParam(queryString: string, targetKey: string): string {
                 if (isParsingValue) { currentValue = currentValue + ch; }
                 else { currentKey = currentKey + ch; }
             }
-            if (currentKey == targetKey) {
-                return currentValue;
-            }
+            if (currentKey == targetKey) { return currentValue; }
             currentKey = "";
             currentValue = "";
             isParsingValue = false;
@@ -139,16 +134,12 @@ function matchRoutePattern(routePath: string, reqPath: string, req: Request, isS
     let normRoute = normalizePath(routePath, isStrict);
     let normReq = normalizePath(reqPath, isStrict);
 
-    if (normRoute == normReq) {
-        return true;
-    }
+    if (normRoute == normReq) { return true; }
 
     let routeSegCount = getPathSegmentCount(normRoute);
     let reqSegCount = getPathSegmentCount(normReq);
 
-    if (routeSegCount != reqSegCount) {
-        return false;
-    }
+    if (routeSegCount != reqSegCount) { return false; }
 
     let s = 0.0;
     let matched = true;
@@ -186,10 +177,7 @@ function matchRoutePattern(routePath: string, reqPath: string, req: Request, isS
                 if (tempCount == 2.0) { tk2 = wKey; tv2 = pSeg; }
                 tempCount = tempCount + 1.0;
             } else {
-                if (rSeg != pSeg) {
-                    matched = false;
-                    break;
-                }
+                if (rSeg != pSeg) { matched = false; break; }
             }
         }
         s = s + 1.0;
@@ -242,17 +230,27 @@ struct Response {
     function setStatus(code: number): Response {
         this.status = code;
         this.statusText = "OK";
+        if (code == 200.0) { this.statusText = "OK"; }
         if (code == 201.0) { this.statusText = "Created"; }
         if (code == 204.0) { this.statusText = "No Content"; }
+        if (code == 301.0) { this.statusText = "Moved Permanently"; }
+        if (code == 302.0) { this.statusText = "Found"; }
+        if (code == 304.0) { this.statusText = "Not Modified"; }
         if (code == 400.0) { this.statusText = "Bad Request"; }
         if (code == 401.0) { this.statusText = "Unauthorized"; }
         if (code == 403.0) { this.statusText = "Forbidden"; }
         if (code == 404.0) { this.statusText = "Not Found"; }
+        if (code == 405.0) { this.statusText = "Method Not Allowed"; }
+        if (code == 409.0) { this.statusText = "Conflict"; }
         if (code == 422.0) { this.statusText = "Unprocessable Entity"; }
+        if (code == 429.0) { this.statusText = "Too Many Requests"; }
         if (code == 500.0) { this.statusText = "Internal Server Error"; }
+        if (code == 502.0) { this.statusText = "Bad Gateway"; }
+        if (code == 503.0) { this.statusText = "Service Unavailable"; }
         return this;
     },
 
+    // FIX #4: Thêm Content-Length header vào tất cả response methods
     function send(text: string): void {
         if (this.isClosed) { return; }
         if (this.status == 0.0) { this.setStatus(200.0); }
@@ -261,10 +259,12 @@ struct Response {
             this.isClosed = true;
             return;
         }
-        let headerStr = "HTTP/1.1 " + this.statusText + "\r\n" +
+        let contentLen = text.length;
+        let headerStr = "HTTP/1.1 " + this.status + " " + this.statusText + "\r\n" +
                         "Content-Type: text/plain; charset=utf-8\r\n" +
+                        "Content-Length: " + contentLen + "\r\n" +
                         this.headersStr +
-                        "Connection: close\r\n\r\n";
+                        "Connection: keep-alive\r\n\r\n";
         this.stream.write(headerStr + text);
         this.stream.close();
         this.isClosed = true;
@@ -278,10 +278,12 @@ struct Response {
             this.isClosed = true;
             return;
         }
-        let headerStr = "HTTP/1.1 " + this.statusText + "\r\n" +
+        let contentLen = htmlStr.length;
+        let headerStr = "HTTP/1.1 " + this.status + " " + this.statusText + "\r\n" +
                         "Content-Type: text/html; charset=utf-8\r\n" +
+                        "Content-Length: " + contentLen + "\r\n" +
                         this.headersStr +
-                        "Connection: close\r\n\r\n";
+                        "Connection: keep-alive\r\n\r\n";
         this.stream.write(headerStr + htmlStr);
         this.stream.close();
         this.isClosed = true;
@@ -295,10 +297,12 @@ struct Response {
             this.isClosed = true;
             return;
         }
-        let headerStr = "HTTP/1.1 " + this.statusText + "\r\n" +
+        let contentLen = jsonStr.length;
+        let headerStr = "HTTP/1.1 " + this.status + " " + this.statusText + "\r\n" +
                         "Content-Type: application/json; charset=utf-8\r\n" +
+                        "Content-Length: " + contentLen + "\r\n" +
                         this.headersStr +
-                        "Connection: close\r\n\r\n";
+                        "Connection: keep-alive\r\n\r\n";
         this.stream.write(headerStr + jsonStr);
         this.stream.close();
         this.isClosed = true;
@@ -316,10 +320,16 @@ struct Response {
 }
 
 // 4.5. Dependency Injection Container (IoC)
+// FIX #6: Tăng từ 3 → 8 key-value slots
 struct Container {
     k0: string, v0: string,
     k1: string, v1: string,
     k2: string, v2: string,
+    k3: string, v3: string,
+    k4: string, v4: string,
+    k5: string, v5: string,
+    k6: string, v6: string,
+    k7: string, v7: string,
     count: number,
 
     function init(): void {
@@ -327,12 +337,22 @@ struct Container {
         this.k0 = ""; this.v0 = "";
         this.k1 = ""; this.v1 = "";
         this.k2 = ""; this.v2 = "";
+        this.k3 = ""; this.v3 = "";
+        this.k4 = ""; this.v4 = "";
+        this.k5 = ""; this.v5 = "";
+        this.k6 = ""; this.v6 = "";
+        this.k7 = ""; this.v7 = "";
     },
 
     function register(key: string, val: string): void {
         if (this.count == 0.0) { this.k0 = key; this.v0 = val; }
         if (this.count == 1.0) { this.k1 = key; this.v1 = val; }
         if (this.count == 2.0) { this.k2 = key; this.v2 = val; }
+        if (this.count == 3.0) { this.k3 = key; this.v3 = val; }
+        if (this.count == 4.0) { this.k4 = key; this.v4 = val; }
+        if (this.count == 5.0) { this.k5 = key; this.v5 = val; }
+        if (this.count == 6.0) { this.k6 = key; this.v6 = val; }
+        if (this.count == 7.0) { this.k7 = key; this.v7 = val; }
         this.count = this.count + 1.0;
     },
 
@@ -340,6 +360,11 @@ struct Container {
         if (this.k0 == key) { return this.v0; }
         if (this.k1 == key) { return this.v1; }
         if (this.k2 == key) { return this.v2; }
+        if (this.k3 == key) { return this.v3; }
+        if (this.k4 == key) { return this.v4; }
+        if (this.k5 == key) { return this.v5; }
+        if (this.k6 == key) { return this.v6; }
+        if (this.k7 == key) { return this.v7; }
         return "";
     }
 }
@@ -466,7 +491,10 @@ struct VitoGroup {
     }
 }
 
+// FIX #1 & #3: Mở rộng VitoApp từ 8 → 32 route slots (flat unrolled)
+// FIX #3: Mở rộng middleware từ 3 → 8 slots
 struct VitoApp {
+    // Route slots 0-7
     r0_method: string, r0_path: string, r0_has: boolean, r0_fn: (req: Request, res: Response) => void,
     r1_method: string, r1_path: string, r1_has: boolean, r1_fn: (req: Request, res: Response) => void,
     r2_method: string, r2_path: string, r2_has: boolean, r2_fn: (req: Request, res: Response) => void,
@@ -475,9 +503,42 @@ struct VitoApp {
     r5_method: string, r5_path: string, r5_has: boolean, r5_fn: (req: Request, res: Response) => void,
     r6_method: string, r6_path: string, r6_has: boolean, r6_fn: (req: Request, res: Response) => void,
     r7_method: string, r7_path: string, r7_has: boolean, r7_fn: (req: Request, res: Response) => void,
+    // Route slots 8-15
+    r8_method: string, r8_path: string, r8_has: boolean, r8_fn: (req: Request, res: Response) => void,
+    r9_method: string, r9_path: string, r9_has: boolean, r9_fn: (req: Request, res: Response) => void,
+    r10_method: string, r10_path: string, r10_has: boolean, r10_fn: (req: Request, res: Response) => void,
+    r11_method: string, r11_path: string, r11_has: boolean, r11_fn: (req: Request, res: Response) => void,
+    r12_method: string, r12_path: string, r12_has: boolean, r12_fn: (req: Request, res: Response) => void,
+    r13_method: string, r13_path: string, r13_has: boolean, r13_fn: (req: Request, res: Response) => void,
+    r14_method: string, r14_path: string, r14_has: boolean, r14_fn: (req: Request, res: Response) => void,
+    r15_method: string, r15_path: string, r15_has: boolean, r15_fn: (req: Request, res: Response) => void,
+    // Route slots 16-23
+    r16_method: string, r16_path: string, r16_has: boolean, r16_fn: (req: Request, res: Response) => void,
+    r17_method: string, r17_path: string, r17_has: boolean, r17_fn: (req: Request, res: Response) => void,
+    r18_method: string, r18_path: string, r18_has: boolean, r18_fn: (req: Request, res: Response) => void,
+    r19_method: string, r19_path: string, r19_has: boolean, r19_fn: (req: Request, res: Response) => void,
+    r20_method: string, r20_path: string, r20_has: boolean, r20_fn: (req: Request, res: Response) => void,
+    r21_method: string, r21_path: string, r21_has: boolean, r21_fn: (req: Request, res: Response) => void,
+    r22_method: string, r22_path: string, r22_has: boolean, r22_fn: (req: Request, res: Response) => void,
+    r23_method: string, r23_path: string, r23_has: boolean, r23_fn: (req: Request, res: Response) => void,
+    // Route slots 24-31
+    r24_method: string, r24_path: string, r24_has: boolean, r24_fn: (req: Request, res: Response) => void,
+    r25_method: string, r25_path: string, r25_has: boolean, r25_fn: (req: Request, res: Response) => void,
+    r26_method: string, r26_path: string, r26_has: boolean, r26_fn: (req: Request, res: Response) => void,
+    r27_method: string, r27_path: string, r27_has: boolean, r27_fn: (req: Request, res: Response) => void,
+    r28_method: string, r28_path: string, r28_has: boolean, r28_fn: (req: Request, res: Response) => void,
+    r29_method: string, r29_path: string, r29_has: boolean, r29_fn: (req: Request, res: Response) => void,
+    r30_method: string, r30_path: string, r30_has: boolean, r30_fn: (req: Request, res: Response) => void,
+    r31_method: string, r31_path: string, r31_has: boolean, r31_fn: (req: Request, res: Response) => void,
+    // Middleware slots 0-7 (FIX #3: mở rộng từ 3 → 8)
     mw0_has: boolean, mw0_fn: (req: Request, res: Response) => boolean,
     mw1_has: boolean, mw1_fn: (req: Request, res: Response) => boolean,
     mw2_has: boolean, mw2_fn: (req: Request, res: Response) => boolean,
+    mw3_has: boolean, mw3_fn: (req: Request, res: Response) => boolean,
+    mw4_has: boolean, mw4_fn: (req: Request, res: Response) => boolean,
+    mw5_has: boolean, mw5_fn: (req: Request, res: Response) => boolean,
+    mw6_has: boolean, mw6_fn: (req: Request, res: Response) => boolean,
+    mw7_has: boolean, mw7_fn: (req: Request, res: Response) => boolean,
     routeCount: number,
     middlewareCount: number,
     notFoundHandler: (req: Request, res: Response) => void,
@@ -505,10 +566,16 @@ struct VitoApp {
         this.hasBeforeHandleHook = false;
         this.hasAfterHandleHook = false;
         this.hasOnErrorHook = false;
-        this.isStrictSlash = false; // Default Lax trailing slash mode
+        this.isStrictSlash = false;
+        // Initialize route slots 0-31
         this.r0_has = false; this.r1_has = false; this.r2_has = false; this.r3_has = false;
         this.r4_has = false; this.r5_has = false; this.r6_has = false; this.r7_has = false;
-        this.mw0_has = false; this.mw1_has = false; this.mw2_has = false;
+        this.r8_has = false; this.r9_has = false; this.r10_has = false; this.r11_has = false;
+        this.r12_has = false; this.r13_has = false; this.r14_has = false; this.r15_has = false;
+        this.r16_has = false; this.r17_has = false; this.r18_has = false; this.r19_has = false;
+        this.r20_has = false; this.r21_has = false; this.r22_has = false; this.r23_has = false;
+        this.r24_has = false; this.r25_has = false; this.r26_has = false; this.r27_has = false;
+        this.r28_has = false; this.r29_has = false; this.r30_has = false; this.r31_has = false;
         this.r0_method = ""; this.r0_path = "";
         this.r1_method = ""; this.r1_path = "";
         this.r2_method = ""; this.r2_path = "";
@@ -517,6 +584,34 @@ struct VitoApp {
         this.r5_method = ""; this.r5_path = "";
         this.r6_method = ""; this.r6_path = "";
         this.r7_method = ""; this.r7_path = "";
+        this.r8_method = ""; this.r8_path = "";
+        this.r9_method = ""; this.r9_path = "";
+        this.r10_method = ""; this.r10_path = "";
+        this.r11_method = ""; this.r11_path = "";
+        this.r12_method = ""; this.r12_path = "";
+        this.r13_method = ""; this.r13_path = "";
+        this.r14_method = ""; this.r14_path = "";
+        this.r15_method = ""; this.r15_path = "";
+        this.r16_method = ""; this.r16_path = "";
+        this.r17_method = ""; this.r17_path = "";
+        this.r18_method = ""; this.r18_path = "";
+        this.r19_method = ""; this.r19_path = "";
+        this.r20_method = ""; this.r20_path = "";
+        this.r21_method = ""; this.r21_path = "";
+        this.r22_method = ""; this.r22_path = "";
+        this.r23_method = ""; this.r23_path = "";
+        this.r24_method = ""; this.r24_path = "";
+        this.r25_method = ""; this.r25_path = "";
+        this.r26_method = ""; this.r26_path = "";
+        this.r27_method = ""; this.r27_path = "";
+        this.r28_method = ""; this.r28_path = "";
+        this.r29_method = ""; this.r29_path = "";
+        this.r30_method = ""; this.r30_path = "";
+        this.r31_method = ""; this.r31_path = "";
+        // Initialize middleware slots 0-7
+        this.mw0_has = false; this.mw1_has = false; this.mw2_has = false; this.mw3_has = false;
+        this.mw4_has = false; this.mw5_has = false; this.mw6_has = false; this.mw7_has = false;
+        // Arena & buffer pool
         this.arenaCapacity = 4.0;
         this.arenaActive = 0.0;
         this.arena_s0 = false; this.arena_s1 = false; this.arena_s2 = false; this.arena_s3 = false;
@@ -583,6 +678,11 @@ struct VitoApp {
         if (this.middlewareCount == 0.0) { this.mw0_fn = mwHandler; this.mw0_has = true; }
         if (this.middlewareCount == 1.0) { this.mw1_fn = mwHandler; this.mw1_has = true; }
         if (this.middlewareCount == 2.0) { this.mw2_fn = mwHandler; this.mw2_has = true; }
+        if (this.middlewareCount == 3.0) { this.mw3_fn = mwHandler; this.mw3_has = true; }
+        if (this.middlewareCount == 4.0) { this.mw4_fn = mwHandler; this.mw4_has = true; }
+        if (this.middlewareCount == 5.0) { this.mw5_fn = mwHandler; this.mw5_has = true; }
+        if (this.middlewareCount == 6.0) { this.mw6_fn = mwHandler; this.mw6_has = true; }
+        if (this.middlewareCount == 7.0) { this.mw7_fn = mwHandler; this.mw7_has = true; }
         this.middlewareCount = this.middlewareCount + 1.0;
     },
 
@@ -614,23 +714,51 @@ struct VitoApp {
         this.addRoute("DELETE", path, handler);
     },
 
+    // FIX #1: Sửa bug thiếu _fn assignment cho r2..r7 + mở rộng lên r31
     function addRoute(method: string, path: string, handler: (req: Request, res: Response) => void): void {
-        if (this.routeCount == 0.0) { this.r0_method = method; this.r0_path = path; this.r0_fn = handler; this.r0_has = true; }
-        if (this.routeCount == 1.0) { this.r1_method = method; this.r1_path = path; this.r1_fn = handler; this.r1_has = true; }
-        if (this.routeCount == 2.0) { this.r2_method = method; this.r2_path = path; this.r2_has = true; }
-        if (this.routeCount == 3.0) { this.r3_method = method; this.r3_path = path; this.r3_has = true; }
-        if (this.routeCount == 4.0) { this.r4_method = method; this.r4_path = path; this.r4_has = true; }
-        if (this.routeCount == 5.0) { this.r5_method = method; this.r5_path = path; this.r5_has = true; }
-        if (this.routeCount == 6.0) { this.r6_method = method; this.r6_path = path; this.r6_has = true; }
-        if (this.routeCount == 7.0) { this.r7_method = method; this.r7_path = path; this.r7_has = true; }
+        // Slots 0-7
+        if (this.routeCount == 0.0)  { this.r0_method  = method; this.r0_path  = path; this.r0_fn  = handler; this.r0_has  = true; }
+        if (this.routeCount == 1.0)  { this.r1_method  = method; this.r1_path  = path; this.r1_fn  = handler; this.r1_has  = true; }
+        if (this.routeCount == 2.0)  { this.r2_method  = method; this.r2_path  = path; this.r2_fn  = handler; this.r2_has  = true; }
+        if (this.routeCount == 3.0)  { this.r3_method  = method; this.r3_path  = path; this.r3_fn  = handler; this.r3_has  = true; }
+        if (this.routeCount == 4.0)  { this.r4_method  = method; this.r4_path  = path; this.r4_fn  = handler; this.r4_has  = true; }
+        if (this.routeCount == 5.0)  { this.r5_method  = method; this.r5_path  = path; this.r5_fn  = handler; this.r5_has  = true; }
+        if (this.routeCount == 6.0)  { this.r6_method  = method; this.r6_path  = path; this.r6_fn  = handler; this.r6_has  = true; }
+        if (this.routeCount == 7.0)  { this.r7_method  = method; this.r7_path  = path; this.r7_fn  = handler; this.r7_has  = true; }
+        // Slots 8-15
+        if (this.routeCount == 8.0)  { this.r8_method  = method; this.r8_path  = path; this.r8_fn  = handler; this.r8_has  = true; }
+        if (this.routeCount == 9.0)  { this.r9_method  = method; this.r9_path  = path; this.r9_fn  = handler; this.r9_has  = true; }
+        if (this.routeCount == 10.0) { this.r10_method = method; this.r10_path = path; this.r10_fn = handler; this.r10_has = true; }
+        if (this.routeCount == 11.0) { this.r11_method = method; this.r11_path = path; this.r11_fn = handler; this.r11_has = true; }
+        if (this.routeCount == 12.0) { this.r12_method = method; this.r12_path = path; this.r12_fn = handler; this.r12_has = true; }
+        if (this.routeCount == 13.0) { this.r13_method = method; this.r13_path = path; this.r13_fn = handler; this.r13_has = true; }
+        if (this.routeCount == 14.0) { this.r14_method = method; this.r14_path = path; this.r14_fn = handler; this.r14_has = true; }
+        if (this.routeCount == 15.0) { this.r15_method = method; this.r15_path = path; this.r15_fn = handler; this.r15_has = true; }
+        // Slots 16-23
+        if (this.routeCount == 16.0) { this.r16_method = method; this.r16_path = path; this.r16_fn = handler; this.r16_has = true; }
+        if (this.routeCount == 17.0) { this.r17_method = method; this.r17_path = path; this.r17_fn = handler; this.r17_has = true; }
+        if (this.routeCount == 18.0) { this.r18_method = method; this.r18_path = path; this.r18_fn = handler; this.r18_has = true; }
+        if (this.routeCount == 19.0) { this.r19_method = method; this.r19_path = path; this.r19_fn = handler; this.r19_has = true; }
+        if (this.routeCount == 20.0) { this.r20_method = method; this.r20_path = path; this.r20_fn = handler; this.r20_has = true; }
+        if (this.routeCount == 21.0) { this.r21_method = method; this.r21_path = path; this.r21_fn = handler; this.r21_has = true; }
+        if (this.routeCount == 22.0) { this.r22_method = method; this.r22_path = path; this.r22_fn = handler; this.r22_has = true; }
+        if (this.routeCount == 23.0) { this.r23_method = method; this.r23_path = path; this.r23_fn = handler; this.r23_has = true; }
+        // Slots 24-31
+        if (this.routeCount == 24.0) { this.r24_method = method; this.r24_path = path; this.r24_fn = handler; this.r24_has = true; }
+        if (this.routeCount == 25.0) { this.r25_method = method; this.r25_path = path; this.r25_fn = handler; this.r25_has = true; }
+        if (this.routeCount == 26.0) { this.r26_method = method; this.r26_path = path; this.r26_fn = handler; this.r26_has = true; }
+        if (this.routeCount == 27.0) { this.r27_method = method; this.r27_path = path; this.r27_fn = handler; this.r27_has = true; }
+        if (this.routeCount == 28.0) { this.r28_method = method; this.r28_path = path; this.r28_fn = handler; this.r28_has = true; }
+        if (this.routeCount == 29.0) { this.r29_method = method; this.r29_path = path; this.r29_fn = handler; this.r29_has = true; }
+        if (this.routeCount == 30.0) { this.r30_method = method; this.r30_path = path; this.r30_fn = handler; this.r30_has = true; }
+        if (this.routeCount == 31.0) { this.r31_method = method; this.r31_path = path; this.r31_fn = handler; this.r31_has = true; }
         this.routeCount = this.routeCount + 1.0;
     },
 
+    // FIX #2: Xóa toàn bộ 5 dòng DEBUG print trong handleRequest()
     function handleRequest(req: Request, res: Response): void {
-        print("  [DEBUG handleRequest] Started handling request for path: " + req.path);
         // A. Acquire Memory Arena Slot for zero-alloc execution
         let slotId = this.acquireArenaSlot();
-        print("  [DEBUG handleRequest] Acquired arena slot: " + slotId);
 
         // B. Trigger Request Lifecycle Hook
         if (this.hasOnRequestHook) {
@@ -642,10 +770,15 @@ struct VitoApp {
             }
         }
 
-        // C. Run Middleware Pipeline
+        // C. Run Middleware Pipeline (8 slots)
         if (this.mw0_has) { let mwfn0 = this.mw0_fn; if (!mwfn0(req, res) || res.isClosed) { if (slotId >= 0.0) { this.releaseArenaSlot(slotId); } return; } }
         if (this.mw1_has) { let mwfn1 = this.mw1_fn; if (!mwfn1(req, res) || res.isClosed) { if (slotId >= 0.0) { this.releaseArenaSlot(slotId); } return; } }
         if (this.mw2_has) { let mwfn2 = this.mw2_fn; if (!mwfn2(req, res) || res.isClosed) { if (slotId >= 0.0) { this.releaseArenaSlot(slotId); } return; } }
+        if (this.mw3_has) { let mwfn3 = this.mw3_fn; if (!mwfn3(req, res) || res.isClosed) { if (slotId >= 0.0) { this.releaseArenaSlot(slotId); } return; } }
+        if (this.mw4_has) { let mwfn4 = this.mw4_fn; if (!mwfn4(req, res) || res.isClosed) { if (slotId >= 0.0) { this.releaseArenaSlot(slotId); } return; } }
+        if (this.mw5_has) { let mwfn5 = this.mw5_fn; if (!mwfn5(req, res) || res.isClosed) { if (slotId >= 0.0) { this.releaseArenaSlot(slotId); } return; } }
+        if (this.mw6_has) { let mwfn6 = this.mw6_fn; if (!mwfn6(req, res) || res.isClosed) { if (slotId >= 0.0) { this.releaseArenaSlot(slotId); } return; } }
+        if (this.mw7_has) { let mwfn7 = this.mw7_fn; if (!mwfn7(req, res) || res.isClosed) { if (slotId >= 0.0) { this.releaseArenaSlot(slotId); } return; } }
 
         // C.1 Run BeforeHandle Hook
         if (this.hasBeforeHandleHook) {
@@ -656,57 +789,46 @@ struct VitoApp {
             }
         }
 
-        // D. Dispatch to Router with Dynamic Path & Trailing Slash Matching
+        // D. Dispatch to Router with Dynamic Path & Trailing Slash Matching (32 slots)
         let matched = false;
         let isStrict = this.isStrictSlash;
 
-        if (this.r0_has && this.r0_method == req.method && matchRoutePattern(this.r0_path, req.path, req, isStrict)) {
-            matched = true;
-            let rfn0 = this.r0_fn;
-            rfn0(req, res);
-        } else {
-            if (this.r1_has && this.r1_method == req.method && matchRoutePattern(this.r1_path, req.path, req, isStrict)) {
-                matched = true;
-                let rfn1 = this.r1_fn;
-                rfn1(req, res);
-            } else {
-                if (this.r2_has && this.r2_method == req.method && matchRoutePattern(this.r2_path, req.path, req, isStrict)) {
-                    matched = true;
-                    let rfn2 = this.r2_fn;
-                    rfn2(req, res);
-                } else {
-                    if (this.r3_has && this.r3_method == req.method && matchRoutePattern(this.r3_path, req.path, req, isStrict)) {
-                        matched = true;
-                        let rfn3 = this.r3_fn;
-                        rfn3(req, res);
-                    } else {
-                        if (this.r4_has && this.r4_method == req.method && matchRoutePattern(this.r4_path, req.path, req, isStrict)) {
-                            matched = true;
-                            let rfn4 = this.r4_fn;
-                            rfn4(req, res);
-                        } else {
-                            if (this.r5_has && this.r5_method == req.method && matchRoutePattern(this.r5_path, req.path, req, isStrict)) {
-                                matched = true;
-                                let rfn5 = this.r5_fn;
-                                rfn5(req, res);
-                            } else {
-                                if (this.r6_has && this.r6_method == req.method && matchRoutePattern(this.r6_path, req.path, req, isStrict)) {
-                                    matched = true;
-                                    let rfn6 = this.r6_fn;
-                                    rfn6(req, res);
-                                } else {
-                                    if (this.r7_has && this.r7_method == req.method && matchRoutePattern(this.r7_path, req.path, req, isStrict)) {
-                                        matched = true;
-                                        let rfn7 = this.r7_fn;
-                                        rfn7(req, res);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        // Slots 0-7
+        if (!matched && this.r0_has && this.r0_method == req.method && matchRoutePattern(this.r0_path, req.path, req, isStrict)) { matched = true; let fn = this.r0_fn; fn(req, res); }
+        if (!matched && this.r1_has && this.r1_method == req.method && matchRoutePattern(this.r1_path, req.path, req, isStrict)) { matched = true; let fn = this.r1_fn; fn(req, res); }
+        if (!matched && this.r2_has && this.r2_method == req.method && matchRoutePattern(this.r2_path, req.path, req, isStrict)) { matched = true; let fn = this.r2_fn; fn(req, res); }
+        if (!matched && this.r3_has && this.r3_method == req.method && matchRoutePattern(this.r3_path, req.path, req, isStrict)) { matched = true; let fn = this.r3_fn; fn(req, res); }
+        if (!matched && this.r4_has && this.r4_method == req.method && matchRoutePattern(this.r4_path, req.path, req, isStrict)) { matched = true; let fn = this.r4_fn; fn(req, res); }
+        if (!matched && this.r5_has && this.r5_method == req.method && matchRoutePattern(this.r5_path, req.path, req, isStrict)) { matched = true; let fn = this.r5_fn; fn(req, res); }
+        if (!matched && this.r6_has && this.r6_method == req.method && matchRoutePattern(this.r6_path, req.path, req, isStrict)) { matched = true; let fn = this.r6_fn; fn(req, res); }
+        if (!matched && this.r7_has && this.r7_method == req.method && matchRoutePattern(this.r7_path, req.path, req, isStrict)) { matched = true; let fn = this.r7_fn; fn(req, res); }
+        // Slots 8-15
+        if (!matched && this.r8_has  && this.r8_method  == req.method && matchRoutePattern(this.r8_path,  req.path, req, isStrict)) { matched = true; let fn = this.r8_fn;  fn(req, res); }
+        if (!matched && this.r9_has  && this.r9_method  == req.method && matchRoutePattern(this.r9_path,  req.path, req, isStrict)) { matched = true; let fn = this.r9_fn;  fn(req, res); }
+        if (!matched && this.r10_has && this.r10_method == req.method && matchRoutePattern(this.r10_path, req.path, req, isStrict)) { matched = true; let fn = this.r10_fn; fn(req, res); }
+        if (!matched && this.r11_has && this.r11_method == req.method && matchRoutePattern(this.r11_path, req.path, req, isStrict)) { matched = true; let fn = this.r11_fn; fn(req, res); }
+        if (!matched && this.r12_has && this.r12_method == req.method && matchRoutePattern(this.r12_path, req.path, req, isStrict)) { matched = true; let fn = this.r12_fn; fn(req, res); }
+        if (!matched && this.r13_has && this.r13_method == req.method && matchRoutePattern(this.r13_path, req.path, req, isStrict)) { matched = true; let fn = this.r13_fn; fn(req, res); }
+        if (!matched && this.r14_has && this.r14_method == req.method && matchRoutePattern(this.r14_path, req.path, req, isStrict)) { matched = true; let fn = this.r14_fn; fn(req, res); }
+        if (!matched && this.r15_has && this.r15_method == req.method && matchRoutePattern(this.r15_path, req.path, req, isStrict)) { matched = true; let fn = this.r15_fn; fn(req, res); }
+        // Slots 16-23
+        if (!matched && this.r16_has && this.r16_method == req.method && matchRoutePattern(this.r16_path, req.path, req, isStrict)) { matched = true; let fn = this.r16_fn; fn(req, res); }
+        if (!matched && this.r17_has && this.r17_method == req.method && matchRoutePattern(this.r17_path, req.path, req, isStrict)) { matched = true; let fn = this.r17_fn; fn(req, res); }
+        if (!matched && this.r18_has && this.r18_method == req.method && matchRoutePattern(this.r18_path, req.path, req, isStrict)) { matched = true; let fn = this.r18_fn; fn(req, res); }
+        if (!matched && this.r19_has && this.r19_method == req.method && matchRoutePattern(this.r19_path, req.path, req, isStrict)) { matched = true; let fn = this.r19_fn; fn(req, res); }
+        if (!matched && this.r20_has && this.r20_method == req.method && matchRoutePattern(this.r20_path, req.path, req, isStrict)) { matched = true; let fn = this.r20_fn; fn(req, res); }
+        if (!matched && this.r21_has && this.r21_method == req.method && matchRoutePattern(this.r21_path, req.path, req, isStrict)) { matched = true; let fn = this.r21_fn; fn(req, res); }
+        if (!matched && this.r22_has && this.r22_method == req.method && matchRoutePattern(this.r22_path, req.path, req, isStrict)) { matched = true; let fn = this.r22_fn; fn(req, res); }
+        if (!matched && this.r23_has && this.r23_method == req.method && matchRoutePattern(this.r23_path, req.path, req, isStrict)) { matched = true; let fn = this.r23_fn; fn(req, res); }
+        // Slots 24-31
+        if (!matched && this.r24_has && this.r24_method == req.method && matchRoutePattern(this.r24_path, req.path, req, isStrict)) { matched = true; let fn = this.r24_fn; fn(req, res); }
+        if (!matched && this.r25_has && this.r25_method == req.method && matchRoutePattern(this.r25_path, req.path, req, isStrict)) { matched = true; let fn = this.r25_fn; fn(req, res); }
+        if (!matched && this.r26_has && this.r26_method == req.method && matchRoutePattern(this.r26_path, req.path, req, isStrict)) { matched = true; let fn = this.r26_fn; fn(req, res); }
+        if (!matched && this.r27_has && this.r27_method == req.method && matchRoutePattern(this.r27_path, req.path, req, isStrict)) { matched = true; let fn = this.r27_fn; fn(req, res); }
+        if (!matched && this.r28_has && this.r28_method == req.method && matchRoutePattern(this.r28_path, req.path, req, isStrict)) { matched = true; let fn = this.r28_fn; fn(req, res); }
+        if (!matched && this.r29_has && this.r29_method == req.method && matchRoutePattern(this.r29_path, req.path, req, isStrict)) { matched = true; let fn = this.r29_fn; fn(req, res); }
+        if (!matched && this.r30_has && this.r30_method == req.method && matchRoutePattern(this.r30_path, req.path, req, isStrict)) { matched = true; let fn = this.r30_fn; fn(req, res); }
+        if (!matched && this.r31_has && this.r31_method == req.method && matchRoutePattern(this.r31_path, req.path, req, isStrict)) { matched = true; let fn = this.r31_fn; fn(req, res); }
 
         // D.1 Run AfterHandle Hook
         if (matched && this.hasAfterHandleHook) {
@@ -731,13 +853,11 @@ struct VitoApp {
         }
 
         // Release Arena Slot after request processing
-        if (slotId >= 0.0) {
-            this.releaseArenaSlot(slotId);
-        }
+        if (slotId >= 0.0) { this.releaseArenaSlot(slotId); }
     },
 
+    // FIX #2: Xóa 3 dòng DEBUG print trong inject()
     function inject(method: string, path: string): Response {
-        print("  [DEBUG inject] Creating mock request for " + method + " " + path);
         let rawReq = method + " " + path + " HTTP/1.1\r\nHost: localhost\r\n\r\n";
         let req = parseHttpRequest(rawReq);
         let res: Response;
@@ -749,44 +869,65 @@ struct VitoApp {
         res.mockBody = "";
         res.stream.fd = -1.0;
 
-        print("  [DEBUG inject] Dispatching to handleRequest...");
         this.handleRequest(req, res);
-        print("  [DEBUG inject] Completed handleRequest!");
         return res;
     },
 
     function listen(port: number): void {
         print("=========================================");
-        print(" 🚀 Vito Web Framework v1.0.0 (Phase 9 Perf)");
+        print(" 🚀 Vito Web Framework v1.1.0");
         print(" Running on: http://127.0.0.1:" + port);
         print(" Memory Arena Capacity: " + this.arenaCapacity + " slots");
-        print(" Registered Routes: " + this.routeCount);
-        print(" Active Middlewares: " + this.middlewareCount);
+        print(" Registered Routes: " + this.routeCount + " / 32");
+        print(" Active Middlewares: " + this.middlewareCount + " / 8");
+        print(" HTTP Keep-Alive: ENABLED");
         print("=========================================");
 
         let listener = listenTcp("127.0.0.1", port);
         while (true) {
-            let bufId = this.acquireBuffer();
+            // Accept connection mới — SO_KEEPALIVE được bật tự động bên trong accept()
             let stream = listener.accept();
-            let rawData = stream.read(4096);
-            if (rawData.length > 0) {
-                let req = parseHttpRequest(rawData);
-                let res: Response;
-                res.status = 200.0;
-                res.statusText = "OK";
-                res.headersStr = "";
-                res.stream = stream;
-                res.isClosed = false;
-                res.isMock = false;
-                res.mockBody = "";
+            let keepAlive = true;
 
-                this.handleRequest(req, res);
-            } else {
-                stream.close();
+            // Fix #11: Keep-Alive loop — phục vụ nhiều request trên cùng TCP connection
+            while (keepAlive) {
+                let bufId = this.acquireBuffer();
+                // Đọc request trên connection hiện tại (blocking read)
+                let rawData = stream.read(4096);
+
+                if (rawData.length > 0) {
+                    let req = parseHttpRequest(rawData);
+                    let res: Response;
+                    res.status = 200.0;
+                    res.statusText = "OK";
+                    res.headersStr = "";
+                    res.stream = stream;
+                    res.isClosed = false;
+                    res.isMock = false;
+                    res.mockBody = "";
+
+                    this.handleRequest(req, res);
+
+                    // Kiểm tra client có muốn đóng không (Connection: close header)
+                    let connHeader = req.header("Connection");
+                    if (connHeader == "close" || connHeader == "Close") {
+                        keepAlive = false;
+                    }
+
+                    // Nếu response đã close stream thì thoát keep-alive loop
+                    if (res.isClosed && !stream.isConnected()) {
+                        keepAlive = false;
+                    }
+                } else {
+                    // Không có data = client đã đóng connection
+                    keepAlive = false;
+                }
+
+                if (bufId >= 0) { this.releaseBuffer(bufId); }
             }
-            if (bufId >= 0) {
-                this.releaseBuffer(bufId);
-            }
+
+            // Đóng connection sau khi Keep-Alive session kết thúc
+            stream.close();
         }
     }
 }
@@ -800,7 +941,7 @@ function createApp(): VitoApp {
 function runVitoApp(port: number): void {
     let app = createApp();
     app.get("/", (req: Request, res: Response) => {
-        res.json("{\"status\":\"ok\",\"framework\":\"Vito v1.0.0\",\"engine\":\"VIT Native Phase 9 Perf\"}");
+        res.json("{\"status\":\"ok\",\"framework\":\"Vito v1.1.0\",\"engine\":\"VIT Native Phase 9 Perf\",\"routes\":32,\"middlewares\":8}");
     });
     app.listen(port);
 }

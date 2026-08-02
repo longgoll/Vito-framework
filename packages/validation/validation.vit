@@ -1,77 +1,208 @@
 // Vito Type-Safe Schema Validation Package (vito/packages/validation/validation.vit)
+// FIX #10: Thêm addNumberRule, addMinLengthRule, addMaxLengthRule, addRequiredRule
+// Tăng slots từ 3 → 6, email validation cải thiện (check @ và dấu chấm sau @)
 import { Request, Response } from "src/vito.vit";
 import { charAt, indexOf } from "std/string";
 
+// Rule type constants
+// 0 = string (non-empty), 1 = email, 2 = number, 3 = minLength, 4 = maxLength, 5 = required
+struct ValidationRule {
+    field: string,
+    ruleType: number,  // 0=string, 1=email, 2=number, 3=minLen, 4=maxLen, 5=required
+    ruleParam: number, // dùng cho minLen / maxLen
+    has: boolean
+}
+
 struct SchemaValidator {
-    r0_field: string, r0_isEmail: boolean, r0_has: boolean,
-    r1_field: string, r1_isEmail: boolean, r1_has: boolean,
-    r2_field: string, r2_isEmail: boolean, r2_has: boolean,
+    r0: ValidationRule, r1: ValidationRule, r2: ValidationRule,
+    r3: ValidationRule, r4: ValidationRule, r5: ValidationRule,
     count: number,
 
     function init(): void {
         this.count = 0.0;
-        this.r0_has = false;
-        this.r1_has = false;
-        this.r2_has = false;
+        this.r0.has = false; this.r1.has = false; this.r2.has = false;
+        this.r3.has = false; this.r4.has = false; this.r5.has = false;
     },
 
+    function _addRule(fieldName: string, ruleType: number, ruleParam: number): void {
+        if (this.count == 0.0) { this.r0.field = fieldName; this.r0.ruleType = ruleType; this.r0.ruleParam = ruleParam; this.r0.has = true; }
+        if (this.count == 1.0) { this.r1.field = fieldName; this.r1.ruleType = ruleType; this.r1.ruleParam = ruleParam; this.r1.has = true; }
+        if (this.count == 2.0) { this.r2.field = fieldName; this.r2.ruleType = ruleType; this.r2.ruleParam = ruleParam; this.r2.has = true; }
+        if (this.count == 3.0) { this.r3.field = fieldName; this.r3.ruleType = ruleType; this.r3.ruleParam = ruleParam; this.r3.has = true; }
+        if (this.count == 4.0) { this.r4.field = fieldName; this.r4.ruleType = ruleType; this.r4.ruleParam = ruleParam; this.r4.has = true; }
+        if (this.count == 5.0) { this.r5.field = fieldName; this.r5.ruleType = ruleType; this.r5.ruleParam = ruleParam; this.r5.has = true; }
+        this.count = this.count + 1.0;
+    },
+
+    // Kiểm tra field không rỗng (string)
     function addStringRule(fieldName: string): void {
-        if (this.count == 0.0) { this.r0_field = fieldName; this.r0_isEmail = false; this.r0_has = true; }
-        if (this.count == 1.0) { this.r1_field = fieldName; this.r1_isEmail = false; this.r1_has = true; }
-        if (this.count == 2.0) { this.r2_field = fieldName; this.r2_isEmail = false; this.r2_has = true; }
-        this.count = this.count + 1.0;
+        this._addRule(fieldName, 0.0, 0.0);
     },
 
+    // Kiểm tra định dạng email (có '@' và có '.' sau '@')
     function addEmailRule(fieldName: string): void {
-        if (this.count == 0.0) { this.r0_field = fieldName; this.r0_isEmail = true; this.r0_has = true; }
-        if (this.count == 1.0) { this.r1_field = fieldName; this.r1_isEmail = true; this.r1_has = true; }
-        if (this.count == 2.0) { this.r2_field = fieldName; this.r2_isEmail = true; this.r2_has = true; }
-        this.count = this.count + 1.0;
+        this._addRule(fieldName, 1.0, 0.0);
     },
 
+    // FIX #10: Kiểm tra field có thể parse thành số (tất cả ký tự là 0-9 hoặc dấu chấm)
+    function addNumberRule(fieldName: string): void {
+        this._addRule(fieldName, 2.0, 0.0);
+    },
+
+    // FIX #10: Kiểm tra độ dài tối thiểu
+    function addMinLengthRule(fieldName: string, minLen: number): void {
+        this._addRule(fieldName, 3.0, minLen);
+    },
+
+    // FIX #10: Kiểm tra độ dài tối đa
+    function addMaxLengthRule(fieldName: string, maxLen: number): void {
+        this._addRule(fieldName, 4.0, maxLen);
+    },
+
+    // FIX #10: Kiểm tra field bắt buộc phải tồn tại (alias cho addStringRule, tên rõ hơn)
+    function addRequiredRule(fieldName: string): void {
+        this._addRule(fieldName, 5.0, 0.0);
+    }
+},
+
+// Helper: kiểm tra email có hợp lệ không (có '@' và có ít nhất 1 ký tự sau '@' rồi '.')
+function _validateEmail(val: string): boolean {
+    let atIdx = indexOf(val, "@");
+    if (atIdx < 1.0) { return false; } // phải có ký tự trước '@'
+    // Phải có '.' sau '@'
+    let len = val.length;
+    let i = atIdx + 1.0;
+    let hasDot = false;
+    while (i < len) {
+        if (charAt(val, i) == ".") { hasDot = true; break; }
+        i = i + 1.0;
+    }
+    if (!hasDot) { return false; }
+    // Phải có ký tự sau dấu chấm cuối
+    return i < len - 1.0;
+}
+
+// Helper: kiểm tra string có phải là số không (chỉ chứa 0-9 và tối đa 1 dấu chấm)
+function _validateNumber(val: string): boolean {
+    let len = val.length;
+    if (len == 0.0) { return false; }
+    let i = 0;
+    let dotCount = 0.0;
+    while (i < len) {
+        let ch = charAt(val, i);
+        if (ch == ".") {
+            dotCount = dotCount + 1.0;
+            if (dotCount > 1.0) { return false; }
+        } else {
+            // Check if ch is 0-9
+            if (ch != "0" && ch != "1" && ch != "2" && ch != "3" && ch != "4" &&
+                ch != "5" && ch != "6" && ch != "7" && ch != "8" && ch != "9") {
+                return false;
+            }
+        }
+        i = i + 1;
+    }
+    return true;
+}
+
+// Validate một field value theo rule type và trả về error string (rỗng = OK)
+function _applyRule(val: string, fieldName: string, ruleType: number, ruleParam: number): string {
+    // ruleType 0 = string non-empty
+    if (ruleType == 0.0) {
+        if (val.length == 0.0) {
+            return "{\"error\":\"Validation Failed\",\"field\":\"" + fieldName + "\",\"rule\":\"string\",\"message\":\"Field is required and must not be empty\"}";
+        }
+    }
+    // ruleType 1 = email
+    if (ruleType == 1.0) {
+        if (val.length == 0.0) {
+            return "{\"error\":\"Validation Failed\",\"field\":\"" + fieldName + "\",\"rule\":\"email\",\"message\":\"Email field is required\"}";
+        }
+        if (!_validateEmail(val)) {
+            return "{\"error\":\"Validation Failed\",\"field\":\"" + fieldName + "\",\"rule\":\"email\",\"message\":\"Invalid email format\"}";
+        }
+    }
+    // ruleType 2 = number
+    if (ruleType == 2.0) {
+        if (val.length == 0.0) {
+            return "{\"error\":\"Validation Failed\",\"field\":\"" + fieldName + "\",\"rule\":\"number\",\"message\":\"Numeric field is required\"}";
+        }
+        if (!_validateNumber(val)) {
+            return "{\"error\":\"Validation Failed\",\"field\":\"" + fieldName + "\",\"rule\":\"number\",\"message\":\"Field must be a valid number\"}";
+        }
+    }
+    // ruleType 3 = minLength
+    if (ruleType == 3.0) {
+        if (val.length < ruleParam) {
+            return "{\"error\":\"Validation Failed\",\"field\":\"" + fieldName + "\",\"rule\":\"minLength\",\"min\":" + ruleParam + ",\"message\":\"Field length is below minimum\"}";
+        }
+    }
+    // ruleType 4 = maxLength
+    if (ruleType == 4.0) {
+        if (val.length > ruleParam) {
+            return "{\"error\":\"Validation Failed\",\"field\":\"" + fieldName + "\",\"rule\":\"maxLength\",\"max\":" + ruleParam + ",\"message\":\"Field length exceeds maximum\"}";
+        }
+    }
+    // ruleType 5 = required (alias cho string)
+    if (ruleType == 5.0) {
+        if (val.length == 0.0) {
+            return "{\"error\":\"Validation Failed\",\"field\":\"" + fieldName + "\",\"rule\":\"required\",\"message\":\"Field is required\"}";
+        }
+    }
+    return ""; // OK
+}
+
+// Extend SchemaValidator với validateRequest method
+struct SchemaValidator {
     function validateRequest(req: Request, res: Response): boolean {
-        if (this.r0_has) {
-            let val0 = req.query(this.r0_field);
-            if (val0.length == 0.0) { val0 = req.param(this.r0_field); }
-            if (val0.length == 0.0) {
-                res.setStatus(422.0);
-                res.json("{\"error\":\"Unprocessable Entity\",\"field\":\"" + this.r0_field + "\"}");
-                return false;
-            }
-            if (this.r0_isEmail && indexOf(val0, "@") < 0.0) {
-                res.setStatus(422.0);
-                res.json("{\"error\":\"Unprocessable Entity\",\"field\":\"" + this.r0_field + "\"}");
-                return false;
-            }
+        // Validate r0
+        if (this.r0.has) {
+            let val = req.query(this.r0.field);
+            if (val.length == 0.0) { val = req.param(this.r0.field); }
+            let err = _applyRule(val, this.r0.field, this.r0.ruleType, this.r0.ruleParam);
+            if (err.length > 0.0) { res.setStatus(422.0); res.json(err); return false; }
         }
-        if (this.r1_has) {
-            let val1 = req.query(this.r1_field);
-            if (val1.length == 0.0) { val1 = req.param(this.r1_field); }
-            if (val1.length == 0.0) {
-                res.setStatus(422.0);
-                res.json("{\"error\":\"Unprocessable Entity\",\"field\":\"" + this.r1_field + "\"}");
-                return false;
-            }
-            if (this.r1_isEmail && indexOf(val1, "@") < 0.0) {
-                res.setStatus(422.0);
-                res.json("{\"error\":\"Unprocessable Entity\",\"field\":\"" + this.r1_field + "\"}");
-                return false;
-            }
+        // Validate r1
+        if (this.r1.has) {
+            let val = req.query(this.r1.field);
+            if (val.length == 0.0) { val = req.param(this.r1.field); }
+            let err = _applyRule(val, this.r1.field, this.r1.ruleType, this.r1.ruleParam);
+            if (err.length > 0.0) { res.setStatus(422.0); res.json(err); return false; }
         }
-        if (this.r2_has) {
-            let val2 = req.query(this.r2_field);
-            if (val2.length == 0.0) { val2 = req.param(this.r2_field); }
-            if (val2.length == 0.0) {
-                res.setStatus(422.0);
-                res.json("{\"error\":\"Unprocessable Entity\",\"field\":\"" + this.r2_field + "\"}");
-                return false;
-            }
-            if (this.r2_isEmail && indexOf(val2, "@") < 0.0) {
-                res.setStatus(422.0);
-                res.json("{\"error\":\"Unprocessable Entity\",\"field\":\"" + this.r2_field + "\"}");
-                return false;
-            }
+        // Validate r2
+        if (this.r2.has) {
+            let val = req.query(this.r2.field);
+            if (val.length == 0.0) { val = req.param(this.r2.field); }
+            let err = _applyRule(val, this.r2.field, this.r2.ruleType, this.r2.ruleParam);
+            if (err.length > 0.0) { res.setStatus(422.0); res.json(err); return false; }
+        }
+        // Validate r3
+        if (this.r3.has) {
+            let val = req.query(this.r3.field);
+            if (val.length == 0.0) { val = req.param(this.r3.field); }
+            let err = _applyRule(val, this.r3.field, this.r3.ruleType, this.r3.ruleParam);
+            if (err.length > 0.0) { res.setStatus(422.0); res.json(err); return false; }
+        }
+        // Validate r4
+        if (this.r4.has) {
+            let val = req.query(this.r4.field);
+            if (val.length == 0.0) { val = req.param(this.r4.field); }
+            let err = _applyRule(val, this.r4.field, this.r4.ruleType, this.r4.ruleParam);
+            if (err.length > 0.0) { res.setStatus(422.0); res.json(err); return false; }
+        }
+        // Validate r5
+        if (this.r5.has) {
+            let val = req.query(this.r5.field);
+            if (val.length == 0.0) { val = req.param(this.r5.field); }
+            let err = _applyRule(val, this.r5.field, this.r5.ruleType, this.r5.ruleParam);
+            if (err.length > 0.0) { res.setStatus(422.0); res.json(err); return false; }
         }
         return true;
     }
+}
+
+function createValidator(): SchemaValidator {
+    let v: SchemaValidator;
+    v.init();
+    return v;
 }

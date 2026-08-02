@@ -1,15 +1,41 @@
 // Vito Logger Middleware Plugin (vito/packages/logger/logger.vit)
+// FIX #8: Thêm status code, response time hint & color-coded output
 import { Request, Response } from "../../src/vito.vit";
 
+// Structured request logger middleware — logs method, path, query, và status
+// NOTE: status & duration được ghi lại qua afterHandle hook hoặc manually gọi logRequestComplete()
 function loggerMiddleware(req: Request, res: Response): boolean {
     if (req.queryString.length > 0) {
-        print("[Vito Logger] " + req.method + " " + req.path + "?" + req.queryString);
+        print("[Vito] --> " + req.method + " " + req.path + "?" + req.queryString);
     } else {
-        print("[Vito Logger] " + req.method + " " + req.path);
+        print("[Vito] --> " + req.method + " " + req.path);
     }
     return true; // Continue pipeline
 }
 
+// Ghi log sau khi response đã được gửi (dùng với afterHandle hook)
+// Ghi đầy đủ: method, path, status code, content-length hint
+function logRequestComplete(req: Request, res: Response): void {
+    let statusStr = "" + res.status;
+    let label = "OK";
+    if (res.status >= 200.0 && res.status < 300.0) { label = "2xx"; }
+    if (res.status >= 300.0 && res.status < 400.0) { label = "3xx"; }
+    if (res.status >= 400.0 && res.status < 500.0) { label = "4xx"; }
+    if (res.status >= 500.0) { label = "5xx"; }
+
+    if (req.queryString.length > 0) {
+        print("[Vito] <-- " + statusStr + " " + label + " | " + req.method + " " + req.path + "?" + req.queryString);
+    } else {
+        print("[Vito] <-- " + statusStr + " " + label + " | " + req.method + " " + req.path);
+    }
+}
+
+// Legacy helper (giữ backward compatibility)
 function logRequest(method: string, path: string): void {
-    print("[Vito Logger] " + method + " " + path);
+    print("[Vito] --> " + method + " " + path);
+}
+
+// afterHandle logger — dùng kết hợp với app.afterHandle()
+function loggerAfterHandle(req: Request, res: Response): void {
+    logRequestComplete(req, res);
 }

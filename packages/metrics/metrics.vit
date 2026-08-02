@@ -1,4 +1,5 @@
 // Vito Prometheus Metrics & OpenTelemetry Tracing Package (vito/packages/metrics/metrics.vit)
+// FIX #9: Xóa hardcoded p50/p90/p99 — tính toán thực từ accumulated duration data
 import { Request, Response } from "src/vito.vit";
 
 struct TraceContext {
@@ -35,14 +36,29 @@ function injectTraceParent(ctx: TraceContext): string {
 struct PrometheusRegistry {
     totalRequests: number,
     totalDurationMs: number,
+    // Per-method counters
     getRequests: number,
     postRequests: number,
-    status200Count: number,
+    putRequests: number,
+    deleteRequests: number,
+    // Per-status counters
+    status2xxCount: number,
+    status3xxCount: number,
+    status4xxCount: number,
     status404Count: number,
     status500Count: number,
-    p50SecondsStr: string,
-    p90SecondsStr: string,
-    p99SecondsStr: string,
+    // FIX #9: Latency buckets cho p50/p90/p99 estimation
+    // Buckets: <1ms, <5ms, <10ms, <25ms, <50ms, <100ms, <250ms, <500ms, >=500ms
+    latBucket_1ms: number,
+    latBucket_5ms: number,
+    latBucket_10ms: number,
+    latBucket_25ms: number,
+    latBucket_50ms: number,
+    latBucket_100ms: number,
+    latBucket_250ms: number,
+    latBucket_500ms: number,
+    latBucket_inf: number,
+    // System metrics (updated externally via setSystemMetrics)
     cpuSecondsTotal: number,
     residentMemoryBytes: number,
 
@@ -51,44 +67,100 @@ struct PrometheusRegistry {
         this.totalDurationMs = 0.0;
         this.getRequests = 0.0;
         this.postRequests = 0.0;
-        this.status200Count = 0.0;
+        this.putRequests = 0.0;
+        this.deleteRequests = 0.0;
+        this.status2xxCount = 0.0;
+        this.status3xxCount = 0.0;
+        this.status4xxCount = 0.0;
         this.status404Count = 0.0;
         this.status500Count = 0.0;
-        this.p50SecondsStr = "0.0024";
-        this.p90SecondsStr = "0.0081";
-        this.p99SecondsStr = "0.0156";
-        this.cpuSecondsTotal = 1.0;
-        this.residentMemoryBytes = 28410000.0;
+        // Init latency buckets to 0 — no hardcoded values
+        this.latBucket_1ms = 0.0;
+        this.latBucket_5ms = 0.0;
+        this.latBucket_10ms = 0.0;
+        this.latBucket_25ms = 0.0;
+        this.latBucket_50ms = 0.0;
+        this.latBucket_100ms = 0.0;
+        this.latBucket_250ms = 0.0;
+        this.latBucket_500ms = 0.0;
+        this.latBucket_inf = 0.0;
+        // System metrics start at 0 — caller must update via setSystemMetrics()
+        this.cpuSecondsTotal = 0.0;
+        this.residentMemoryBytes = 0.0;
     },
 
+    // Cập nhật system metrics từ bên ngoài (gọi mỗi scrape interval)
+    function setSystemMetrics(cpuSeconds: number, memoryBytes: number): void {
+        this.cpuSecondsTotal = cpuSeconds;
+        this.residentMemoryBytes = memoryBytes;
+    },
+
+    // FIX #9: recordRequest ghi nhận duration vào latency buckets thực
     function recordRequest(method: string, path: string, statusCode: number, durationMs: number): void {
         this.totalRequests = this.totalRequests + 1.0;
         this.totalDurationMs = this.totalDurationMs + durationMs;
-        if (method == "GET") { this.getRequests = this.getRequests + 1.0; }
-        if (method == "POST") { this.postRequests = this.postRequests + 1.0; }
 
-        if (statusCode == 200.0) { this.status200Count = this.status200Count + 1.0; }
+        // Method counters
+        if (method == "GET")    { this.getRequests    = this.getRequests    + 1.0; }
+        if (method == "POST")   { this.postRequests   = this.postRequests   + 1.0; }
+        if (method == "PUT")    { this.putRequests    = this.putRequests    + 1.0; }
+        if (method == "DELETE") { this.deleteRequests = this.deleteRequests + 1.0; }
+
+        // Status class counters
+        if (statusCode >= 200.0 && statusCode < 300.0) { this.status2xxCount = this.status2xxCount + 1.0; }
+        if (statusCode >= 300.0 && statusCode < 400.0) { this.status3xxCount = this.status3xxCount + 1.0; }
+        if (statusCode >= 400.0 && statusCode < 500.0) { this.status4xxCount = this.status4xxCount + 1.0; }
         if (statusCode == 404.0) { this.status404Count = this.status404Count + 1.0; }
         if (statusCode == 500.0) { this.status500Count = this.status500Count + 1.0; }
+
+        // Latency histogram buckets (cumulative — Prometheus convention)
+        if (durationMs < 1.0)   { this.latBucket_1ms   = this.latBucket_1ms   + 1.0; }
+        if (durationMs < 5.0)   { this.latBucket_5ms   = this.latBucket_5ms   + 1.0; }
+        if (durationMs < 10.0)  { this.latBucket_10ms  = this.latBucket_10ms  + 1.0; }
+        if (durationMs < 25.0)  { this.latBucket_25ms  = this.latBucket_25ms  + 1.0; }
+        if (durationMs < 50.0)  { this.latBucket_50ms  = this.latBucket_50ms  + 1.0; }
+        if (durationMs < 100.0) { this.latBucket_100ms = this.latBucket_100ms + 1.0; }
+        if (durationMs < 250.0) { this.latBucket_250ms = this.latBucket_250ms + 1.0; }
+        if (durationMs < 500.0) { this.latBucket_500ms = this.latBucket_500ms + 1.0; }
+        this.latBucket_inf = this.latBucket_inf + 1.0;
     },
 
     function renderPrometheusMetrics(): string {
         let out = "";
+
+        // http_requests_total
         out = out + "# HELP http_requests_total Total number of HTTP requests processed.\n";
         out = out + "# TYPE http_requests_total counter\n";
-        out = out + "http_requests_total{method=\"GET\",status=\"200\"} " + this.getRequests + "\n";
-        out = out + "http_requests_total{method=\"POST\",status=\"200\"} " + this.postRequests + "\n";
-        out = out + "http_requests_total{status=\"404\"} " + this.status404Count + "\n";
-        out = out + "http_requests_total{status=\"500\"} " + this.status500Count + "\n\n";
+        out = out + "http_requests_total{method=\"GET\"}    " + this.getRequests    + "\n";
+        out = out + "http_requests_total{method=\"POST\"}   " + this.postRequests   + "\n";
+        out = out + "http_requests_total{method=\"PUT\"}    " + this.putRequests    + "\n";
+        out = out + "http_requests_total{method=\"DELETE\"} " + this.deleteRequests + "\n\n";
 
-        out = out + "# HELP http_request_duration_seconds HTTP request latency quantiles in seconds.\n";
-        out = out + "# TYPE http_request_duration_seconds summary\n";
-        out = out + "http_request_duration_seconds{quantile=\"0.5\"} " + this.p50SecondsStr + "\n";
-        out = out + "http_request_duration_seconds{quantile=\"0.9\"} " + this.p90SecondsStr + "\n";
-        out = out + "http_request_duration_seconds{quantile=\"0.99\"} " + this.p99SecondsStr + "\n";
-        out = out + "http_request_duration_seconds_sum 0.0171\n";
-        out = out + "http_request_duration_seconds_count " + this.totalRequests + "\n\n";
+        // http_responses_total by status class
+        out = out + "# HELP http_responses_total Total HTTP responses by status class.\n";
+        out = out + "# TYPE http_responses_total counter\n";
+        out = out + "http_responses_total{status_class=\"2xx\"} " + this.status2xxCount + "\n";
+        out = out + "http_responses_total{status_class=\"3xx\"} " + this.status3xxCount + "\n";
+        out = out + "http_responses_total{status_class=\"4xx\"} " + this.status4xxCount + "\n";
+        out = out + "http_responses_total{status=\"404\"}       " + this.status404Count + "\n";
+        out = out + "http_responses_total{status=\"500\"}       " + this.status500Count + "\n\n";
 
+        // FIX #9: Histogram thực — tính từ latBucket_* thực (không hardcode)
+        out = out + "# HELP http_request_duration_ms_bucket HTTP request latency histogram (ms).\n";
+        out = out + "# TYPE http_request_duration_ms_bucket histogram\n";
+        out = out + "http_request_duration_ms_bucket{le=\"1\"}   " + this.latBucket_1ms   + "\n";
+        out = out + "http_request_duration_ms_bucket{le=\"5\"}   " + this.latBucket_5ms   + "\n";
+        out = out + "http_request_duration_ms_bucket{le=\"10\"}  " + this.latBucket_10ms  + "\n";
+        out = out + "http_request_duration_ms_bucket{le=\"25\"}  " + this.latBucket_25ms  + "\n";
+        out = out + "http_request_duration_ms_bucket{le=\"50\"}  " + this.latBucket_50ms  + "\n";
+        out = out + "http_request_duration_ms_bucket{le=\"100\"} " + this.latBucket_100ms + "\n";
+        out = out + "http_request_duration_ms_bucket{le=\"250\"} " + this.latBucket_250ms + "\n";
+        out = out + "http_request_duration_ms_bucket{le=\"500\"} " + this.latBucket_500ms + "\n";
+        out = out + "http_request_duration_ms_bucket{le=\"+Inf\"} " + this.latBucket_inf  + "\n";
+        out = out + "http_request_duration_ms_sum "   + this.totalDurationMs + "\n";
+        out = out + "http_request_duration_ms_count " + this.totalRequests + "\n\n";
+
+        // System metrics (updated by caller via setSystemMetrics)
         out = out + "# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.\n";
         out = out + "# TYPE process_cpu_seconds_total counter\n";
         out = out + "process_cpu_seconds_total " + this.cpuSecondsTotal + "\n\n";
@@ -103,7 +175,7 @@ struct PrometheusRegistry {
     function handleMetricsEndpoint(req: Request, res: Response): boolean {
         if (req.method == "GET" && req.path == "/metrics") {
             let metricsText = this.renderPrometheusMetrics();
-            res.setStatus(200);
+            res.setStatus(200.0);
             res.setHeader("Content-Type", "text/plain; version=0.0.4; charset=utf-8");
             res.send(metricsText);
             return false;
