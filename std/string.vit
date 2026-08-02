@@ -3,6 +3,7 @@
 
 extern function __vit_char_at(str: string, index: number): string;
 extern function __vit_strlen(str: string): number;
+extern function __vit_str_index_of(str: string, sub: string): number;
 
 function charAt(str: string, index: number): string {
     return __vit_char_at(str, index);
@@ -10,4 +11,8 @@ function charAt(str: string, index: number): string {
 
 function stringLength(str: string): number {
     return __vit_strlen(str);
+}
+
+function indexOf(str: string, sub: string): number {
+    return __vit_str_index_of(str, sub);
 }

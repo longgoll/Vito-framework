@@ -40,6 +40,7 @@ vito/
 │   └── vito.vit        # HTTP Parser, Dynamic Matcher, Route Grouping & App Engine
 ├── packages/           # Official Middleware & Enterprise Packages (27 Modules)
 │   ├── auth/           # JWT Guard Pro, OAuth2 PKCE, API Key, Argon2id/AES-256-GCM, RBAC
+│   ├── cli/            # Vit CLI generator, vit doctor & RPC Client SDK generator
 │   ├── cors/           # CORS header & OPTIONS preflight middleware
 │   ├── db/             # Connection Pooling for Postgres, SQLite, MySQL
 │   ├── events/         # Async Event Emitter & Redis Pub/Sub Cluster
@@ -55,6 +56,7 @@ vito/
 │   ├── static/         # Static file serving middleware with ETag & Gzip
 │   ├── swagger/        # OpenAPI 3.0 auto generator & Swagger UI (/docs)
 │   ├── upload/         # Multipart form data streaming & file validation engine
+│   ├── validation/     # Schema Validator, field rules & auto 422 JSON response
 │   └── websocket/      # WebSockets Engine (50K+ conns, Room Broadcast & Heartbeat)
 └── examples/           # Web app examples
     ├── app_demo.vit    # Complete router, dynamic params, grouping & middleware demo

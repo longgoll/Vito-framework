@@ -1,5 +1,5 @@
 // Vito Prometheus Metrics & OpenTelemetry Tracing Package (vito/packages/metrics/metrics.vit)
-import { Request, Response } from "../src/vito.vit";
+import { Request, Response } from "src/vito.vit";
 
 struct TraceContext {
     traceId: string,
@@ -46,31 +46,30 @@ struct PrometheusRegistry {
     cpuSecondsTotal: number,
     residentMemoryBytes: number,
 
-    function init(): PrometheusRegistry {
-        this.totalRequests = 0;
-        this.totalDurationMs = 0;
-        this.getRequests = 0;
-        this.postRequests = 0;
-        this.status200Count = 0;
-        this.status404Count = 0;
-        this.status500Count = 0;
+    function init(): void {
+        this.totalRequests = 0.0;
+        this.totalDurationMs = 0.0;
+        this.getRequests = 0.0;
+        this.postRequests = 0.0;
+        this.status200Count = 0.0;
+        this.status404Count = 0.0;
+        this.status500Count = 0.0;
         this.p50SecondsStr = "0.0024";
         this.p90SecondsStr = "0.0081";
         this.p99SecondsStr = "0.0156";
-        this.cpuSecondsTotal = 1;
-        this.residentMemoryBytes = 28410000;
-        return this;
+        this.cpuSecondsTotal = 1.0;
+        this.residentMemoryBytes = 28410000.0;
     },
 
     function recordRequest(method: string, path: string, statusCode: number, durationMs: number): void {
-        this.totalRequests = this.totalRequests + 1;
+        this.totalRequests = this.totalRequests + 1.0;
         this.totalDurationMs = this.totalDurationMs + durationMs;
-        if (method == "GET") { this.getRequests = this.getRequests + 1; }
-        if (method == "POST") { this.postRequests = this.postRequests + 1; }
+        if (method == "GET") { this.getRequests = this.getRequests + 1.0; }
+        if (method == "POST") { this.postRequests = this.postRequests + 1.0; }
 
-        if (statusCode == 200) { this.status200Count = this.status200Count + 1; }
-        if (statusCode == 404) { this.status404Count = this.status404Count + 1; }
-        if (statusCode == 500) { this.status500Count = this.status500Count + 1; }
+        if (statusCode == 200.0) { this.status200Count = this.status200Count + 1.0; }
+        if (statusCode == 404.0) { this.status404Count = this.status404Count + 1.0; }
+        if (statusCode == 500.0) { this.status500Count = this.status500Count + 1.0; }
     },
 
     function renderPrometheusMetrics(): string {

@@ -1,99 +1,77 @@
 // Vito Type-Safe Schema Validation Package (vito/packages/validation/validation.vit)
-import { Request, Response } from "../../src/vito.vit";
+import { Request, Response } from "src/vito.vit";
+import { charAt, indexOf } from "std/string";
 
-struct FieldRule {
-    field: string,
-    required: boolean,
-    minLength: number,
-    isEmail: boolean,
+struct SchemaValidator {
+    r0_field: string, r0_isEmail: boolean, r0_has: boolean,
+    r1_field: string, r1_isEmail: boolean, r1_has: boolean,
+    r2_field: string, r2_isEmail: boolean, r2_has: boolean,
+    count: number,
 
-    function init(name: string): FieldRule {
-        this.field = name;
-        this.required = true;
-        this.minLength = 0;
-        this.isEmail = false;
-        return this;
+    function init(): void {
+        this.count = 0.0;
+        this.r0_has = false;
+        this.r1_has = false;
+        this.r2_has = false;
     },
 
-    function min(len: number): FieldRule {
-        this.minLength = len;
-        return this;
+    function addStringRule(fieldName: string): void {
+        if (this.count == 0.0) { this.r0_field = fieldName; this.r0_isEmail = false; this.r0_has = true; }
+        if (this.count == 1.0) { this.r1_field = fieldName; this.r1_isEmail = false; this.r1_has = true; }
+        if (this.count == 2.0) { this.r2_field = fieldName; this.r2_isEmail = false; this.r2_has = true; }
+        this.count = this.count + 1.0;
     },
 
-    function email(): FieldRule {
-        this.isEmail = true;
-        return this;
+    function addEmailRule(fieldName: string): void {
+        if (this.count == 0.0) { this.r0_field = fieldName; this.r0_isEmail = true; this.r0_has = true; }
+        if (this.count == 1.0) { this.r1_field = fieldName; this.r1_isEmail = true; this.r1_has = true; }
+        if (this.count == 2.0) { this.r2_field = fieldName; this.r2_isEmail = true; this.r2_has = true; }
+        this.count = this.count + 1.0;
     },
 
-    function optional(): FieldRule {
-        this.required = false;
-        return this;
-    }
-}
-
-struct ValidationResult {
-    isValid: boolean,
-    errorMessage: string
-}
-
-function containsChar(str: string, target: string): boolean {
-    let len = str.length;
-    let i = 0;
-    while (i < len) {
-        let ch = "";
-        let k = 0;
-        let match = true;
-        while (k < target.length && (i + k) < len) {
-            if (str.length > (i + k)) {
-                // simple char check
-            }
-            k = k + 1;
-        }
-        if (str.length > i) {
-            let c = "";
-            // basic check
-        }
-        i = i + 1;
-    }
-    return true;
-}
-
-function validateField(val: string, rule: FieldRule): ValidationResult {
-    let res: ValidationResult;
-    res.isValid = true;
-    res.errorMessage = "";
-
-    if (rule.required && val.length == 0) {
-        res.isValid = false;
-        res.errorMessage = "Field '" + rule.field + "' is required.";
-        return res;
-    }
-
-    if (val.length > 0 && rule.minLength > 0 && val.length < rule.minLength) {
-        res.isValid = false;
-        res.errorMessage = "Field '" + rule.field + "' must be at least " + rule.minLength + " characters long.";
-        return res;
-    }
-
-    return res;
-}
-
-function createValidationMiddleware(rules: FieldRule[], ruleCount: number): (req: Request, res: Response) => boolean {
-    return (req: Request, res: Response): boolean => {
-        let i = 0;
-        while (i < ruleCount) {
-            let rule = rules[i];
-            let val = req.query(rule.field);
-            if (val.length == 0) {
-                val = req.param(rule.field);
-            }
-            let check = validateField(val, rule);
-            if (!check.isValid) {
-                res.setStatus(422).json("{\"error\":\"Unprocessable Entity\",\"message\":\"" + check.errorMessage + "\"}");
+    function validateRequest(req: Request, res: Response): boolean {
+        if (this.r0_has) {
+            let val0 = req.query(this.r0_field);
+            if (val0.length == 0.0) { val0 = req.param(this.r0_field); }
+            if (val0.length == 0.0) {
+                res.setStatus(422.0);
+                res.json("{\"error\":\"Unprocessable Entity\",\"field\":\"" + this.r0_field + "\"}");
                 return false;
             }
-            i = i + 1;
+            if (this.r0_isEmail && indexOf(val0, "@") < 0.0) {
+                res.setStatus(422.0);
+                res.json("{\"error\":\"Unprocessable Entity\",\"field\":\"" + this.r0_field + "\"}");
+                return false;
+            }
+        }
+        if (this.r1_has) {
+            let val1 = req.query(this.r1_field);
+            if (val1.length == 0.0) { val1 = req.param(this.r1_field); }
+            if (val1.length == 0.0) {
+                res.setStatus(422.0);
+                res.json("{\"error\":\"Unprocessable Entity\",\"field\":\"" + this.r1_field + "\"}");
+                return false;
+            }
+            if (this.r1_isEmail && indexOf(val1, "@") < 0.0) {
+                res.setStatus(422.0);
+                res.json("{\"error\":\"Unprocessable Entity\",\"field\":\"" + this.r1_field + "\"}");
+                return false;
+            }
+        }
+        if (this.r2_has) {
+            let val2 = req.query(this.r2_field);
+            if (val2.length == 0.0) { val2 = req.param(this.r2_field); }
+            if (val2.length == 0.0) {
+                res.setStatus(422.0);
+                res.json("{\"error\":\"Unprocessable Entity\",\"field\":\"" + this.r2_field + "\"}");
+                return false;
+            }
+            if (this.r2_isEmail && indexOf(val2, "@") < 0.0) {
+                res.setStatus(422.0);
+                res.json("{\"error\":\"Unprocessable Entity\",\"field\":\"" + this.r2_field + "\"}");
+                return false;
+            }
         }
         return true;
-    };
+    }
 }

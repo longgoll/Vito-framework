@@ -1,16 +1,70 @@
 // Vito OpenAPI & Swagger Documentation Package (vito/packages/swagger/swagger.vit)
-import { VitoApp, Request, Response } from "../../src/vito.vit";
+import { VitoApp, Request, Response } from "src/vito.vit";
+
+struct OpenAPIRouteDoc {
+    path: string,
+    method: string,
+    summary: string,
+    description: string,
+    tag: string
+}
+
+struct OpenAPISpec {
+    title: string,
+    version: string,
+    r0_path: string, r0_method: string, r0_summary: string, r0_has: boolean,
+    r1_path: string, r1_method: string, r1_summary: string, r1_has: boolean,
+    r2_path: string, r2_method: string, r2_summary: string, r2_has: boolean,
+    count: number,
+
+    function init(appTitle: string, appVer: string): void {
+        this.title = appTitle;
+        this.version = appVer;
+        this.count = 0.0;
+        this.r0_has = false;
+        this.r1_has = false;
+        this.r2_has = false;
+    },
+
+    function addRouteDoc(path: string, method: string, summary: string): void {
+        if (this.count == 0.0) { this.r0_path = path; this.r0_method = method; this.r0_summary = summary; this.r0_has = true; }
+        if (this.count == 1.0) { this.r1_path = path; this.r1_method = method; this.r1_summary = summary; this.r1_has = true; }
+        if (this.count == 2.0) { this.r2_path = path; this.r2_method = method; this.r2_summary = summary; this.r2_has = true; }
+        this.count = this.count + 1.0;
+    },
+
+    function generateJSON(): string {
+        let json = "{\"openapi\":\"3.0.0\",\"info\":{\"title\":\"" + this.title + "\",\"version\":\"" + this.version + "\"},\"paths\":{";
+        if (this.r0_has) {
+            json = json + "\"" + this.r0_path + "\":{\"" + this.r0_method + "\":{\"summary\":\"" + this.r0_summary + "\",\"responses\":{\"200\":{\"description\":\"OK\"}}}}";
+        }
+        if (this.r1_has) {
+            json = json + ",\"" + this.r1_path + "\":{\"" + this.r1_method + "\":{\"summary\":\"" + this.r1_summary + "\",\"responses\":{\"200\":{\"description\":\"OK\"}}}}";
+        }
+        if (this.r2_has) {
+            json = json + ",\"" + this.r2_path + "\":{\"" + this.r2_method + "\":{\"summary\":\"" + this.r2_summary + "\",\"responses\":{\"200\":{\"description\":\"OK\"}}}}";
+        }
+        json = json + "}}";
+        return json;
+    }
+}
+
+function createOpenAPISpec(title: string, version: string): OpenAPISpec {
+    let spec: OpenAPISpec;
+    spec.init(title, version);
+    return spec;
+}
 
 function setupSwaggerDocs(app: VitoApp, title: string, version: string): void {
     // 1. Register OpenAPI Spec Endpoint (/openapi.json)
     app.get("/openapi.json", (req: Request, res: Response) => {
-        let jsonSpec = "{\"openapi\":\"3.0.0\",\"info\":{\"title\":\"" + title + "\",\"version\":\"" + version + "\"},\"paths\":{\"/api/v1/status\":{\"get\":{\"summary\":\"System Status Check\",\"responses\":{\"200\":{\"description\":\"OK\"}}}},\"/users/{id}\":{\"get\":{\"summary\":\"Get User By ID\",\"parameters\":[{\"name\":\"id\",\"in\":\"path\",\"required\":true}],\"responses\":{\"200\":{\"description\":\"OK\"}}}}}}";
+        let jsonSpec = "{\"openapi\":\"3.0.0\",\"info\":{\"title\":\"Vito OpenAPI\",\"version\":\"1.0.0\"},\"paths\":{\"/api/v1/status\":{\"get\":{\"summary\":\"System Status Check\",\"responses\":{\"200\":{\"description\":\"OK\"}}}},\"/users/{id}\":{\"get\":{\"summary\":\"Get User By ID\",\"parameters\":[{\"name\":\"id\",\"in\":\"path\",\"required\":true}],\"responses\":{\"200\":{\"description\":\"OK\"}}}}}}";
         res.json(jsonSpec);
     });
 
     // 2. Register Interactive Swagger UI Page (/docs)
     app.get("/docs", (req: Request, res: Response) => {
-        let uiHtml = "<!DOCTYPE html><html><head><title>" + title + " - Swagger UI</title>" +
+        let uiHtml = "<!DOCTYPE html><html><head><title>Vito Swagger UI</title>" +
                      "<link rel='stylesheet' href='https://unpkg.com/swagger-ui-dist@4/swagger-ui.css'/>" +
                      "</head><body style='margin:0;background:#fafafa;'><div id='swagger-ui'></div>" +
                      "<script src='https://unpkg.com/swagger-ui-dist@4/swagger-ui-bundle.js'></script>" +

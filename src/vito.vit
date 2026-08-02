@@ -1,23 +1,23 @@
 // Vito Web Framework Engine (vito/src/vito.vit)
 import { listenTcp, TcpListener, TcpStream } from "std/net";
 import { charAt } from "std/string";
-import { zeroAllocHeaderLookup } from "../packages/pool/pool.vit";
-import { normalizePath } from "../packages/router/router.vit";
+import { zeroAllocHeaderLookup } from "packages/pool/pool.vit";
+import { normalizePath } from "packages/router/router.vit";
 
 // 1. Helper Functions for Path & Header Parsing
 function getPathSegment(path: string, segIndex: number): string {
     let len = path.length;
     let i = 0;
-    let currentSeg = 0;
+    let currentSeg = 0.0;
     let result = "";
     while (i < len) {
         let ch = charAt(path, i);
         if (ch == "/") {
-            if (result.length > 0 || i > 0) {
+            if (result.length > 0.0 || i > 0) {
                 if (currentSeg == segIndex) {
                     return result;
                 }
-                currentSeg = currentSeg + 1;
+                currentSeg = currentSeg + 1.0;
                 result = "";
             }
         } else {
@@ -34,13 +34,13 @@ function getPathSegment(path: string, segIndex: number): string {
 function getPathSegmentCount(path: string): number {
     let len = path.length;
     let i = 0;
-    let count = 0;
+    let count = 0.0;
     let hasChar = false;
     while (i < len) {
         let ch = charAt(path, i);
         if (ch == "/") {
             if (hasChar) {
-                count = count + 1;
+                count = count + 1.0;
                 hasChar = false;
             }
         } else {
@@ -49,22 +49,22 @@ function getPathSegmentCount(path: string): number {
         i = i + 1;
     }
     if (hasChar) {
-        count = count + 1;
+        count = count + 1.0;
     }
     return count;
 }
 
 function parseQueryParam(queryString: string, targetKey: string): string {
-    if (queryString.length == 0 || targetKey.length == 0) { return ""; }
+    if (queryString.length == 0.0 || targetKey.length == 0.0) { return ""; }
     let len = queryString.length;
-    let i = 0;
+    let i = 0.0;
     let currentKey = "";
     let currentValue = "";
     let isParsingValue = false;
 
     while (i < len) {
         let ch = charAt(queryString, i);
-        if (ch == "&" || i == len - 1) {
+        if (ch == "&" || i == len - 1.0) {
             if (ch != "&") {
                 if (isParsingValue) { currentValue = currentValue + ch; }
                 else { currentKey = currentKey + ch; }
@@ -83,7 +83,7 @@ function parseQueryParam(queryString: string, targetKey: string): string {
                 else { currentKey = currentKey + ch; }
             }
         }
-        i = i + 1;
+        i = i + 1.0;
     }
     return "";
 }
@@ -97,12 +97,26 @@ struct Request {
     method: string,
     path: string,
     queryString: string,
+    headersStr: string,
     body: string,
     raw: string,
     pk0: string, pv0: string,
     pk1: string, pv1: string,
     pk2: string, pv2: string,
     paramsCount: number,
+
+    function init(): void {
+        this.method = "GET";
+        this.path = "/";
+        this.queryString = "";
+        this.headersStr = "";
+        this.body = "";
+        this.raw = "";
+        this.pk0 = ""; this.pv0 = "";
+        this.pk1 = ""; this.pv1 = "";
+        this.pk2 = ""; this.pv2 = "";
+        this.paramsCount = 0.0;
+    },
 
     function param(key: string): string {
         if (this.pk0 == key) { return this.pv0; }
@@ -136,30 +150,30 @@ function matchRoutePattern(routePath: string, reqPath: string, req: Request, isS
         return false;
     }
 
-    let s = 0;
+    let s = 0.0;
     let matched = true;
     let tk0 = ""; let tv0 = "";
     let tk1 = ""; let tv1 = "";
     let tk2 = ""; let tv2 = "";
-    let tempCount = 0;
+    let tempCount = 0.0;
 
     while (s < routeSegCount) {
         let rSeg = getPathSegment(normRoute, s);
         let pSeg = getPathSegment(normReq, s);
 
-        if (rSeg.length > 0 && charAt(rSeg, 0) == ":") {
+        if (rSeg.length > 0.0 && charAt(rSeg, 0) == ":") {
             let paramKey = "";
             let kp = 1;
             while (kp < rSeg.length) {
                 paramKey = paramKey + charAt(rSeg, kp);
                 kp = kp + 1;
             }
-            if (tempCount == 0) { tk0 = paramKey; tv0 = pSeg; }
-            if (tempCount == 1) { tk1 = paramKey; tv1 = pSeg; }
-            if (tempCount == 2) { tk2 = paramKey; tv2 = pSeg; }
-            tempCount = tempCount + 1;
+            if (tempCount == 0.0) { tk0 = paramKey; tv0 = pSeg; }
+            if (tempCount == 1.0) { tk1 = paramKey; tv1 = pSeg; }
+            if (tempCount == 2.0) { tk2 = paramKey; tv2 = pSeg; }
+            tempCount = tempCount + 1.0;
         } else {
-            if (rSeg.length > 0 && charAt(rSeg, 0) == "*") {
+            if (rSeg.length > 0.0 && charAt(rSeg, 0) == "*") {
                 let wKey = "";
                 let kw = 1;
                 while (kw < rSeg.length) {
@@ -167,10 +181,10 @@ function matchRoutePattern(routePath: string, reqPath: string, req: Request, isS
                     kw = kw + 1;
                 }
                 if (wKey == "") { wKey = "wildcard"; }
-                if (tempCount == 0) { tk0 = wKey; tv0 = pSeg; }
-                if (tempCount == 1) { tk1 = wKey; tv1 = pSeg; }
-                if (tempCount == 2) { tk2 = wKey; tv2 = pSeg; }
-                tempCount = tempCount + 1;
+                if (tempCount == 0.0) { tk0 = wKey; tv0 = pSeg; }
+                if (tempCount == 1.0) { tk1 = wKey; tv1 = pSeg; }
+                if (tempCount == 2.0) { tk2 = wKey; tv2 = pSeg; }
+                tempCount = tempCount + 1.0;
             } else {
                 if (rSeg != pSeg) {
                     matched = false;
@@ -178,13 +192,13 @@ function matchRoutePattern(routePath: string, reqPath: string, req: Request, isS
                 }
             }
         }
-        s = s + 1;
+        s = s + 1.0;
     }
 
     if (matched) {
-        if (tempCount >= 1) { req.pk0 = tk0; req.pv0 = tv0; }
-        if (tempCount >= 2) { req.pk1 = tk1; req.pv1 = tv1; }
-        if (tempCount >= 3) { req.pk2 = tk2; req.pv2 = tv2; }
+        if (tempCount >= 1.0) { req.pk0 = tk0; req.pv0 = tv0; }
+        if (tempCount >= 2.0) { req.pk1 = tk1; req.pv1 = tv1; }
+        if (tempCount >= 3.0) { req.pk2 = tk2; req.pv2 = tv2; }
         req.paramsCount = tempCount;
         return true;
     }
@@ -201,6 +215,15 @@ struct Response {
     isClosed: boolean,
     isMock: boolean,
     mockBody: string,
+
+    function initMock(): void {
+        this.status = 200.0;
+        this.statusText = "OK";
+        this.headersStr = "";
+        this.isClosed = false;
+        this.isMock = true;
+        this.mockBody = "";
+    },
 
     function setHeader(name: string, value: string): void {
         this.headersStr = this.headersStr + name + ": " + value + "\r\n";
@@ -219,70 +242,71 @@ struct Response {
     function setStatus(code: number): Response {
         this.status = code;
         this.statusText = "OK";
-        if (code == 201) { this.statusText = "Created"; }
-        if (code == 204) { this.statusText = "No Content"; }
-        if (code == 400) { this.statusText = "Bad Request"; }
-        if (code == 401) { this.statusText = "Unauthorized"; }
-        if (code == 403) { this.statusText = "Forbidden"; }
-        if (code == 404) { this.statusText = "Not Found"; }
-        if (code == 500) { this.statusText = "Internal Server Error"; }
+        if (code == 201.0) { this.statusText = "Created"; }
+        if (code == 204.0) { this.statusText = "No Content"; }
+        if (code == 400.0) { this.statusText = "Bad Request"; }
+        if (code == 401.0) { this.statusText = "Unauthorized"; }
+        if (code == 403.0) { this.statusText = "Forbidden"; }
+        if (code == 404.0) { this.statusText = "Not Found"; }
+        if (code == 422.0) { this.statusText = "Unprocessable Entity"; }
+        if (code == 500.0) { this.statusText = "Internal Server Error"; }
         return this;
     },
 
     function send(text: string): void {
         if (this.isClosed) { return; }
-        if (this.status == 0) { this.setStatus(200); }
-        let headerStr = "HTTP/1.1 " + this.status + " " + this.statusText + "\r\n" +
-                        "Content-Type: text/plain; charset=utf-8\r\n" +
-                        "Content-Length: " + text.length + "\r\n" +
-                        this.headersStr +
-                        "Connection: close\r\n\r\n";
+        if (this.status == 0.0) { this.setStatus(200.0); }
         if (this.isMock) {
             this.mockBody = text;
-        } else {
-            this.stream.write(headerStr + text);
-            this.stream.close();
+            this.isClosed = true;
+            return;
         }
+        let headerStr = "HTTP/1.1 " + this.statusText + "\r\n" +
+                        "Content-Type: text/plain; charset=utf-8\r\n" +
+                        this.headersStr +
+                        "Connection: close\r\n\r\n";
+        this.stream.write(headerStr + text);
+        this.stream.close();
         this.isClosed = true;
     },
 
     function html(htmlStr: string): void {
         if (this.isClosed) { return; }
-        if (this.status == 0) { this.setStatus(200); }
-        let headerStr = "HTTP/1.1 " + this.status + " " + this.statusText + "\r\n" +
-                        "Content-Type: text/html; charset=utf-8\r\n" +
-                        "Content-Length: " + htmlStr.length + "\r\n" +
-                        this.headersStr +
-                        "Connection: close\r\n\r\n";
+        if (this.status == 0.0) { this.setStatus(200.0); }
         if (this.isMock) {
             this.mockBody = htmlStr;
-        } else {
-            this.stream.write(headerStr + htmlStr);
-            this.stream.close();
+            this.isClosed = true;
+            return;
         }
+        let headerStr = "HTTP/1.1 " + this.statusText + "\r\n" +
+                        "Content-Type: text/html; charset=utf-8\r\n" +
+                        this.headersStr +
+                        "Connection: close\r\n\r\n";
+        this.stream.write(headerStr + htmlStr);
+        this.stream.close();
         this.isClosed = true;
     },
 
     function json(jsonStr: string): void {
         if (this.isClosed) { return; }
-        if (this.status == 0) { this.setStatus(200); }
-        let headerStr = "HTTP/1.1 " + this.status + " " + this.statusText + "\r\n" +
-                        "Content-Type: application/json; charset=utf-8\r\n" +
-                        "Content-Length: " + jsonStr.length + "\r\n" +
-                        this.headersStr +
-                        "Connection: close\r\n\r\n";
+        if (this.status == 0.0) { this.setStatus(200.0); }
         if (this.isMock) {
             this.mockBody = jsonStr;
-        } else {
-            this.stream.write(headerStr + jsonStr);
-            this.stream.close();
+            this.isClosed = true;
+            return;
         }
+        let headerStr = "HTTP/1.1 " + this.statusText + "\r\n" +
+                        "Content-Type: application/json; charset=utf-8\r\n" +
+                        this.headersStr +
+                        "Connection: close\r\n\r\n";
+        this.stream.write(headerStr + jsonStr);
+        this.stream.close();
         this.isClosed = true;
     },
 
     function sendChunk(chunk: string): void {
         if (this.isClosed) { return; }
-        if (this.status == 0) { this.setStatus(200); }
+        if (this.status == 0.0) { this.setStatus(200.0); }
         if (this.isMock) {
             this.mockBody = this.mockBody + chunk;
         } else {
@@ -299,17 +323,17 @@ struct Container {
     count: number,
 
     function init(): void {
-        this.count = 0;
+        this.count = 0.0;
         this.k0 = ""; this.v0 = "";
         this.k1 = ""; this.v1 = "";
         this.k2 = ""; this.v2 = "";
     },
 
     function register(key: string, val: string): void {
-        if (this.count == 0) { this.k0 = key; this.v0 = val; }
-        if (this.count == 1) { this.k1 = key; this.v1 = val; }
-        if (this.count == 2) { this.k2 = key; this.v2 = val; }
-        this.count = this.count + 1;
+        if (this.count == 0.0) { this.k0 = key; this.v0 = val; }
+        if (this.count == 1.0) { this.k1 = key; this.v1 = val; }
+        if (this.count == 2.0) { this.k2 = key; this.v2 = val; }
+        this.count = this.count + 1.0;
     },
 
     function get(key: string): string {
@@ -406,7 +430,7 @@ function parseHttpRequest(raw: string): Request {
     req.pk0 = ""; req.pv0 = "";
     req.pk1 = ""; req.pv1 = "";
     req.pk2 = ""; req.pv2 = "";
-    req.paramsCount = 0;
+    req.paramsCount = 0.0;
     return req;
 }
 
@@ -460,6 +484,12 @@ struct VitoApp {
     hasNotFoundHandler: boolean,
     onRequestHook: (req: Request, res: Response) => void,
     hasOnRequestHook: boolean,
+    beforeHandleHook: (req: Request, res: Response) => boolean,
+    hasBeforeHandleHook: boolean,
+    afterHandleHook: (req: Request, res: Response) => void,
+    hasAfterHandleHook: boolean,
+    onErrorHook: (req: Request, res: Response) => void,
+    hasOnErrorHook: boolean,
     isStrictSlash: boolean,
     arenaCapacity: number,
     arenaActive: number,
@@ -468,10 +498,13 @@ struct VitoApp {
     buf_b0: boolean, buf_b1: boolean, buf_b2: boolean, buf_b3: boolean,
 
     function init(): void {
-        this.routeCount = 0;
-        this.middlewareCount = 0;
+        this.routeCount = 0.0;
+        this.middlewareCount = 0.0;
         this.hasNotFoundHandler = false;
         this.hasOnRequestHook = false;
+        this.hasBeforeHandleHook = false;
+        this.hasAfterHandleHook = false;
+        this.hasOnErrorHook = false;
         this.isStrictSlash = false; // Default Lax trailing slash mode
         this.r0_has = false; this.r1_has = false; this.r2_has = false; this.r3_has = false;
         this.r4_has = false; this.r5_has = false; this.r6_has = false; this.r7_has = false;
@@ -484,42 +517,42 @@ struct VitoApp {
         this.r5_method = ""; this.r5_path = "";
         this.r6_method = ""; this.r6_path = "";
         this.r7_method = ""; this.r7_path = "";
-        this.arenaCapacity = 4;
-        this.arenaActive = 0;
+        this.arenaCapacity = 4.0;
+        this.arenaActive = 0.0;
         this.arena_s0 = false; this.arena_s1 = false; this.arena_s2 = false; this.arena_s3 = false;
-        this.poolRecycledCount = 0;
+        this.poolRecycledCount = 0.0;
         this.buf_b0 = false; this.buf_b1 = false; this.buf_b2 = false; this.buf_b3 = false;
     },
 
     function acquireArenaSlot(): number {
-        if (!this.arena_s0) { this.arena_s0 = true; this.arenaActive = this.arenaActive + 1; return 0; }
-        if (!this.arena_s1) { this.arena_s1 = true; this.arenaActive = this.arenaActive + 1; return 1; }
-        if (!this.arena_s2) { this.arena_s2 = true; this.arenaActive = this.arenaActive + 1; return 2; }
-        if (!this.arena_s3) { this.arena_s3 = true; this.arenaActive = this.arenaActive + 1; return 3; }
-        return -1;
+        if (!this.arena_s0) { this.arena_s0 = true; this.arenaActive = this.arenaActive + 1.0; return 0.0; }
+        if (!this.arena_s1) { this.arena_s1 = true; this.arenaActive = this.arenaActive + 1.0; return 1.0; }
+        if (!this.arena_s2) { this.arena_s2 = true; this.arenaActive = this.arenaActive + 1.0; return 2.0; }
+        if (!this.arena_s3) { this.arena_s3 = true; this.arenaActive = this.arenaActive + 1.0; return 3.0; }
+        return -1.0;
     },
 
     function releaseArenaSlot(slotId: number): void {
-        if (slotId == 0 && this.arena_s0) { this.arena_s0 = false; this.arenaActive = this.arenaActive - 1; }
-        if (slotId == 1 && this.arena_s1) { this.arena_s1 = false; this.arenaActive = this.arenaActive - 1; }
-        if (slotId == 2 && this.arena_s2) { this.arena_s2 = false; this.arenaActive = this.arenaActive - 1; }
-        if (slotId == 3 && this.arena_s3) { this.arena_s3 = false; this.arenaActive = this.arenaActive - 1; }
+        if (slotId == 0.0 && this.arena_s0) { this.arena_s0 = false; this.arenaActive = this.arenaActive - 1.0; }
+        if (slotId == 1.0 && this.arena_s1) { this.arena_s1 = false; this.arenaActive = this.arenaActive - 1.0; }
+        if (slotId == 2.0 && this.arena_s2) { this.arena_s2 = false; this.arenaActive = this.arenaActive - 1.0; }
+        if (slotId == 3.0 && this.arena_s3) { this.arena_s3 = false; this.arenaActive = this.arenaActive - 1.0; }
     },
 
     function acquireBuffer(): number {
-        if (!this.buf_b0) { this.buf_b0 = true; return 0; }
-        if (!this.buf_b1) { this.buf_b1 = true; return 1; }
-        if (!this.buf_b2) { this.buf_b2 = true; return 2; }
-        if (!this.buf_b3) { this.buf_b3 = true; return 3; }
-        return -1;
+        if (!this.buf_b0) { this.buf_b0 = true; return 0.0; }
+        if (!this.buf_b1) { this.buf_b1 = true; return 1.0; }
+        if (!this.buf_b2) { this.buf_b2 = true; return 2.0; }
+        if (!this.buf_b3) { this.buf_b3 = true; return 3.0; }
+        return -1.0;
     },
 
     function releaseBuffer(bufId: number): void {
-        if (bufId == 0) { this.buf_b0 = false; }
-        if (bufId == 1) { this.buf_b1 = false; }
-        if (bufId == 2) { this.buf_b2 = false; }
-        if (bufId == 3) { this.buf_b3 = false; }
-        this.poolRecycledCount = this.poolRecycledCount + 1;
+        if (bufId == 0.0) { this.buf_b0 = false; }
+        if (bufId == 1.0) { this.buf_b1 = false; }
+        if (bufId == 2.0) { this.buf_b2 = false; }
+        if (bufId == 3.0) { this.buf_b3 = false; }
+        this.poolRecycledCount = this.poolRecycledCount + 1.0;
     },
 
     function setStrictSlash(strict: boolean): void {
@@ -531,11 +564,26 @@ struct VitoApp {
         this.hasOnRequestHook = true;
     },
 
+    function beforeHandle(hook: (req: Request, res: Response) => boolean): void {
+        this.beforeHandleHook = hook;
+        this.hasBeforeHandleHook = true;
+    },
+
+    function afterHandle(hook: (req: Request, res: Response) => void): void {
+        this.afterHandleHook = hook;
+        this.hasAfterHandleHook = true;
+    },
+
+    function onError(hook: (req: Request, res: Response) => void): void {
+        this.onErrorHook = hook;
+        this.hasOnErrorHook = true;
+    },
+
     function use(mwHandler: (req: Request, res: Response) => boolean): void {
-        if (this.middlewareCount == 0) { this.mw0_fn = mwHandler; this.mw0_has = true; }
-        if (this.middlewareCount == 1) { this.mw1_fn = mwHandler; this.mw1_has = true; }
-        if (this.middlewareCount == 2) { this.mw2_fn = mwHandler; this.mw2_has = true; }
-        this.middlewareCount = this.middlewareCount + 1;
+        if (this.middlewareCount == 0.0) { this.mw0_fn = mwHandler; this.mw0_has = true; }
+        if (this.middlewareCount == 1.0) { this.mw1_fn = mwHandler; this.mw1_has = true; }
+        if (this.middlewareCount == 2.0) { this.mw2_fn = mwHandler; this.mw2_has = true; }
+        this.middlewareCount = this.middlewareCount + 1.0;
     },
 
     function setNotFoundHandler(handler: (req: Request, res: Response) => void): void {
@@ -567,35 +615,46 @@ struct VitoApp {
     },
 
     function addRoute(method: string, path: string, handler: (req: Request, res: Response) => void): void {
-        if (this.routeCount == 0) { this.r0_method = method; this.r0_path = path; this.r0_fn = handler; this.r0_has = true; }
-        if (this.routeCount == 1) { this.r1_method = method; this.r1_path = path; this.r1_fn = handler; this.r1_has = true; }
-        if (this.routeCount == 2) { this.r2_method = method; this.r2_path = path; this.r2_has = true; }
-        if (this.routeCount == 3) { this.r3_method = method; this.r3_path = path; this.r3_has = true; }
-        if (this.routeCount == 4) { this.r4_method = method; this.r4_path = path; this.r4_has = true; }
-        if (this.routeCount == 5) { this.r5_method = method; this.r5_path = path; this.r5_has = true; }
-        if (this.routeCount == 6) { this.r6_method = method; this.r6_path = path; this.r6_has = true; }
-        if (this.routeCount == 7) { this.r7_method = method; this.r7_path = path; this.r7_has = true; }
-        this.routeCount = this.routeCount + 1;
+        if (this.routeCount == 0.0) { this.r0_method = method; this.r0_path = path; this.r0_fn = handler; this.r0_has = true; }
+        if (this.routeCount == 1.0) { this.r1_method = method; this.r1_path = path; this.r1_fn = handler; this.r1_has = true; }
+        if (this.routeCount == 2.0) { this.r2_method = method; this.r2_path = path; this.r2_has = true; }
+        if (this.routeCount == 3.0) { this.r3_method = method; this.r3_path = path; this.r3_has = true; }
+        if (this.routeCount == 4.0) { this.r4_method = method; this.r4_path = path; this.r4_has = true; }
+        if (this.routeCount == 5.0) { this.r5_method = method; this.r5_path = path; this.r5_has = true; }
+        if (this.routeCount == 6.0) { this.r6_method = method; this.r6_path = path; this.r6_has = true; }
+        if (this.routeCount == 7.0) { this.r7_method = method; this.r7_path = path; this.r7_has = true; }
+        this.routeCount = this.routeCount + 1.0;
     },
 
     function handleRequest(req: Request, res: Response): void {
+        print("  [DEBUG handleRequest] Started handling request for path: " + req.path);
         // A. Acquire Memory Arena Slot for zero-alloc execution
         let slotId = this.acquireArenaSlot();
+        print("  [DEBUG handleRequest] Acquired arena slot: " + slotId);
 
         // B. Trigger Request Lifecycle Hook
         if (this.hasOnRequestHook) {
             let hookFn = this.onRequestHook;
             hookFn(req, res);
             if (res.isClosed) {
-                if (slotId >= 0) { this.releaseArenaSlot(slotId); }
+                if (slotId >= 0.0) { this.releaseArenaSlot(slotId); }
                 return;
             }
         }
 
         // C. Run Middleware Pipeline
-        if (this.mw0_has) { let mwfn0 = this.mw0_fn; if (!mwfn0(req, res) || res.isClosed) { if (slotId >= 0) { this.releaseArenaSlot(slotId); } return; } }
-        if (this.mw1_has) { let mwfn1 = this.mw1_fn; if (!mwfn1(req, res) || res.isClosed) { if (slotId >= 0) { this.releaseArenaSlot(slotId); } return; } }
-        if (this.mw2_has) { let mwfn2 = this.mw2_fn; if (!mwfn2(req, res) || res.isClosed) { if (slotId >= 0) { this.releaseArenaSlot(slotId); } return; } }
+        if (this.mw0_has) { let mwfn0 = this.mw0_fn; if (!mwfn0(req, res) || res.isClosed) { if (slotId >= 0.0) { this.releaseArenaSlot(slotId); } return; } }
+        if (this.mw1_has) { let mwfn1 = this.mw1_fn; if (!mwfn1(req, res) || res.isClosed) { if (slotId >= 0.0) { this.releaseArenaSlot(slotId); } return; } }
+        if (this.mw2_has) { let mwfn2 = this.mw2_fn; if (!mwfn2(req, res) || res.isClosed) { if (slotId >= 0.0) { this.releaseArenaSlot(slotId); } return; } }
+
+        // C.1 Run BeforeHandle Hook
+        if (this.hasBeforeHandleHook) {
+            let bhFn = this.beforeHandleHook;
+            if (!bhFn(req, res) || res.isClosed) {
+                if (slotId >= 0.0) { this.releaseArenaSlot(slotId); }
+                return;
+            }
+        }
 
         // D. Dispatch to Router with Dynamic Path & Trailing Slash Matching
         let matched = false;
@@ -649,35 +708,50 @@ struct VitoApp {
             }
         }
 
-        // E. Custom or Default 404 Not Found Handling
+        // D.1 Run AfterHandle Hook
+        if (matched && this.hasAfterHandleHook) {
+            let ahFn = this.afterHandleHook;
+            ahFn(req, res);
+        }
+
+        // E. Custom or Default Error & 404 Handling
         if (!matched && !res.isClosed) {
-            if (this.hasNotFoundHandler) {
-                let nfFn = this.notFoundHandler;
-                nfFn(req, res);
+            if (this.hasOnErrorHook) {
+                res.setStatus(404.0);
+                let errFn = this.onErrorHook;
+                errFn(req, res);
             } else {
-                res.setStatus(404).json("{\"error\":\"Route Not Found\",\"path\":\"" + req.path + "\",\"method\":\"" + req.method + "\"}");
+                if (this.hasNotFoundHandler) {
+                    let nfFn = this.notFoundHandler;
+                    nfFn(req, res);
+                } else {
+                    res.setStatus(404.0).json("{\"error\":\"Route Not Found\",\"path\":\"" + req.path + "\",\"method\":\"" + req.method + "\"}");
+                }
             }
         }
 
         // Release Arena Slot after request processing
-        if (slotId >= 0) {
+        if (slotId >= 0.0) {
             this.releaseArenaSlot(slotId);
         }
     },
 
     function inject(method: string, path: string): Response {
+        print("  [DEBUG inject] Creating mock request for " + method + " " + path);
         let rawReq = method + " " + path + " HTTP/1.1\r\nHost: localhost\r\n\r\n";
         let req = parseHttpRequest(rawReq);
         let res: Response;
-        res.status = 200;
+        res.status = 200.0;
         res.statusText = "OK";
         res.headersStr = "";
         res.isClosed = false;
         res.isMock = true;
         res.mockBody = "";
-        res.stream.fd = -1;
+        res.stream.fd = -1.0;
 
+        print("  [DEBUG inject] Dispatching to handleRequest...");
         this.handleRequest(req, res);
+        print("  [DEBUG inject] Completed handleRequest!");
         return res;
     },
 
@@ -698,7 +772,7 @@ struct VitoApp {
             if (rawData.length > 0) {
                 let req = parseHttpRequest(rawData);
                 let res: Response;
-                res.status = 200;
+                res.status = 200.0;
                 res.statusText = "OK";
                 res.headersStr = "";
                 res.stream = stream;

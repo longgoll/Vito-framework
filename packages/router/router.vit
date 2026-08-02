@@ -75,7 +75,7 @@ struct RadixRouter {
 
     function init(strictMode: boolean): void {
         this.isStrictSlash = strictMode;
-        this.f_count = 0;
+        this.f_count = 0.0;
         this.f0_has = false; this.f1_has = false;
         this.f2_has = false; this.f3_has = false;
         this.f0_method = ""; this.f0_path = "";
@@ -85,11 +85,11 @@ struct RadixRouter {
     },
 
     function registerStatic(method: string, path: string): void {
-        if (this.f_count == 0) { this.f0_method = method; this.f0_path = path; this.f0_has = true; }
-        if (this.f_count == 1) { this.f1_method = method; this.f1_path = path; this.f1_has = true; }
-        if (this.f_count == 2) { this.f2_method = method; this.f2_path = path; this.f2_has = true; }
-        if (this.f_count == 3) { this.f3_method = method; this.f3_path = path; this.f3_has = true; }
-        this.f_count = this.f_count + 1;
+        if (this.f_count == 0.0) { this.f0_method = method; this.f0_path = path; this.f0_has = true; }
+        if (this.f_count == 1.0) { this.f1_method = method; this.f1_path = path; this.f1_has = true; }
+        if (this.f_count == 2.0) { this.f2_method = method; this.f2_path = path; this.f2_has = true; }
+        if (this.f_count == 3.0) { this.f3_method = method; this.f3_path = path; this.f3_has = true; }
+        this.f_count = this.f_count + 1.0;
     },
 
     function matchRoute(method: string, reqPath: string): boolean {

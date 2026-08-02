@@ -1,0 +1,8 @@
+import { indexOf } from "std/string";
+
+function main(): number {
+    print("Testing indexOf...\n");
+    let idx = indexOf("alice@example.com", "@");
+    print("idx = " + idx + "\n");
+    return 0;
+}

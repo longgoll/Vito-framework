@@ -1,8 +1,8 @@
 // Vito Phase 14 Observability, Metrics & Developer Experience (DX) Demo (vito/examples/phase14_observability_dx_demo.vit)
-import { VitoApp, Request, Response, createApp } from "../src/vito.vit";
-import { createPrometheusRegistry, PrometheusRegistry, TraceContext, extractTraceParent, injectTraceParent } from "../packages/metrics/metrics.vit";
-import { createMockHttpEngine, MockHttpEngine, InjectResponse, createTestDbFixture, TestDbFixture } from "../packages/testing/testing.vit";
-import { createVitCodeGenerator, VitCodeGenerator, createVitDoctor, VitDoctor } from "../packages/cli/cli.vit";
+import { VitoApp, Request, Response, createApp } from "src/vito.vit";
+import { createPrometheusRegistry, PrometheusRegistry, TraceContext, extractTraceParent, injectTraceParent } from "packages/metrics/metrics.vit";
+import { createMockHttpEngine, MockHttpEngine, InjectResponse, createTestDbFixture, TestDbFixture } from "packages/testing/testing.vit";
+import { createVitCodeGenerator, VitCodeGenerator, createVitDoctor, VitDoctor } from "packages/cli/cli.vit";
 
 function main(): number {
     print("=================================================================");
@@ -73,5 +73,3 @@ function main(): number {
     print("=================================================================");
     return 0;
 }
-
-main();

@@ -4,12 +4,12 @@ struct VitCodeGenerator {
     generatedCount: number,
 
     function init(): VitCodeGenerator {
-        this.generatedCount = 0;
+        this.generatedCount = 0.0;
         return this;
     },
 
     function generateCode(artifactType: string, artifactName: string): string {
-        this.generatedCount = this.generatedCount + 1;
+        this.generatedCount = this.generatedCount + 1.0;
         let code = "";
 
         if (artifactType == "controller" || artifactType == "ctrl") {
@@ -59,8 +59,30 @@ struct VitCodeGenerator {
             code = code + ");\n";
         }
 
-        print("  [+] Successfully generated " + artifactType + " file: " + artifactName);
+        if (artifactType == "eden" || artifactType == "client") {
+            code = "// Vito Eden RPC Client SDK generated for " + artifactName + "Client\n";
+            code = code + "import { fetchUrl } from \"std/http\";\n\n";
+            code = code + "struct " + artifactName + "Client {\n";
+            code = code + "    baseUrl: string,\n";
+            code = code + "    function init(url: string): " + artifactName + "Client {\n";
+            code = code + "        this.baseUrl = url;\n";
+            code = code + "        return this;\n";
+            code = code + "    },\n";
+            code = code + "    function getStatus(): string {\n";
+            code = code + "        return fetchUrl(this.baseUrl + \"/api/v1/status\");\n";
+            code = code + "    },\n";
+            code = code + "    function getUser(id: string): string {\n";
+            code = code + "        return fetchUrl(this.baseUrl + \"/users/\" + id);\n";
+            code = code + "    }\n";
+            code = code + "}\n";
+        }
+
+        print("  [+] Successfully generated " + artifactType + " file: " + artifactName + "\n");
         return code;
+    },
+
+    function generateEdenClient(serviceName: string): string {
+        return this.generateCode("eden", serviceName);
     }
 }
 

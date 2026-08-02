@@ -1,0 +1,4 @@
+function main(): number {
+    print("Hello from Vit test");
+    return 0;
+}
