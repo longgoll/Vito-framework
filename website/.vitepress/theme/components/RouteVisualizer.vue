@@ -1,53 +1,107 @@
 <template>
-  <div class="route-visualizer">
-    <div class="vis-header">
-      <h4>⚡ Interactive Vito Router Testbed (Radix Trie Engine)</h4>
-      <p class="subtitle">Thử gõ một URL bất kỳ bên dưới để trực quan hóa cách Vito Router giải mã và phân tích Route Param!</p>
+  <div class="route-testbed-container">
+    <!-- Header Section -->
+    <div class="testbed-header">
+      <div class="header-title-group">
+        <div class="header-icon">⚡</div>
+        <div>
+          <h3 class="header-title">Interactive Vito Router Testbed</h3>
+          <p class="header-subtitle">Trực quan hóa thuật toán <strong>Radix Trie (O(1) Fast-Path)</strong> giải mã URL và phân tích Params real-time.</p>
+        </div>
+      </div>
+      <span class="live-status-pill">
+        <span class="pulse-dot"></span> Trie Engine Active
+      </span>
     </div>
 
-    <div class="preset-buttons">
-      <span>Thử nhanh:</span>
-      <button 
-        v-for="p in presets" 
-        :key="p.url"
-        class="preset-btn"
-        @click="testUrl = p.url"
-      >
-        {{ p.label }}
-      </button>
+    <!-- Quick Presets -->
+    <div class="preset-section">
+      <span class="preset-label">Thử nhanh URL mẫu:</span>
+      <div class="preset-chips">
+        <button 
+          v-for="p in presets" 
+          :key="p.url"
+          :class="['preset-chip', { active: testUrl === p.url }]"
+          @click="testUrl = p.url"
+        >
+          <span class="chip-dot"></span>
+          {{ p.label }}
+        </button>
+      </div>
     </div>
 
-    <div class="input-group">
-      <span class="method-tag">GET</span>
-      <input 
-        v-model="testUrl" 
-        type="text" 
-        class="url-input"
-        placeholder="e.g. /users/42 or /products/laptop/macbook-m3"
-      />
+    <!-- Input Bar -->
+    <div class="url-input-card">
+      <div class="method-badge-glow">GET</div>
+      <div class="input-wrapper">
+        <input 
+          v-model="testUrl" 
+          type="text" 
+          class="url-input-field"
+          placeholder="Gõ URL (ví dụ: /users/108?tab=profile)..."
+          spellcheck="false"
+        />
+        <button v-if="testUrl" class="clear-btn" title="Clear" @click="testUrl = ''">✕</button>
+      </div>
     </div>
 
-    <div class="result-card">
-      <div class="result-row">
-        <span class="label">Matching Strategy:</span>
-        <span :class="['badge', matchedResult.strategyClass]">
-          {{ matchedResult.strategy }}
-        </span>
+    <!-- Results Display Panel -->
+    <div class="analysis-panel">
+      <!-- Strategy & Pattern Grid -->
+      <div class="meta-grid">
+        <div class="meta-card">
+          <span class="meta-label">Matching Strategy</span>
+          <div :class="['strategy-badge', matchedResult.strategyClass]">
+            <span class="badge-icon">{{ matchedResult.icon }}</span>
+            <span>{{ matchedResult.strategy }}</span>
+          </div>
+        </div>
+
+        <div class="meta-card">
+          <span class="meta-label">Matched Route Pattern</span>
+          <div class="pattern-code">
+            <code>{{ matchedResult.pattern }}</code>
+          </div>
+        </div>
       </div>
 
-      <div class="result-row">
-        <span class="label">Matched Route Pattern:</span>
-        <span class="route-pattern">{{ matchedResult.pattern }}</span>
-      </div>
+      <!-- Params and Query Strings -->
+      <div class="data-grid">
+        <!-- Extracted Params -->
+        <div class="data-card">
+          <div class="data-card-header">
+            <span class="data-title">Extracted Params (<code>req.param</code>)</span>
+            <span class="data-count">{{ Object.keys(matchedResult.params).length }} keys</span>
+          </div>
+          <div class="data-body">
+            <template v-if="Object.keys(matchedResult.params).length > 0">
+              <div v-for="(val, key) in matchedResult.params" :key="key" class="kv-row">
+                <span class="kv-key">:{{ key }}</span>
+                <span class="kv-arrow">➔</span>
+                <span class="kv-val">"{{ val }}"</span>
+              </div>
+            </template>
+            <div v-else class="empty-state">Không có URL Params</div>
+          </div>
+        </div>
 
-      <div class="result-row align-start">
-        <span class="label">Extracted Params (`req.param`):</span>
-        <pre class="params-json"><code>{{ JSON.stringify(matchedResult.params, null, 2) }}</code></pre>
-      </div>
-
-      <div class="result-row align-start">
-        <span class="label">Query Strings (`req.query`):</span>
-        <pre class="params-json"><code>{{ JSON.stringify(matchedResult.query, null, 2) }}</code></pre>
+        <!-- Query Strings -->
+        <div class="data-card">
+          <div class="data-card-header">
+            <span class="data-title">Query Strings (<code>req.query</code>)</span>
+            <span class="data-count">{{ Object.keys(matchedResult.query).length }} keys</span>
+          </div>
+          <div class="data-body">
+            <template v-if="Object.keys(matchedResult.query).length > 0">
+              <div v-for="(val, key) in matchedResult.query" :key="key" class="kv-row">
+                <span class="kv-key">{{ key }}</span>
+                <span class="kv-arrow">=</span>
+                <span class="kv-val">"{{ val }}"</span>
+              </div>
+            </template>
+            <div v-else class="empty-state">Không có Query Parameters</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -67,12 +121,10 @@ const presets = [
 
 const matchedResult = computed(() => {
   const fullUrl = testUrl.value.trim()
-  if (!fullUrl) return { strategy: 'N/A', pattern: 'None', params: {}, query: {}, strategyClass: 'gray' }
+  if (!fullUrl) return { strategy: 'N/A', pattern: 'None', params: {}, query: {}, strategyClass: 'gray', icon: '❓' }
 
-  // Extract path and query
   const [pathPart, queryPart] = fullUrl.split('?')
   
-  // Parse query
   const query = {}
   if (queryPart) {
     const pairs = queryPart.split('&')
@@ -82,11 +134,11 @@ const matchedResult = computed(() => {
     }
   }
 
-  // Matching logic simulation
   if (pathPart === '/health' || pathPart === '/' || pathPart === '/api/v1/metrics') {
     return {
-      strategy: '⚡ Static Fast Path O(1)',
+      strategy: 'Static Fast Path O(1)',
       strategyClass: 'green',
+      icon: '⚡',
       pattern: pathPart,
       params: {},
       query
@@ -96,8 +148,9 @@ const matchedResult = computed(() => {
   if (pathPart.startsWith('/users/')) {
     const id = pathPart.replace('/users/', '')
     return {
-      strategy: '🌲 Radix Trie Dynamic Segment',
+      strategy: 'Radix Trie Dynamic Segment',
       strategyClass: 'purple',
+      icon: '🌲',
       pattern: '/users/:id',
       params: { id },
       query
@@ -107,8 +160,9 @@ const matchedResult = computed(() => {
   if (pathPart.startsWith('/products/')) {
     const parts = pathPart.replace('/products/', '').split('/')
     return {
-      strategy: '🌲 Radix Trie Multi Segment',
+      strategy: 'Radix Trie Multi Segment',
       strategyClass: 'purple',
+      icon: '🌲',
       pattern: '/products/:category/:id',
       params: { category: parts[0] || '', id: parts[1] || '' },
       query
@@ -118,8 +172,9 @@ const matchedResult = computed(() => {
   if (pathPart.startsWith('/files/')) {
     const filepath = pathPart.replace('/files/', '')
     return {
-      strategy: '🌐 Radix Trie Wildcard Path',
+      strategy: 'Radix Trie Wildcard Path',
       strategyClass: 'blue',
+      icon: '🌐',
       pattern: '/files/*filepath',
       params: { filepath },
       query
@@ -127,8 +182,9 @@ const matchedResult = computed(() => {
   }
 
   return {
-    strategy: '❌ 404 Not Found (Fallback)',
+    strategy: '404 Not Found (Fallback)',
     strategyClass: 'red',
+    icon: '❌',
     pattern: 'Custom NotFoundHandler',
     params: {},
     query
@@ -137,144 +193,320 @@ const matchedResult = computed(() => {
 </script>
 
 <style scoped>
-.route-visualizer {
+.route-testbed-container {
   background: var(--vp-c-bg-soft, #f8fafc);
   border: 1px solid var(--vp-c-divider, #e2e8f0);
   border-radius: 16px;
   padding: 1.5rem;
   margin: 2rem 0;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.06);
+  transition: all 0.25s ease;
 }
 
-.vis-header h4 {
-  margin: 0 0 0.25rem 0;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--vp-c-text-1, #0f172a);
+.testbed-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.subtitle {
-  margin: 0 0 1rem 0;
-  font-size: 0.88rem;
-  color: var(--vp-c-text-2, #475569);
-}
-
-.preset-buttons {
+.header-title-group {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  margin-bottom: 1.25rem;
-  font-size: 0.85rem;
-  color: var(--vp-c-text-2, #475569);
+  gap: 0.75rem;
 }
 
-.preset-btn {
+.header-icon {
+  font-size: 1.5rem;
+  background: var(--vp-c-brand-soft, rgba(99, 102, 241, 0.12));
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--vp-c-text-1);
+}
+
+.header-subtitle {
+  margin: 0.2rem 0 0 0;
+  font-size: 0.88rem;
+  color: var(--vp-c-text-2);
+}
+
+.live-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #10b981;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #10b981;
+}
+
+.preset-section {
+  margin-bottom: 1.25rem;
+}
+
+.preset-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--vp-c-text-2);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.preset-chips {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.preset-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   background: var(--vp-c-bg-alt, #ffffff);
   border: 1px solid var(--vp-c-divider, #cbd5e1);
-  border-radius: 6px;
-  padding: 0.3rem 0.7rem;
-  color: var(--vp-c-text-1, #0f172a);
+  border-radius: 8px;
+  padding: 0.4rem 0.8rem;
   font-size: 0.82rem;
   font-weight: 600;
+  color: var(--vp-c-text-1);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.preset-btn:hover {
-  background: var(--vp-c-brand-soft, rgba(79, 70, 229, 0.1));
-  border-color: var(--vp-c-brand-1, #4f46e5);
-  color: var(--vp-c-brand-1, #4f46e5);
+.chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--vp-c-brand-1);
+  opacity: 0.6;
 }
 
-.input-group {
+.preset-chip:hover, .preset-chip.active {
+  background: var(--vp-c-brand-soft);
+  border-color: var(--vp-c-brand-1);
+  color: var(--vp-c-brand-1);
+}
+
+.preset-chip.active .chip-dot {
+  opacity: 1;
+}
+
+/* Input Card */
+.url-input-card {
   display: flex;
   align-items: center;
-  background: #0f172a;
-  border: 1px solid #334155;
-  border-radius: 10px;
+  background: var(--vp-c-bg-alt, #ffffff);
+  border: 2px solid var(--vp-c-brand-1, #6366f1);
+  border-radius: 12px;
   overflow: hidden;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.12);
   margin-bottom: 1.25rem;
 }
 
-.method-tag {
-  background: #059669;
-  color: #ffffff;
+.method-badge-glow {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
   font-family: var(--vp-font-family-mono, monospace);
   font-weight: 800;
-  font-size: 0.85rem;
-  padding: 0.75rem 1.2rem;
+  font-size: 0.9rem;
+  padding: 0.8rem 1.25rem;
+  letter-spacing: 0.05em;
 }
 
-.url-input {
+.input-wrapper {
   flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.url-input-field {
+  width: 100%;
   background: transparent;
   border: none;
-  padding: 0.75rem 1rem;
-  color: #f8fafc;
+  color: var(--vp-c-text-1);
   font-family: var(--vp-font-family-mono, monospace);
   font-size: 0.95rem;
+  font-weight: 600;
   outline: none;
+  padding: 0.75rem 0;
 }
 
-.result-card {
-  background: var(--vp-c-bg-alt, #ffffff);
-  border: 1px solid var(--vp-c-divider, #e2e8f0);
-  border-radius: 12px;
-  padding: 1.25rem;
+.clear-btn {
+  background: none;
+  border: none;
+  color: var(--vp-c-text-3);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+}
+
+.clear-btn:hover {
+  color: var(--vp-c-text-1);
+}
+
+/* Analysis Panel */
+.analysis-panel {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.result-row {
+.meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.meta-card {
+  background: var(--vp-c-bg-alt, #ffffff);
+  border: 1px solid var(--vp-c-divider, #e2e8f0);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+}
+
+.meta-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--vp-c-text-2);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.strategy-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.strategy-badge.green { background: rgba(16, 185, 129, 0.15); color: #047857; }
+.strategy-badge.purple { background: rgba(168, 85, 247, 0.15); color: #7e22ce; }
+.strategy-badge.blue { background: rgba(59, 130, 246, 0.15); color: #1d4ed8; }
+.strategy-badge.red { background: rgba(239, 68, 68, 0.15); color: #b91c1c; }
+
+.dark .strategy-badge.green { color: #34d399; }
+.dark .strategy-badge.purple { color: #c084fc; }
+.dark .strategy-badge.blue { color: #60a5fa; }
+.dark .strategy-badge.red { color: #f87171; }
+
+.pattern-code code {
+  font-family: var(--vp-font-family-mono, monospace);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--vp-c-brand-1, #6366f1);
+  background: var(--vp-c-brand-soft);
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+}
+
+/* Data Cards */
+.data-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.data-card {
+  background: var(--vp-c-bg-alt, #ffffff);
+  border: 1px solid var(--vp-c-divider, #e2e8f0);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.data-card-header {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  font-size: 0.9rem;
-}
-
-.result-row.align-start {
-  align-items: flex-start;
-}
-
-.result-row .label {
-  min-width: 220px;
-  color: var(--vp-c-text-1, #0f172a);
-  font-weight: 700;
-}
-
-.badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 6px;
-  font-weight: 800;
-  font-size: 0.82rem;
-}
-
-.badge.green { background: #d1fae5; color: #047857; }
-.badge.purple { background: #f3e8ff; color: #6b21a8; }
-.badge.blue { background: #dbeafe; color: #1e40af; }
-.badge.red { background: #fee2e2; color: #b91c1c; }
-
-.dark .badge.green { background: rgba(16, 185, 129, 0.2); color: #34d399; }
-.dark .badge.purple { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
-.dark .badge.blue { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
-.dark .badge.red { background: rgba(239, 68, 68, 0.2); color: #f87171; }
-
-.route-pattern {
-  font-family: var(--vp-font-family-mono, monospace);
-  color: var(--vp-c-brand-1, #4f46e5);
-  font-weight: 700;
-}
-
-.params-json {
-  margin: 0;
+  justify-content: space-between;
+  background: var(--vp-c-bg-soft);
   padding: 0.6rem 1rem;
-  background: #0f172a;
-  border-radius: 8px;
+  border-bottom: 1px solid var(--vp-c-divider);
+}
+
+.data-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--vp-c-text-1);
+}
+
+.data-count {
+  font-size: 0.75rem;
+  color: var(--vp-c-text-2);
+  font-family: var(--vp-font-family-mono);
+}
+
+.data-body {
+  padding: 0.8rem 1rem;
+  min-height: 70px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.kv-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-family: var(--vp-font-family-mono, monospace);
   font-size: 0.85rem;
-  color: #38bdf8;
-  flex: 1;
+  padding: 0.3rem 0;
+  border-bottom: 1px dashed var(--vp-c-divider);
+}
+
+.kv-row:last-child {
+  border-bottom: none;
+}
+
+.kv-key {
+  color: #ec4899;
+  font-weight: 700;
+}
+
+.kv-arrow {
+  color: var(--vp-c-text-3);
+  font-size: 0.75rem;
+}
+
+.kv-val {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.dark .kv-key { color: #f472b6; }
+.dark .kv-val { color: #34d399; }
+
+.empty-state {
+  font-size: 0.82rem;
+  color: var(--vp-c-text-3);
+  font-style: italic;
+  text-align: center;
 }
 </style>

@@ -25,11 +25,13 @@ export default defineConfig({
         logo: '/logo.svg',
         nav: [
           { text: 'Trang chủ', link: '/' },
-          { text: 'Hướng dẫn', link: '/guide/getting-started' },
+          { text: 'Ngôn Ngữ Vit', link: '/guide/vit-language' },
+          { text: 'Vito Framework', link: '/guide/getting-started' },
           { text: 'Thư Viện Chuẩn (STD)', link: '/guide/std-packages' },
           {
             text: 'Tính Năng & Mô-đun',
             items: [
+              { text: 'Ngôn Ngữ Vit', link: '/guide/vit-language' },
               { text: 'Thư Viện Chuẩn & Packages', link: '/guide/std-packages' },
               { text: 'Định Tuyến (Routing)', link: '/guide/routing' },
               { text: 'Hệ Thống Middleware', link: '/guide/middleware' },
@@ -46,10 +48,16 @@ export default defineConfig({
         ],
         sidebar: [
           {
-            text: 'Bắt Đầu',
+            text: '📘 Ngôn Ngữ Vit',
+            items: [
+              { text: 'Hướng Dẫn Ngôn Ngữ Vit', link: '/guide/vit-language' },
+              { text: 'Thư Viện Chuẩn & Packages', link: '/guide/std-packages' }
+            ]
+          },
+          {
+            text: '⚡ Vito Framework',
             items: [
               { text: 'Khởi Đầu Siêu Tốc', link: '/guide/getting-started' },
-              { text: 'Thư Viện Chuẩn & Packages', link: '/guide/std-packages' },
               { text: 'Benchmark Hiệu Năng', link: '/guide/benchmarks' }
             ]
           },
@@ -94,11 +102,13 @@ export default defineConfig({
         logo: '/logo.svg',
         nav: [
           { text: 'Home', link: '/en/' },
-          { text: 'Guide', link: '/en/guide/getting-started' },
+          { text: 'Vit Language', link: '/en/guide/vit-language' },
+          { text: 'Vito Framework', link: '/en/guide/getting-started' },
           { text: 'Standard Library (STD)', link: '/en/guide/std-packages' },
           {
             text: 'Features & Modules',
             items: [
+              { text: 'Vit Language Guide', link: '/en/guide/vit-language' },
               { text: 'Standard Library & Packages', link: '/en/guide/std-packages' },
               { text: 'Routing System', link: '/en/guide/routing' },
               { text: 'Middleware System', link: '/en/guide/middleware' },
@@ -115,10 +125,16 @@ export default defineConfig({
         ],
         sidebar: [
           {
-            text: 'Getting Started',
+            text: '📘 Vit Language',
+            items: [
+              { text: 'Vit Language Guide', link: '/en/guide/vit-language' },
+              { text: 'Standard Library & Packages', link: '/en/guide/std-packages' }
+            ]
+          },
+          {
+            text: '⚡ Vito Framework',
             items: [
               { text: 'Quick Start Guide', link: '/en/guide/getting-started' },
-              { text: 'Standard Library & Packages', link: '/en/guide/std-packages' },
               { text: 'Performance Benchmarks', link: '/en/guide/benchmarks' }
             ]
           },
