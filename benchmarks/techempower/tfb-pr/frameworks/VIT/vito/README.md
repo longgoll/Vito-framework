@@ -134,7 +134,23 @@ curl http://localhost:8080/fortunes       # → HTML table, sorted, escaped
 wrk -t4 -c256 -d30s http://localhost:8080/plaintext
 ```
 
+## Future Optimization Roadmap (Targeting Top 1 DB Benchmark)
+
+While the current implementation uses synchronous `libpq` per-worker connection (delivering solid performance and 100% test verification compliance), the following architecture upgrades are planned for future rounds to push DB performance to the **Top 1 absolute spot**:
+
+1. **Non-blocking Async `libpq` Integration**:
+   - Replace `PQexecPrepared` with `PQsendQueryPrepared` + `PQconsumeInput` non-blocking calls.
+   - Register PostgreSQL socket file descriptors directly into each worker's `epoll` event loop alongside HTTP client sockets.
+   - Eliminate worker thread blocking on DB network I/O, allowing a single worker to multiplex thousands of active DB queries concurrently.
+
+2. **PostgreSQL Protocol Pipelining (libpq Pipeline Mode)**:
+   - Leverage `PQenterPipelineMode()` (available in PostgreSQL 14+) to batch `/queries` and `/updates` requests in a single socket flush, cutting network round-trip latency by N-fold.
+
+3. **Custom Native Zero-Copy Postgres Driver**:
+   - Implement a lightweight, zero-allocation C binary protocol driver directly decoding PostgreSQL Frontend/Backend Protocol v3.0, removing `libpq` overhead completely.
+
 ## Links
 
 - VIT Language: [github.com/HoangLong-Dev/vit](https://github.com/HoangLong-Dev/vit)
 - Vito Framework: [github.com/HoangLong-Dev/Vito-framework](https://github.com/HoangLong-Dev/Vito-framework)
+
