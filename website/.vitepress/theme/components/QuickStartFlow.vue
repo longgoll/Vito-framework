@@ -23,7 +23,16 @@
           </div>
 
           <!-- Code Box -->
-          <div class="code-box">
+          <div v-if="Array.isArray(step.code)" class="code-block-group">
+            <div v-for="(block, blockIndex) in step.code" :key="blockIndex" class="code-box code-block-item">
+              <div class="code-header">
+                <span class="file-name">{{ block.label }}</span>
+                <span class="tag-badge">{{ step.tag }}</span>
+              </div>
+              <pre class="code-preview"><code>{{ block.content }}</code></pre>
+            </div>
+          </div>
+          <div v-else class="code-box">
             <div class="code-header">
               <span class="file-name">{{ step.fileName }}</span>
               <span class="tag-badge">{{ step.tag }}</span>
@@ -53,14 +62,19 @@
 const steps = [
   {
     title: 'Cài Đặt Toolchain Vito (1-Line Install)',
-    description: 'Chạy câu lệnh dưới đây để tự động tải và cấu hình bộ dịch Vit Compiler Engine & Vito CLI.',
-    fileName: 'Terminal (PowerShell / Bash)',
+    description: 'Chọn câu lệnh phù hợp với hệ điều hành của bạn để tự động tải và cấu hình bộ dịch Vit Compiler Engine & Vito CLI.',
+    fileName: 'Terminal',
     tag: 'Install Command',
-    code: `# Windows PowerShell (PowerShell 5.1+ / Core):
-iwr -useb https://raw.githubusercontent.com/longgoll/vit/main/install.ps1 | iex
-
-# Linux / macOS:
-curl -fsSL https://raw.githubusercontent.com/longgoll/vit/main/install.sh | bash`,
+    code: [
+      {
+        label: 'Windows (PowerShell)',
+        content: `iwr -useb https://raw.githubusercontent.com/longgoll/vit/main/install.ps1 | iex`
+      },
+      {
+        label: 'Linux / macOS (Bash)',
+        content: `curl -fsSL https://raw.githubusercontent.com/longgoll/vit/main/install.sh | bash`
+      }
+    ],
     terminalOutput: `[✓] Downloading Vit Compiler Engine v2.0.0...
 [✓] Installing Vito CLI binary to PATH...
 [✓] Clang/LLVM toolchain runtime verified.
@@ -210,12 +224,18 @@ function main(): number {
 }
 
 /* Code Box */
+.code-block-group {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
 .code-box {
   background: #0f172a;
   border-radius: 10px;
   border: 1px solid #1e293b;
   overflow: hidden;
-  margin-top: 1rem;
+  margin-top: 0;
 }
 
 .code-header {

@@ -31,7 +31,7 @@
 
 ---
 
-## 1. Connecting to a Database (`packages/db/driver.vit`)
+## 1. Connecting to a Database (`packages/db/driver.vit`) {#database-connection}
 
 `DbDriver` is the unified abstraction layer. Both the ORM and Migration engine target this interface:
 
@@ -119,7 +119,7 @@ db.close();
 
 ---
 
-## 2. Unified DbDriver Interface
+## 2. Unified DbDriver Interface {#unified-dbdriver-interface}
 
 Use `connectDb()` to write driver-agnostic code — ORM and Migration share this single interface:
 
@@ -153,7 +153,7 @@ db.close();
 
 ---
 
-## 3. Connection Pool (`packages/db/db_pool.vit`)
+## 3. Connection Pool (`packages/db/db_pool.vit`) {#connection-pool}
 
 The Connection Pool manages the full connection lifecycle, auto-reconnect, and idle connection eviction:
 
@@ -184,7 +184,7 @@ pool.reclaimIdleConnections(Date.now());
 
 ---
 
-## 4. Transactions & Savepoints (`packages/orm/transaction.vit`)
+## 4. Transactions & Savepoints (`packages/orm/transaction.vit`) {#transactions-savepoints}
 
 100% ACID transactions with nested savepoint support for complex financial operations:
 
@@ -226,7 +226,7 @@ tx.commit();
 
 ---
 
-## 5. Schema Migration CLI 🛠️
+## 5. Schema Migration CLI 🛠️ {#schema-migration-cli}
 
 The Migration CLI is comparable to Prisma Migrate / Goose / Flyway — with **dry-run**, **per-migration auto-rollback**, **batch tracking**, and **automatic schema diffing**.
 
@@ -343,7 +343,7 @@ Each migration runs inside its **own transaction**. On error, the failed migrati
 
 ---
 
-## 6. Database Seeder
+## 6. Database Seeder {#database-seeder}
 
 Seed development and staging environments with reproducible fixture data:
 
@@ -364,7 +364,7 @@ print("Seeded " + seeded + " table(s) successfully!");
 
 ---
 
-## 7. Schema Introspector & Diff
+## 7. Schema Introspector & Diff {#schema-introspector-diff}
 
 Compare the live database schema against your model definitions to automatically generate migration SQL:
 

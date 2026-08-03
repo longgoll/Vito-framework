@@ -31,7 +31,7 @@
 
 ---
 
-## 1. Kết Nối Database (`packages/db/driver.vit`)
+## 1. Kết Nối Database (`packages/db/driver.vit`) {#database-connection}
 
 `DbDriver` là abstraction layer thống nhất. ORM và Migration đều dùng interface này:
 
@@ -119,7 +119,7 @@ db.close();
 
 ---
 
-## 2. Unified DbDriver Interface
+## 2. Unified DbDriver Interface {#unified-dbdriver-interface}
 
 Dùng `connectDb()` để viết code driver-agnostic — ORM và Migration dùng cùng interface:
 
@@ -153,7 +153,7 @@ db.close();
 
 ---
 
-## 3. Connection Pool (`packages/db/db_pool.vit`)
+## 3. Connection Pool (`packages/db/db_pool.vit`) {#connection-pool}
 
 Connection Pool quản lý vòng đời kết nối, auto-reconnect và idle eviction:
 
@@ -184,7 +184,7 @@ pool.reclaimIdleConnections(Date.now());
 
 ---
 
-## 4. Transaction & Savepoints (`packages/orm/transaction.vit`)
+## 4. Transaction & Savepoints (`packages/orm/transaction.vit`) {#transactions-savepoints}
 
 ACID transactions 100% với hỗ trợ nested savepoints cho các thao tác phức tạp:
 
@@ -226,7 +226,7 @@ tx.commit();
 
 ---
 
-## 5. Schema Migration CLI 🛠️
+## 5. Schema Migration CLI 🛠️ {#schema-migration-cli}
 
 Migration CLI tương tự Prisma/Goose/Flyway — hỗ trợ **dry-run**, **auto-rollback**, **batch tracking**, và **schema diff tự động**.
 
@@ -341,7 +341,7 @@ Mỗi migration chạy trong **transaction riêng biệt**. Nếu lỗi xảy ra
 
 ---
 
-## 6. Database Seeder
+## 6. Database Seeder {#database-seeder}
 
 Đổ dữ liệu mẫu vào database cho môi trường Dev/Staging:
 
@@ -362,7 +362,7 @@ print("Seeded " + seeded + " bảng thành công!");
 
 ---
 
-## 7. Schema Introspector & Diff
+## 7. Schema Introspector & Diff {#schema-introspector-diff}
 
 So sánh schema đang chạy vs model để tự động sinh migration SQL:
 

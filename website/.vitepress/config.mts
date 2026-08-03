@@ -48,21 +48,21 @@ export default defineConfig({
         ],
         sidebar: [
           {
-            text: '📘 Ngôn Ngữ Vit',
+            text: '🌐 Language',
             items: [
               { text: 'Hướng Dẫn Ngôn Ngữ Vit', link: '/guide/vit-language' },
               { text: 'Thư Viện Chuẩn & Packages', link: '/guide/std-packages' }
             ]
           },
           {
-            text: '⚡ Vito Framework',
+            text: '⚡ Platform',
             items: [
               { text: 'Khởi Đầu Siêu Tốc', link: '/guide/getting-started' },
               { text: 'Benchmark Hiệu Năng', link: '/guide/benchmarks' }
             ]
           },
           {
-            text: 'Cốt Lõi Framework',
+            text: '⚙️ Core',
             items: [
               { text: 'Định Tuyến & Route Params', link: '/guide/routing' },
               { text: 'Hệ Thống Middleware', link: '/guide/middleware' },
@@ -70,42 +70,40 @@ export default defineConfig({
             ]
           },
           {
-            text: 'Dữ Liệu & Bảo Mật',
+            text: '🔐 Data & Security',
             items: [
               { text: 'Vito ORM & CSDL', link: '/guide/database-orm' },
               { text: 'Xác Thực & Bảo Mật (Auth)', link: '/guide/auth-security' }
             ]
           },
           {
-            text: '🗄️ Database Driver Ecosystem',
+            text: '🗄️ Database',
             items: [
-              { text: 'PostgreSQL Native Driver', link: '/guide/database-orm#1-kết-nối-database' },
-              { text: 'MySQL / MariaDB Driver', link: '/guide/database-orm#1-kết-nối-database' },
-              { text: 'SQLite Native Driver (WAL)', link: '/guide/database-orm#1-kết-nối-database' },
-              { text: 'Unified DbDriver Interface', link: '/guide/database-orm#2-unified-dbdriver-interface' },
-              { text: 'Connection Pool', link: '/guide/database-orm#3-connection-pool' },
-              { text: 'Transactions & Savepoints', link: '/guide/database-orm#4-transaction-savepoints' }
+              { text: 'Drivers', link: '/guide/database-orm#database-connection' },
+              { text: 'ORM', link: '/guide/database-orm#unified-dbdriver-interface' },
+              { text: 'Pool', link: '/guide/database-orm#connection-pool' },
+              { text: 'Transactions', link: '/guide/database-orm#transactions-savepoints' }
             ]
           },
           {
-            text: '🛠️ Migration CLI',
+            text: '🛠️ Migration',
             items: [
-              { text: 'Schema Migration CLI', link: '/guide/database-orm#5-schema-migration-cli' },
-              { text: 'Dry-Run & Auto-Rollback', link: '/guide/database-orm#5-schema-migration-cli' },
-              { text: 'Database Seeder', link: '/guide/database-orm#6-database-seeder' },
-              { text: 'Schema Introspector & Diff', link: '/guide/database-orm#7-schema-introspector-diff' },
-              { text: 'Bộ Công Cụ CLI', link: '/guide/cli' }
+              { text: 'Migrations', link: '/guide/database-orm#schema-migration-cli' },
+              { text: 'Rollback', link: '/guide/database-orm#schema-migration-cli' },
+              { text: 'Seeder', link: '/guide/database-orm#database-seeder' },
+              { text: 'Schema Diff', link: '/guide/database-orm#schema-introspector-diff' },
+              { text: 'CLI', link: '/guide/cli' }
             ]
           },
           {
-            text: 'Tính Năng Nâng Cao',
+            text: '🚀 Advanced',
             items: [
               { text: 'Realtime WebSockets & Jobs', link: '/guide/realtime-jobs' },
               { text: 'Metrics & Observability', link: '/guide/observability-dx' }
             ]
           },
           {
-            text: 'API Reference',
+            text: '📚 Reference',
             items: [
               { text: 'Tổng Quan API', link: '/api/overview' }
             ]
@@ -146,21 +144,21 @@ export default defineConfig({
         ],
         sidebar: [
           {
-            text: '📘 Vit Language',
+            text: '🌐 Language',
             items: [
               { text: 'Vit Language Guide', link: '/en/guide/vit-language' },
               { text: 'Standard Library & Packages', link: '/en/guide/std-packages' }
             ]
           },
           {
-            text: '⚡ Vito Framework',
+            text: '⚡ Platform',
             items: [
               { text: 'Quick Start Guide', link: '/en/guide/getting-started' },
               { text: 'Performance Benchmarks', link: '/en/guide/benchmarks' }
             ]
           },
           {
-            text: 'Core Framework',
+            text: '⚙️ Core',
             items: [
               { text: 'Routing & Parameters', link: '/en/guide/routing' },
               { text: 'Middleware System', link: '/en/guide/middleware' },
@@ -168,42 +166,40 @@ export default defineConfig({
             ]
           },
           {
-            text: 'Data & Security',
+            text: '🔐 Data & Security',
             items: [
               { text: 'Vito ORM & Database', link: '/en/guide/database-orm' },
               { text: 'Auth & Security Suite', link: '/en/guide/auth-security' }
             ]
           },
           {
-            text: '🗄️ Database Driver Ecosystem',
+            text: '🗄️ Database',
             items: [
-              { text: 'PostgreSQL Native Driver', link: '/en/guide/database-orm#1-connecting-to-a-database' },
-              { text: 'MySQL / MariaDB Driver', link: '/en/guide/database-orm#1-connecting-to-a-database' },
-              { text: 'SQLite Native Driver (WAL)', link: '/en/guide/database-orm#1-connecting-to-a-database' },
-              { text: 'Unified DbDriver Interface', link: '/en/guide/database-orm#2-unified-dbdriver-interface' },
-              { text: 'Connection Pool', link: '/en/guide/database-orm#3-connection-pool' },
-              { text: 'Transactions & Savepoints', link: '/en/guide/database-orm#4-transactions-savepoints' }
+              { text: 'Drivers', link: '/en/guide/database-orm#database-connection' },
+              { text: 'ORM', link: '/en/guide/database-orm#unified-dbdriver-interface' },
+              { text: 'Pool', link: '/en/guide/database-orm#connection-pool' },
+              { text: 'Transactions', link: '/en/guide/database-orm#transactions-savepoints' }
             ]
           },
           {
-            text: '🛠️ Migration CLI',
+            text: '🛠️ Migration',
             items: [
-              { text: 'Schema Migration CLI', link: '/en/guide/database-orm#5-schema-migration-cli' },
-              { text: 'Dry-Run & Auto-Rollback', link: '/en/guide/database-orm#5-schema-migration-cli' },
-              { text: 'Database Seeder', link: '/en/guide/database-orm#6-database-seeder' },
-              { text: 'Schema Introspector & Diff', link: '/en/guide/database-orm#7-schema-introspector-diff' },
-              { text: 'CLI Tooling', link: '/en/guide/cli' }
+              { text: 'Migrations', link: '/en/guide/database-orm#schema-migration-cli' },
+              { text: 'Rollback', link: '/en/guide/database-orm#schema-migration-cli' },
+              { text: 'Seeder', link: '/en/guide/database-orm#database-seeder' },
+              { text: 'Schema Diff', link: '/en/guide/database-orm#schema-introspector-diff' },
+              { text: 'CLI', link: '/en/guide/cli' }
             ]
           },
           {
-            text: 'Advanced Features',
+            text: '🚀 Advanced',
             items: [
               { text: 'WebSockets & Job Queue', link: '/en/guide/realtime-jobs' },
               { text: 'Metrics & Observability', link: '/en/guide/observability-dx' }
             ]
           },
           {
-            text: 'API Reference',
+            text: '📚 Reference',
             items: [
               { text: 'API Overview', link: '/en/api/overview' }
             ]
