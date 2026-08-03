@@ -238,6 +238,10 @@ app.get("/articles/:slug([a-z0-9-]+)", (req: Request, res: Response) => {
 // GET /users/abc  → 404/405 (does not match regex \\d+)
 ```
 
+> ✅ This feature is implemented in Vito Router: `:param(pattern)` is evaluated during route matching. Inline regex patterns are automatically anchored with `^...$` so the entire segment must match.
+>
+> Use `req.paramInt("id")`, `req.paramFloat("price")`, `req.paramBool("active")` for type-safe route params.
+
 :::
 
 ---

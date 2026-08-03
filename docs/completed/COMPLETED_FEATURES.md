@@ -62,13 +62,16 @@ vito/
 
 ### 2. 🎯 Hệ Thống Định Tuyến Động (Dynamic Route Pattern Matcher)
 - **Trie/Segment Matcher**: Hỗ trợ khớp đường dẫn động dạng `:paramName` (ví dụ `/users/:id` hoặc `/products/:category/:id`).
+- **Regex constraints cho route params**: Hỗ trợ inline pattern như `:id(\d+)` và `:slug([a-z0-9-]+)` để chỉ khớp nếu segment thỏa regex.
 - **Tham số nhiều cấp**: Khớp đa phân đoạn linh hoạt và tự động gom các tham số động vào mảng lưu trữ của `Request`.
+- **Type-safe route param helpers**: `req.paramInt(key)`, `req.paramFloat(key)`, `req.paramBool(key)` giúp lấy route params trực tiếp dưới dạng số hoặc boolean.
 - **`req.param(key)`**: API lấy nhanh giá trị tham số động theo tên khóa.
 
 ---
 
 ### 3. 🔍 Bộ Phân Tích Query Parameters & Headers Helper
 - **`req.query(key)`**: Truy xuất nhanh tham số URL search (ví dụ `/search?q=vit&page=2` -> `req.query("q") == "vit"`).
+- **`req.queryInt(key)`**: Truy xuất query param số nguyên dưới dạng `number`.
 - **`req.header(key)`**: Đọc chính xác các HTTP request header từ client (ví dụ `Authorization: Bearer <token>`, `User-Agent`, `Accept`).
 
 ---

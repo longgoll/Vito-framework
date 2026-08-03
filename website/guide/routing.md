@@ -238,6 +238,10 @@ app.get("/articles/:slug([a-z0-9-]+)", (req: Request, res: Response) => {
 // GET /users/abc  → 404/405 (không khớp regex \\d+)
 ```
 
+> ✅ Tính năng này đã được triển khai trong Vito Router: `:param(pattern)` được xử lý khi khớp route. Mẫu regex inline được tự động khoá bằng `^...$` để phân tích toàn bộ segment.
+>
+> Dùng `req.paramInt("id")`, `req.paramFloat("price")`, `req.paramBool("active")` để lấy route params theo kiểu an toàn.
+
 :::
 
 ---

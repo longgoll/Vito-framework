@@ -16,6 +16,13 @@ function handleItems(req: Request, res: Response): void {
     res.setStatus(200.0).json("{\"slug\":\"" + slugVal + "\",\"price\":" + priceVal + "}");
 }
 
+function handleFlags(req: Request, res: Response): void {
+    print("[Inside handleFlags]");
+    let activeVal: boolean = req.paramBool("active");
+    print("activeVal: " + (activeVal ? "true" : "false"));
+    res.setStatus(200.0).json("{\"active\":" + (activeVal ? "true" : "false") + "}");
+}
+
 function main(): number {
     print("Step 1: Create app");
     let app: VitoApp;
@@ -24,6 +31,7 @@ function main(): number {
     print("Step 2: Register routes");
     app.get("/users/:id(\\d+)", handleUsers);
     app.get("/items/:slug([a-z0-9-]+)/:price", handleItems);
+    app.get("/features/:active(true|false)", handleFlags);
 
     print("Step 3: Test 1 - Valid numeric ID");
     let req1: Request;
@@ -70,7 +78,29 @@ function main(): number {
     app.handleRequest(req4, res4);
     print("Test 4 status: " + res4.status + " body: " + res4.mockBody);
 
-    let pass = (res1.status == 200.0) && (res2.status == 404.0) && (res3.status == 200.0) && (res4.status == 404.0);
+    print("Step 7: Test 5 - Valid boolean flag");
+    let req5: Request;
+    req5.init();
+    req5.raw = "GET /features/true HTTP/1.1\r\nHost: localhost\r\n\r\n";
+    req5.method = "GET";
+    req5.path = "/features/true";
+    let res5: Response;
+    res5.initMock();
+    app.handleRequest(req5, res5);
+    print("Test 5 status: " + res5.status + " body: " + res5.mockBody);
+
+    print("Step 8: Test 6 - Invalid boolean flag (should be 404)");
+    let req6: Request;
+    req6.init();
+    req6.raw = "GET /features/yes HTTP/1.1\r\nHost: localhost\r\n\r\n";
+    req6.method = "GET";
+    req6.path = "/features/yes";
+    let res6: Response;
+    res6.initMock();
+    app.handleRequest(req6, res6);
+    print("Test 6 status: " + res6.status + " body: " + res6.mockBody);
+
+    let pass = (res1.status == 200.0) && (res2.status == 404.0) && (res3.status == 200.0) && (res4.status == 404.0) && (res5.status == 200.0) && (res6.status == 404.0);
 
     if (pass) {
         print("=========================================");
