@@ -1,0 +1,54 @@
+// Vito Web Framework Dependency Injection Container (vito/src/core/container.vit)
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Dependency Injection Container (IoC — 8 key-value slots)
+// ═══════════════════════════════════════════════════════════════════════════
+struct Container {
+    k0: string, v0: string,
+    k1: string, v1: string,
+    k2: string, v2: string,
+    k3: string, v3: string,
+    k4: string, v4: string,
+    k5: string, v5: string,
+    k6: string, v6: string,
+    k7: string, v7: string,
+    count: number,
+
+    function init(): void {
+        this.count = 0.0;
+        this.k0 = ""; this.v0 = ""; this.k1 = ""; this.v1 = "";
+        this.k2 = ""; this.v2 = ""; this.k3 = ""; this.v3 = "";
+        this.k4 = ""; this.v4 = ""; this.k5 = ""; this.v5 = "";
+        this.k6 = ""; this.v6 = ""; this.k7 = ""; this.v7 = "";
+    },
+
+    function register(key: string, val: string): void {
+        if (this.count == 0.0) { this.k0 = key; this.v0 = val; }
+        if (this.count == 1.0) { this.k1 = key; this.v1 = val; }
+        if (this.count == 2.0) { this.k2 = key; this.v2 = val; }
+        if (this.count == 3.0) { this.k3 = key; this.v3 = val; }
+        if (this.count == 4.0) { this.k4 = key; this.v4 = val; }
+        if (this.count == 5.0) { this.k5 = key; this.v5 = val; }
+        if (this.count == 6.0) { this.k6 = key; this.v6 = val; }
+        if (this.count == 7.0) { this.k7 = key; this.v7 = val; }
+        this.count = this.count + 1.0;
+    },
+
+    function get(key: string): string {
+        if (this.k0 == key) { return this.v0; }
+        if (this.k1 == key) { return this.v1; }
+        if (this.k2 == key) { return this.v2; }
+        if (this.k3 == key) { return this.v3; }
+        if (this.k4 == key) { return this.v4; }
+        if (this.k5 == key) { return this.v5; }
+        if (this.k6 == key) { return this.v6; }
+        if (this.k7 == key) { return this.v7; }
+        return "";
+    }
+}
+
+function createContainer(): Container {
+    let c: Container;
+    c.init();
+    return c;
+}

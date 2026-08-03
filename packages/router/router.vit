@@ -7,16 +7,17 @@ import { charAt } from "std/string";
 // ═══════════════════════════════════════════════════════════════════════════
 
 function normalizePath(rawPath: string, isStrict: boolean): string {
-    if (rawPath.length <= 1) { return rawPath; }
+    if (rawPath == "") { return ""; }
+    if (rawPath.length <= 1.0) { return rawPath; }
     if (isStrict) { return rawPath; } // Strict mode: preserve exactly
     // Lax mode: strip trailing slash except for root "/"
     let len = rawPath.length;
-    if (charAt(rawPath, len - 1) == "/") {
+    if (charAt(rawPath, len - 1.0) == "/") {
         let normalized = "";
         let i = 0;
-        while (i < len - 1) {
+        while (i < len - 1.0) {
             normalized = normalized + charAt(rawPath, i);
-            i = i + 1;
+            i = i + 1.0;
         }
         return normalized;
     }
@@ -220,20 +221,20 @@ struct NamedRouteTable {
         while (i < len) {
             let ch = charAt(path, i);
             if (ch == ":" && !replaced) {
-                i = i + 1;
+                i = i + 1.0;
                 let segName = "";
                 while (i < len) {
                     let c = charAt(path, i);
                     if (c == "/" || c == "?") { break; }
                     segName = segName + c;
-                    i = i + 1;
+                    i = i + 1.0;
                 }
-                if (i < len && charAt(path, i) == "?") { i = i + 1; }
+                if (i < len && charAt(path, i) == "?") { i = i + 1.0; }
                 if (segName == paramKey) { result = result + paramVal; replaced = true; }
                 else { result = result + ":" + segName; }
             } else {
                 result = result + ch;
-                i = i + 1;
+                i = i + 1.0;
             }
         }
         return result;

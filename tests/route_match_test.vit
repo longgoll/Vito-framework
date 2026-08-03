@@ -1,0 +1,54 @@
+import { matchRoutePattern, Request } from "src/vito.vit";
+
+function main(): number {
+    let req: Request;
+    req.init();
+
+    // Test 1: Matching /users/:id(\d+) with /users/101
+    let m1 = matchRoutePattern("/users/:id(\\d+)", "/users/101", req, false);
+    if (m1) {
+        print("Match 1: true | param pk0: " + req.pk0 + " pv0: " + req.pv0);
+    } else {
+        print("Match 1: false");
+    }
+
+    let req2: Request;
+    req2.init();
+    // Test 2: Matching /users/:id(\d+) with /users/abc (should be false)
+    let m2 = matchRoutePattern("/users/:id(\\d+)", "/users/abc", req2, false);
+    if (m2) {
+        print("Match 2: true");
+    } else {
+        print("Match 2: false (correctly rejected non-digit)");
+    }
+
+    let req3: Request;
+    req3.init();
+    // Test 3: Matching /items/:slug([a-z0-9-]+)/:price with /items/vit-v12/19.99
+    let m3 = matchRoutePattern("/items/:slug([a-z0-9-]+)/:price", "/items/vit-v12/19.99", req3, false);
+    if (m3) {
+        print("Match 3: true | pk0: " + req3.pk0 + " pv0: " + req3.pv0 + " | pk1: " + req3.pk1 + " pv1: " + req3.pv1);
+    } else {
+        print("Match 3: false");
+    }
+
+    let req4: Request;
+    req4.init();
+    // Test 4: Matching /items/:slug([a-z0-9-]+)/:price with /items/UPPERCASE/19.99 (should be false)
+    let m4 = matchRoutePattern("/items/:slug([a-z0-9-]+)/:price", "/items/UPPERCASE/19.99", req4, false);
+    if (m4) {
+        print("Match 4: true");
+    } else {
+        print("Match 4: false (correctly rejected uppercase slug)");
+    }
+
+    if (m1 && !m2 && m3 && !m4 && req.pv0 == "101" && req3.pv0 == "vit-v12" && req3.pv1 == "19.99") {
+        print("=========================================");
+        print("[PASS] matchRoutePattern regex constraints test passed cleanly!");
+        print("=========================================");
+        return 0;
+    }
+
+    print("[FAIL] matchRoutePattern test failed.");
+    return 1;
+}

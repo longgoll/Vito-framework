@@ -1,0 +1,84 @@
+import { VitoApp, Request, Response } from "src/vito.vit";
+
+function handleUsers(req: Request, res: Response): void {
+    print("[Inside handleUsers]");
+    let idVal: number = req.paramInt("id");
+    let pageVal: number = req.queryInt("page");
+    print("idVal: " + idVal + " pageVal: " + pageVal);
+    res.setStatus(200.0).json("{\"id\":" + idVal + ",\"page\":" + pageVal + "}");
+}
+
+function handleItems(req: Request, res: Response): void {
+    print("[Inside handleItems]");
+    let slugVal: string = req.param("slug");
+    let priceVal: number = req.paramFloat("price");
+    print("slugVal: " + slugVal + " priceVal: " + priceVal);
+    res.setStatus(200.0).json("{\"slug\":\"" + slugVal + "\",\"price\":" + priceVal + "}");
+}
+
+function main(): number {
+    print("Step 1: Create app");
+    let app: VitoApp;
+    app.init();
+
+    print("Step 2: Register routes");
+    app.get("/users/:id(\\d+)", handleUsers);
+    app.get("/items/:slug([a-z0-9-]+)/:price", handleItems);
+
+    print("Step 3: Test 1 - Valid numeric ID");
+    let req1: Request;
+    req1.init();
+    req1.raw = "GET /users/101?page=5 HTTP/1.1\r\nHost: localhost\r\n\r\n";
+    req1.method = "GET";
+    req1.path = "/users/101";
+    req1.queryString = "page=5";
+    let res1: Response;
+    res1.initMock();
+    app.handleRequest(req1, res1);
+    print("Test 1 status: " + res1.status + " body: " + res1.mockBody);
+
+    print("Step 4: Test 2 - Non-numeric ID (should be 404)");
+    let req2: Request;
+    req2.init();
+    req2.raw = "GET /users/abc HTTP/1.1\r\nHost: localhost\r\n\r\n";
+    req2.method = "GET";
+    req2.path = "/users/abc";
+    let res2: Response;
+    res2.initMock();
+    app.handleRequest(req2, res2);
+    print("Test 2 status: " + res2.status + " body: " + res2.mockBody);
+
+    print("Step 5: Test 3 - Valid slug + float price");
+    let req3: Request;
+    req3.init();
+    req3.raw = "GET /items/vit-v12/19.99 HTTP/1.1\r\nHost: localhost\r\n\r\n";
+    req3.method = "GET";
+    req3.path = "/items/vit-v12/19.99";
+    let res3: Response;
+    res3.initMock();
+    app.handleRequest(req3, res3);
+    print("Test 3 status: " + res3.status + " body: " + res3.mockBody);
+
+    print("Step 6: Test 4 - Invalid uppercase slug (should be 404)");
+    let req4: Request;
+    req4.init();
+    req4.raw = "GET /items/UPPERCASE_SLUG/19.99 HTTP/1.1\r\nHost: localhost\r\n\r\n";
+    req4.method = "GET";
+    req4.path = "/items/UPPERCASE_SLUG/19.99";
+    let res4: Response;
+    res4.initMock();
+    app.handleRequest(req4, res4);
+    print("Test 4 status: " + res4.status + " body: " + res4.mockBody);
+
+    let pass = (res1.status == 200.0) && (res2.status == 404.0) && (res3.status == 200.0) && (res4.status == 404.0);
+
+    if (pass) {
+        print("=========================================");
+        print("[PASS] All Vito Regex Constraint & Type-Safe Param tests passed!");
+        print("=========================================");
+        return 0;
+    } else {
+        print("[FAIL] Vito test cases failed!");
+        return 1;
+    }
+}

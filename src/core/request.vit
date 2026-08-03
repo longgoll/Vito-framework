@@ -1,0 +1,241 @@
+// Vito Web Framework Engine Request Context & Parser (vito/src/core/request.vit)
+import { charAt } from "std/string";
+import { parseQueryParam, parseHeaderParam } from "src/core/utils.vit";
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Request Context Struct (Standard 11-Field ABI Layout)
+// ═══════════════════════════════════════════════════════════════════════════
+struct Request {
+    method: string,
+    path: string,
+    queryString: string,
+    headersStr: string,
+    body: string,
+    raw: string,
+    pk0: string, pv0: string,
+    pk1: string, pv1: string,
+    pk2: string, pv2: string,
+    paramsCount: number,
+
+    function init(): void {
+        this.method = "GET";
+        this.path = "/";
+        this.queryString = "";
+        this.headersStr = "";
+        this.body = "";
+        this.raw = "";
+        this.pk0 = ""; this.pv0 = "";
+        this.pk1 = ""; this.pv1 = "";
+        this.pk2 = ""; this.pv2 = "";
+        this.paramsCount = 0.0;
+    },
+
+    function param(key: string): string {
+        if (this.pk0 == key) { return this.pv0; }
+        if (this.pk1 == key) { return this.pv1; }
+        if (this.pk2 == key) { return this.pv2; }
+        return "";
+    },
+
+    function query(key: string): string {
+        return parseQueryParam(this.queryString, key);
+    },
+
+    function header(key: string): string {
+        return parseHeaderParam(this.raw, key);
+    },
+
+    // ── Type-safe parameter helpers ─────────────────────────────────────────
+    function parseIntVal(str: string): number {
+        if (str.length == 0.0) { return 0.0; }
+        let len = str.length;
+        let i = 0.0;
+        let sign = 1.0;
+        if (charAt(str, 0) == "-") { sign = -1.0; i = 1.0; }
+        let val = 0.0;
+        let running = true;
+        while (i < len && running) {
+            let ch = charAt(str, i);
+            let digit = -1.0;
+            if (ch == "0") { digit = 0.0; }
+            if (ch == "1") { digit = 1.0; }
+            if (ch == "2") { digit = 2.0; }
+            if (ch == "3") { digit = 3.0; }
+            if (ch == "4") { digit = 4.0; }
+            if (ch == "5") { digit = 5.0; }
+            if (ch == "6") { digit = 6.0; }
+            if (ch == "7") { digit = 7.0; }
+            if (ch == "8") { digit = 8.0; }
+            if (ch == "9") { digit = 9.0; }
+            if (digit >= 0.0) {
+                val = val * 10.0 + digit;
+                i = i + 1.0;
+            } else {
+                running = false;
+            }
+        }
+        return val * sign;
+    },
+
+    function parseFloatVal(str: string): number {
+        if (str.length == 0.0) { return 0.0; }
+        let len = str.length;
+        let i = 0.0;
+        let sign = 1.0;
+        if (charAt(str, 0) == "-") { sign = -1.0; i = 1.0; }
+        let intPart = 0.0;
+        let running = true;
+        while (i < len && running) {
+            let ch = charAt(str, i);
+            let digit = -1.0;
+            if (ch == "0") { digit = 0.0; }
+            if (ch == "1") { digit = 1.0; }
+            if (ch == "2") { digit = 2.0; }
+            if (ch == "3") { digit = 3.0; }
+            if (ch == "4") { digit = 4.0; }
+            if (ch == "5") { digit = 5.0; }
+            if (ch == "6") { digit = 6.0; }
+            if (ch == "7") { digit = 7.0; }
+            if (ch == "8") { digit = 8.0; }
+            if (ch == "9") { digit = 9.0; }
+            if (digit >= 0.0) {
+                intPart = intPart * 10.0 + digit;
+                i = i + 1.0;
+            } else {
+                running = false;
+            }
+        }
+        let fracPart = 0.0;
+        let divisor = 1.0;
+        if (i < len && charAt(str, i) == ".") {
+            i = i + 1.0;
+            running = true;
+            while (i < len && running) {
+                let ch2 = charAt(str, i);
+                let digit2 = -1.0;
+                if (ch2 == "0") { digit2 = 0.0; }
+                if (ch2 == "1") { digit2 = 1.0; }
+                if (ch2 == "2") { digit2 = 2.0; }
+                if (ch2 == "3") { digit2 = 3.0; }
+                if (ch2 == "4") { digit2 = 4.0; }
+                if (ch2 == "5") { digit2 = 5.0; }
+                if (ch2 == "6") { digit2 = 6.0; }
+                if (ch2 == "7") { digit2 = 7.0; }
+                if (ch2 == "8") { digit2 = 8.0; }
+                if (ch2 == "9") { digit2 = 9.0; }
+                if (digit2 >= 0.0) {
+                    fracPart = fracPart * 10.0 + digit2;
+                    divisor = divisor * 10.0;
+                    i = i + 1.0;
+                } else {
+                    running = false;
+                }
+            }
+        }
+        return (intPart + (fracPart / divisor)) * sign;
+    },
+
+    function paramInt(key: string): number {
+        let p = this.param(key);
+        return this.parseIntVal(p);
+    },
+
+    function paramFloat(key: string): number {
+        let p = this.param(key);
+        return this.parseFloatVal(p);
+    },
+
+    function paramBool(key: string): boolean {
+        let p = this.param(key);
+        if (p == "true" || p == "1" || p == "yes") { return true; }
+        return false;
+    },
+
+    function queryInt(key: string): number {
+        let q = this.query(key);
+        return this.parseIntVal(q);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// High-Speed HTTP Request Parser
+// ═══════════════════════════════════════════════════════════════════════════
+function parseHttpMethod(raw: string): string {
+    let method = "";
+    let len = raw.length;
+    let i = 0;
+    while (i < len) {
+        let ch = charAt(raw, i);
+        if (ch == " ") { break; }
+        method = method + ch;
+        i = i + 1;
+    }
+    if (method == "") { return "GET"; }
+    return method;
+}
+
+function parseHttpPath(raw: string): string {
+    let len = raw.length;
+    let i = 0;
+    while (i < len && charAt(raw, i) != " ") { i = i + 1; }
+    while (i < len && charAt(raw, i) == " ") { i = i + 1; }
+    let path = "";
+    while (i < len) {
+        let ch = charAt(raw, i);
+        if (ch == " " || ch == "?" || ch == "\r" || ch == "\n") { break; }
+        path = path + ch;
+        i = i + 1;
+    }
+    if (path == "") { return "/"; }
+    return path;
+}
+
+function parseQueryString(raw: string): string {
+    let len = raw.length;
+    let i = 0;
+    while (i < len && charAt(raw, i) != " ") { i = i + 1; }
+    while (i < len && charAt(raw, i) == " ") { i = i + 1; }
+    while (i < len && charAt(raw, i) != " " && charAt(raw, i) != "?") { i = i + 1; }
+    if (i < len && charAt(raw, i) == "?") {
+        i = i + 1;
+        let query = "";
+        while (i < len) {
+            let ch = charAt(raw, i);
+            if (ch == " " || ch == "\r" || ch == "\n") { break; }
+            query = query + ch;
+            i = i + 1;
+        }
+        return query;
+    }
+    return "";
+}
+
+function parseHttpBody(raw: string): string {
+    let len = raw.length;
+    let i = 0;
+    while (i + 3 < len) {
+        if (charAt(raw, i) == "\r" && charAt(raw, i + 1) == "\n" &&
+            charAt(raw, i + 2) == "\r" && charAt(raw, i + 3) == "\n") {
+            i = i + 4;
+            let body = "";
+            while (i < len) { body = body + charAt(raw, i); i = i + 1; }
+            return body;
+        }
+        i = i + 1;
+    }
+    return "";
+}
+
+function parseHttpRequest(raw: string): Request {
+    let req: Request;
+    req.raw = raw;
+    req.method = parseHttpMethod(raw);
+    req.path = parseHttpPath(raw);
+    req.queryString = parseQueryString(raw);
+    req.body = parseHttpBody(raw);
+    req.pk0 = ""; req.pv0 = "";
+    req.pk1 = ""; req.pv1 = "";
+    req.pk2 = ""; req.pv2 = "";
+    req.paramsCount = 0.0;
+    return req;
+}

@@ -1,0 +1,717 @@
+// Vito Application Core Engine (vito/src/core/app.vit)
+import { listenTcp, TcpListener, TcpStream } from "std/net";
+import { charAt } from "std/string";
+extern function vit_net_socket_is_connected(fd: number): number;
+import { Request, parseHttpRequest } from "src/core/request.vit";
+import { Response } from "src/core/response.vit";
+import { matchRoutePattern, pathMatchesPattern } from "src/core/matcher.vit";
+import { getRouteType } from "src/core/utils.vit";
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Router, Grouping & Vito Application Core
+// ═══════════════════════════════════════════════════════════════════════════
+
+// VitoGroup — Route group with shared prefix (supports GET/POST/PUT/PATCH/DELETE/HEAD/OPTIONS/ANY)
+struct VitoGroup {
+    app: VitoApp,
+    prefix: string,
+
+    function get(path: string, handler: (req: Request, res: Response) => void): void {
+        this.app.addRoute("GET", this.prefix + path, handler);
+    },
+    function post(path: string, handler: (req: Request, res: Response) => void): void {
+        this.app.addRoute("POST", this.prefix + path, handler);
+    },
+    function put(path: string, handler: (req: Request, res: Response) => void): void {
+        this.app.addRoute("PUT", this.prefix + path, handler);
+    },
+    function delete(path: string, handler: (req: Request, res: Response) => void): void {
+        this.app.addRoute("DELETE", this.prefix + path, handler);
+    },
+    function patch(path: string, handler: (req: Request, res: Response) => void): void {
+        this.app.addRoute("PATCH", this.prefix + path, handler);
+    },
+    function head(path: string, handler: (req: Request, res: Response) => void): void {
+        this.app.addRoute("HEAD", this.prefix + path, handler);
+    },
+    function options(path: string, handler: (req: Request, res: Response) => void): void {
+        this.app.addRoute("OPTIONS", this.prefix + path, handler);
+    },
+    function any(path: string, handler: (req: Request, res: Response) => void): void {
+        this.app.addRoute("ANY", this.prefix + path, handler);
+    }
+}
+
+// VitoApp — Main application struct (32 route slots, 8 middleware slots, 16 named routes)
+struct VitoApp {
+    // ── Route slots 0-7 ──────────────────────────────────────────────────
+    r0_method: string,  r0_path: string,  r0_type: number,  r0_fn: (req: Request, res: Response) => void,  r0_has: number,
+    r1_method: string,  r1_path: string,  r1_type: number,  r1_fn: (req: Request, res: Response) => void,  r1_has: number,
+    r2_method: string,  r2_path: string,  r2_type: number,  r2_fn: (req: Request, res: Response) => void,  r2_has: number,
+    r3_method: string,  r3_path: string,  r3_type: number,  r3_fn: (req: Request, res: Response) => void,  r3_has: number,
+    r4_method: string,  r4_path: string,  r4_type: number,  r4_fn: (req: Request, res: Response) => void,  r4_has: number,
+    r5_method: string,  r5_path: string,  r5_type: number,  r5_fn: (req: Request, res: Response) => void,  r5_has: number,
+    r6_method: string,  r6_path: string,  r6_type: number,  r6_fn: (req: Request, res: Response) => void,  r6_has: number,
+    r7_method: string,  r7_path: string,  r7_type: number,  r7_fn: (req: Request, res: Response) => void,  r7_has: number,
+    // ── Route slots 8-15 ─────────────────────────────────────────────────
+    r8_method: string,  r8_path: string,  r8_type: number,  r8_fn: (req: Request, res: Response) => void,  r8_has: number,
+    r9_method: string,  r9_path: string,  r9_type: number,  r9_fn: (req: Request, res: Response) => void,  r9_has: number,
+    r10_method: string, r10_path: string, r10_type: number, r10_fn: (req: Request, res: Response) => void, r10_has: number,
+    r11_method: string, r11_path: string, r11_type: number, r11_fn: (req: Request, res: Response) => void, r11_has: number,
+    r12_method: string, r12_path: string, r12_type: number, r12_fn: (req: Request, res: Response) => void, r12_has: number,
+    r13_method: string, r13_path: string, r13_type: number, r13_fn: (req: Request, res: Response) => void, r13_has: number,
+    r14_method: string, r14_path: string, r14_type: number, r14_fn: (req: Request, res: Response) => void, r14_has: number,
+    r15_method: string, r15_path: string, r15_type: number, r15_fn: (req: Request, res: Response) => void, r15_has: number,
+    // ── Route slots 16-23 ────────────────────────────────────────────────
+    r16_method: string, r16_path: string, r16_type: number, r16_fn: (req: Request, res: Response) => void, r16_has: number,
+    r17_method: string, r17_path: string, r17_type: number, r17_fn: (req: Request, res: Response) => void, r17_has: number,
+    r18_method: string, r18_path: string, r18_type: number, r18_fn: (req: Request, res: Response) => void, r18_has: number,
+    r19_method: string, r19_path: string, r19_type: number, r19_fn: (req: Request, res: Response) => void, r19_has: number,
+    r20_method: string, r20_path: string, r20_type: number, r20_fn: (req: Request, res: Response) => void, r20_has: number,
+    r21_method: string, r21_path: string, r21_type: number, r21_fn: (req: Request, res: Response) => void, r21_has: number,
+    r22_method: string, r22_path: string, r22_type: number, r22_fn: (req: Request, res: Response) => void, r22_has: number,
+    r23_method: string, r23_path: string, r23_type: number, r23_fn: (req: Request, res: Response) => void, r23_has: number,
+    // ── Route slots 24-31 ────────────────────────────────────────────────
+    r24_method: string, r24_path: string, r24_type: number, r24_fn: (req: Request, res: Response) => void, r24_has: number,
+    r25_method: string, r25_path: string, r25_type: number, r25_fn: (req: Request, res: Response) => void, r25_has: number,
+    r26_method: string, r26_path: string, r26_type: number, r26_fn: (req: Request, res: Response) => void, r26_has: number,
+    r27_method: string, r27_path: string, r27_type: number, r27_fn: (req: Request, res: Response) => void, r27_has: number,
+    r28_method: string, r28_path: string, r28_type: number, r28_fn: (req: Request, res: Response) => void, r28_has: number,
+    r29_method: string, r29_path: string, r29_type: number, r29_fn: (req: Request, res: Response) => void, r29_has: number,
+    r30_method: string, r30_path: string, r30_type: number, r30_fn: (req: Request, res: Response) => void, r30_has: number,
+    r31_method: string, r31_path: string, r31_type: number, r31_fn: (req: Request, res: Response) => void, r31_has: number,
+    // ── Middleware slots 0-7 ──────────────────────────────────────────────
+    mw0_has: number, mw0_fn: (req: Request, res: Response) => boolean,
+    mw1_has: number, mw1_fn: (req: Request, res: Response) => boolean,
+    mw2_has: number, mw2_fn: (req: Request, res: Response) => boolean,
+    mw3_has: number, mw3_fn: (req: Request, res: Response) => boolean,
+    mw4_has: number, mw4_fn: (req: Request, res: Response) => boolean,
+    mw5_has: number, mw5_fn: (req: Request, res: Response) => boolean,
+    mw6_has: number, mw6_fn: (req: Request, res: Response) => boolean,
+    mw7_has: number, mw7_fn: (req: Request, res: Response) => boolean, 
+    // ── Counters ──────────────────────────────────────────────────────────
+    routeCount: number,
+    middlewareCount: number,
+    // ── Lifecycle hooks & error handlers ─────────────────────────────────
+    notFoundHandler:           (req: Request, res: Response) => void,
+    hasNotFoundHandler:        boolean,
+    methodNotAllowedHandler:   (req: Request, res: Response) => void,
+    hasMethodNotAllowedHandler: boolean,
+    errorHandler:              (req: Request, res: Response) => void,
+    hasErrorHandler:           boolean,
+    onRequestHook:             (req: Request, res: Response) => void,
+    hasOnRequestHook:          boolean,
+    beforeHandleHook:          (req: Request, res: Response) => boolean,
+    hasBeforeHandleHook:       boolean,
+    afterHandleHook:           (req: Request, res: Response) => void,
+    hasAfterHandleHook:        boolean,
+    onErrorHook:               (req: Request, res: Response) => void,
+    hasOnErrorHook:            boolean,
+    // ── Named Route Registry (16 slots: name → path template) ────────────
+    nr0_name:  string, nr0_rpath:  string, nr0_has:  boolean,
+    nr1_name:  string, nr1_rpath:  string, nr1_has:  boolean,
+    nr2_name:  string, nr2_rpath:  string, nr2_has:  boolean,
+    nr3_name:  string, nr3_rpath:  string, nr3_has:  boolean,
+    nr4_name:  string, nr4_rpath:  string, nr4_has:  boolean,
+    nr5_name:  string, nr5_rpath:  string, nr5_has:  boolean,
+    nr6_name:  string, nr6_rpath:  string, nr6_has:  boolean,
+    nr7_name:  string, nr7_rpath:  string, nr7_has:  boolean,
+    nr8_name:  string, nr8_rpath:  string, nr8_has:  boolean,
+    nr9_name:  string, nr9_rpath:  string, nr9_has:  boolean,
+    nr10_name: string, nr10_rpath: string, nr10_has: boolean,
+    nr11_name: string, nr11_rpath: string, nr11_has: boolean,
+    nr12_name: string, nr12_rpath: string, nr12_has: boolean,
+    nr13_name: string, nr13_rpath: string, nr13_has: boolean,
+    nr14_name: string, nr14_rpath: string, nr14_has: boolean,
+    nr15_name: string, nr15_rpath: string, nr15_has: boolean,
+    nrCount: number,
+    // ── Config & Arena ────────────────────────────────────────────────────
+    isStrictSlash: boolean,
+    arenaCapacity: number,
+    arenaActive: number,
+    arena_s0: boolean, arena_s1: boolean, arena_s2: boolean, arena_s3: boolean,
+    poolRecycledCount: number,
+    buf_b0: boolean, buf_b1: boolean, buf_b2: boolean, buf_b3: boolean,
+
+    function init(): void {
+        this.routeCount = 0.0;
+        this.middlewareCount = 0.0;
+        this.hasNotFoundHandler        = false;
+        this.hasMethodNotAllowedHandler = false;
+        this.hasErrorHandler           = false;
+        this.hasOnRequestHook          = false;
+        this.hasBeforeHandleHook       = false;
+        this.hasAfterHandleHook        = false;
+        this.hasOnErrorHook            = false;
+        this.isStrictSlash             = false;
+        // Route slots — has flags & types
+        this.r0_has = 0.0; this.r0_type  = 0.0; this.r0_method  = ""; this.r0_path  = "";
+        this.r1_has = 0.0; this.r1_type  = 0.0; this.r1_method  = ""; this.r1_path  = "";
+        this.r2_has = 0.0; this.r2_type  = 0.0; this.r2_method  = ""; this.r2_path  = "";
+        this.r3_has = 0.0; this.r3_type  = 0.0; this.r3_method  = ""; this.r3_path  = "";
+        this.r4_has = 0.0; this.r4_type  = 0.0; this.r4_method  = ""; this.r4_path  = "";
+        this.r5_has = 0.0; this.r5_type  = 0.0; this.r5_method  = ""; this.r5_path  = "";
+        this.r6_has = 0.0; this.r6_type  = 0.0; this.r6_method  = ""; this.r6_path  = "";
+        this.r7_has = 0.0; this.r7_type  = 0.0; this.r7_method  = ""; this.r7_path  = "";
+        this.r8_has = 0.0; this.r8_type  = 0.0; this.r8_method  = ""; this.r8_path  = "";
+        this.r9_has = 0.0; this.r9_type  = 0.0; this.r9_method  = ""; this.r9_path  = "";
+        this.r10_has = 0.0; this.r10_type = 0.0; this.r10_method = ""; this.r10_path = "";
+        this.r11_has = 0.0; this.r11_type = 0.0; this.r11_method = ""; this.r11_path = "";
+        this.r12_has = 0.0; this.r12_type = 0.0; this.r12_method = ""; this.r12_path = "";
+        this.r13_has = 0.0; this.r13_type = 0.0; this.r13_method = ""; this.r13_path = "";
+        this.r14_has = 0.0; this.r14_type = 0.0; this.r14_method = ""; this.r14_path = "";
+        this.r15_has = 0.0; this.r15_type = 0.0; this.r15_method = ""; this.r15_path = "";
+        this.r16_has = 0.0; this.r16_type = 0.0; this.r16_method = ""; this.r16_path = "";
+        this.r17_has = 0.0; this.r17_type = 0.0; this.r17_method = ""; this.r17_path = "";
+        this.r18_has = 0.0; this.r18_type = 0.0; this.r18_method = ""; this.r18_path = "";
+        this.r19_has = 0.0; this.r19_type = 0.0; this.r19_method = ""; this.r19_path = "";
+        this.r20_has = 0.0; this.r20_type = 0.0; this.r20_method = ""; this.r20_path = "";
+        this.r21_has = 0.0; this.r21_type = 0.0; this.r21_method = ""; this.r21_path = "";
+        this.r22_has = 0.0; this.r22_type = 0.0; this.r22_method = ""; this.r22_path = "";
+        this.r23_has = 0.0; this.r23_type = 0.0; this.r23_method = ""; this.r23_path = "";
+        this.r24_has = 0.0; this.r24_type = 0.0; this.r24_method = ""; this.r24_path = "";
+        this.r25_has = 0.0; this.r25_type = 0.0; this.r25_method = ""; this.r25_path = "";
+        this.r26_has = 0.0; this.r26_type = 0.0; this.r26_method = ""; this.r26_path = "";
+        this.r27_has = 0.0; this.r27_type = 0.0; this.r27_method = ""; this.r27_path = "";
+        this.r28_has = 0.0; this.r28_type = 0.0; this.r28_method = ""; this.r28_path = "";
+        this.r29_has = 0.0; this.r29_type = 0.0; this.r29_method = ""; this.r29_path = "";
+        this.r30_has = 0.0; this.r30_type = 0.0; this.r30_method = ""; this.r30_path = "";
+        this.r31_has = 0.0; this.r31_type = 0.0; this.r31_method = ""; this.r31_path = "";
+        // Middleware slots
+        this.mw0_has = 0.0; this.mw1_has = 0.0; this.mw2_has = 0.0; this.mw3_has = 0.0;
+        this.mw4_has = 0.0; this.mw5_has = 0.0; this.mw6_has = 0.0; this.mw7_has = 0.0;
+        // Named route registry
+        this.nrCount = 0.0;
+        this.nr0_has  = false; this.nr0_name  = ""; this.nr0_rpath  = "";
+        this.nr1_has  = false; this.nr1_name  = ""; this.nr1_rpath  = "";
+        this.nr2_has  = false; this.nr2_name  = ""; this.nr2_rpath  = "";
+        this.nr3_has  = false; this.nr3_name  = ""; this.nr3_rpath  = "";
+        this.nr4_has  = false; this.nr4_name  = ""; this.nr4_rpath  = "";
+        this.nr5_has  = false; this.nr5_name  = ""; this.nr5_rpath  = "";
+        this.nr6_has  = false; this.nr6_name  = ""; this.nr6_rpath  = "";
+        this.nr7_has  = false; this.nr7_name  = ""; this.nr7_rpath  = "";
+        this.nr8_has  = false; this.nr8_name  = ""; this.nr8_rpath  = "";
+        this.nr9_has  = false; this.nr9_name  = ""; this.nr9_rpath  = "";
+        this.nr10_has = false; this.nr10_name = ""; this.nr10_rpath = "";
+        this.nr11_has = false; this.nr11_name = ""; this.nr11_rpath = "";
+        this.nr12_has = false; this.nr12_name = ""; this.nr12_rpath = "";
+        this.nr13_has = false; this.nr13_name = ""; this.nr13_rpath = "";
+        this.nr14_has = false; this.nr14_name = ""; this.nr14_rpath = "";
+        this.nr15_has = false; this.nr15_name = ""; this.nr15_rpath = "";
+        // Arena & buffer pool
+        this.arenaCapacity = 4.0; this.arenaActive = 0.0;
+        this.arena_s0 = false; this.arena_s1 = false; this.arena_s2 = false; this.arena_s3 = false;
+        this.poolRecycledCount = 0.0;
+        this.buf_b0 = false; this.buf_b1 = false; this.buf_b2 = false; this.buf_b3 = false;
+    },
+
+    function acquireArenaSlot(): number {
+        if (!this.arena_s0) { this.arena_s0 = true; this.arenaActive = this.arenaActive + 1.0; return 0.0; }
+        if (!this.arena_s1) { this.arena_s1 = true; this.arenaActive = this.arenaActive + 1.0; return 1.0; }
+        if (!this.arena_s2) { this.arena_s2 = true; this.arenaActive = this.arenaActive + 1.0; return 2.0; }
+        if (!this.arena_s3) { this.arena_s3 = true; this.arenaActive = this.arenaActive + 1.0; return 3.0; }
+        return -1.0;
+    },
+
+    function releaseArenaSlot(slotId: number): void {
+        if (slotId == 0.0 && this.arena_s0) { this.arena_s0 = false; this.arenaActive = this.arenaActive - 1.0; }
+        if (slotId == 1.0 && this.arena_s1) { this.arena_s1 = false; this.arenaActive = this.arenaActive - 1.0; }
+        if (slotId == 2.0 && this.arena_s2) { this.arena_s2 = false; this.arenaActive = this.arenaActive - 1.0; }
+        if (slotId == 3.0 && this.arena_s3) { this.arena_s3 = false; this.arenaActive = this.arenaActive - 1.0; }
+    },
+
+    function acquireBuffer(): number {
+        if (!this.buf_b0) { this.buf_b0 = true; return 0.0; }
+        if (!this.buf_b1) { this.buf_b1 = true; return 1.0; }
+        if (!this.buf_b2) { this.buf_b2 = true; return 2.0; }
+        if (!this.buf_b3) { this.buf_b3 = true; return 3.0; }
+        return -1.0;
+    },
+
+    function releaseBuffer(bufId: number): void {
+        if (bufId == 0.0) { this.buf_b0 = false; }
+        if (bufId == 1.0) { this.buf_b1 = false; }
+        if (bufId == 2.0) { this.buf_b2 = false; }
+        if (bufId == 3.0) { this.buf_b3 = false; }
+        this.poolRecycledCount = this.poolRecycledCount + 1.0;
+    },
+
+    function setStrictSlash(strict: boolean): void { this.isStrictSlash = strict; },
+
+    // ── Lifecycle Hooks ───────────────────────────────────────────────────
+    function onRequest(hook: (req: Request, res: Response) => void): void {
+        this.onRequestHook = hook; this.hasOnRequestHook = true;
+    },
+    function beforeHandle(hook: (req: Request, res: Response) => boolean): void {
+        this.beforeHandleHook = hook; this.hasBeforeHandleHook = true;
+    },
+    function afterHandle(hook: (req: Request, res: Response) => void): void {
+        this.afterHandleHook = hook; this.hasAfterHandleHook = true;
+    },
+    function onError(hook: (req: Request, res: Response) => void): void {
+        this.onErrorHook = hook; this.hasOnErrorHook = true;
+    },
+
+    // ── Error Handler Registration ────────────────────────────────────────
+    function setNotFoundHandler(handler: (req: Request, res: Response) => void): void {
+        this.notFoundHandler = handler; this.hasNotFoundHandler = true;
+    },
+    function setMethodNotAllowedHandler(handler: (req: Request, res: Response) => void): void {
+        this.methodNotAllowedHandler = handler; this.hasMethodNotAllowedHandler = true;
+    },
+    function setErrorHandler(handler: (req: Request, res: Response) => void): void {
+        this.errorHandler = handler; this.hasErrorHandler = true;
+    },
+
+    // ── Middleware Registration ───────────────────────────────────────────
+    function use(mwHandler: (req: Request, res: Response) => boolean): void {
+        if (this.middlewareCount == 0.0) { this.mw0_fn = mwHandler; this.mw0_has = 1.0; }
+        if (this.middlewareCount == 1.0) { this.mw1_fn = mwHandler; this.mw1_has = 1.0; }
+        if (this.middlewareCount == 2.0) { this.mw2_fn = mwHandler; this.mw2_has = 1.0; }
+        if (this.middlewareCount == 3.0) { this.mw3_fn = mwHandler; this.mw3_has = 1.0; }
+        if (this.middlewareCount == 4.0) { this.mw4_fn = mwHandler; this.mw4_has = 1.0; }
+        if (this.middlewareCount == 5.0) { this.mw5_fn = mwHandler; this.mw5_has = 1.0; }
+        if (this.middlewareCount == 6.0) { this.mw6_fn = mwHandler; this.mw6_has = 1.0; }
+        if (this.middlewareCount == 7.0) { this.mw7_fn = mwHandler; this.mw7_has = 1.0; }
+        this.middlewareCount = this.middlewareCount + 1.0;
+    },
+
+    // ── Route Grouping ────────────────────────────────────────────────────
+    function group(prefix: string, groupCallback: (g: VitoGroup) => void): void {
+        let g: VitoGroup;
+        g.app = this;
+        g.prefix = prefix;
+        groupCallback(g);
+    },
+
+    // ── Named Route Registry ──────────────────────────────────────────────
+    function nameRoute(routeName: string, routePath: string): void {
+        if (this.nrCount == 0.0)  { this.nr0_name  = routeName; this.nr0_rpath  = routePath; this.nr0_has  = true; }
+        if (this.nrCount == 1.0)  { this.nr1_name  = routeName; this.nr1_rpath  = routePath; this.nr1_has  = true; }
+        if (this.nrCount == 2.0)  { this.nr2_name  = routeName; this.nr2_rpath  = routePath; this.nr2_has  = true; }
+        if (this.nrCount == 3.0)  { this.nr3_name  = routeName; this.nr3_rpath  = routePath; this.nr3_has  = true; }
+        if (this.nrCount == 4.0)  { this.nr4_name  = routeName; this.nr4_rpath  = routePath; this.nr4_has  = true; }
+        if (this.nrCount == 5.0)  { this.nr5_name  = routeName; this.nr5_rpath  = routePath; this.nr5_has  = true; }
+        if (this.nrCount == 6.0)  { this.nr6_name  = routeName; this.nr6_rpath  = routePath; this.nr6_has  = true; }
+        if (this.nrCount == 7.0)  { this.nr7_name  = routeName; this.nr7_rpath  = routePath; this.nr7_has  = true; }
+        if (this.nrCount == 8.0)  { this.nr8_name  = routeName; this.nr8_rpath  = routePath; this.nr8_has  = true; }
+        if (this.nrCount == 9.0)  { this.nr9_name  = routeName; this.nr9_rpath  = routePath; this.nr9_has  = true; }
+        if (this.nrCount == 10.0) { this.nr10_name = routeName; this.nr10_rpath = routePath; this.nr10_has = true; }
+        if (this.nrCount == 11.0) { this.nr11_name = routeName; this.nr11_rpath = routePath; this.nr11_has = true; }
+        if (this.nrCount == 12.0) { this.nr12_name = routeName; this.nr12_rpath = routePath; this.nr12_has = true; }
+        if (this.nrCount == 13.0) { this.nr13_name = routeName; this.nr13_rpath = routePath; this.nr13_has = true; }
+        if (this.nrCount == 14.0) { this.nr14_name = routeName; this.nr14_rpath = routePath; this.nr14_has = true; }
+        if (this.nrCount == 15.0) { this.nr15_name = routeName; this.nr15_rpath = routePath; this.nr15_has = true; }
+        this.nrCount = this.nrCount + 1.0;
+    },
+
+    function url(name: string, paramKey: string, paramVal: string): string {
+        let path = "";
+        if (this.nr0_has  && this.nr0_name  == name) { path = this.nr0_rpath;  }
+        if (path == "" && this.nr1_has  && this.nr1_name  == name) { path = this.nr1_rpath;  }
+        if (path == "" && this.nr2_has  && this.nr2_name  == name) { path = this.nr2_rpath;  }
+        if (path == "" && this.nr3_has  && this.nr3_name  == name) { path = this.nr3_rpath;  }
+        if (path == "" && this.nr4_has  && this.nr4_name  == name) { path = this.nr4_rpath;  }
+        if (path == "" && this.nr5_has  && this.nr5_name  == name) { path = this.nr5_rpath;  }
+        if (path == "" && this.nr6_has  && this.nr6_name  == name) { path = this.nr6_rpath;  }
+        if (path == "" && this.nr7_has  && this.nr7_name  == name) { path = this.nr7_rpath;  }
+        if (path == "" && this.nr8_has  && this.nr8_name  == name) { path = this.nr8_rpath;  }
+        if (path == "" && this.nr9_has  && this.nr9_name  == name) { path = this.nr9_rpath;  }
+        if (path == "" && this.nr10_has && this.nr10_name == name) { path = this.nr10_rpath; }
+        if (path == "" && this.nr11_has && this.nr11_name == name) { path = this.nr11_rpath; }
+        if (path == "" && this.nr12_has && this.nr12_name == name) { path = this.nr12_rpath; }
+        if (path == "" && this.nr13_has && this.nr13_name == name) { path = this.nr13_rpath; }
+        if (path == "" && this.nr14_has && this.nr14_name == name) { path = this.nr14_rpath; }
+        if (path == "" && this.nr15_has && this.nr15_name == name) { path = this.nr15_rpath; }
+        if (path == "") { return ""; }
+
+        let result = "";
+        let len = path.length;
+        let i = 0;
+        let replaced = false;
+        while (i < len) {
+            let ch = charAt(path, i);
+            if (ch == ":" && !replaced) {
+                i = i + 1;
+                let segName = "";
+                while (i < len) {
+                    let c = charAt(path, i);
+                    if (c == "/" || c == "?") { break; }
+                    segName = segName + c;
+                    i = i + 1;
+                }
+                if (i < len && charAt(path, i) == "?") { i = i + 1; }
+                if (segName == paramKey) { result = result + paramVal; replaced = true; }
+                else { result = result + ":" + segName; }
+            } else {
+                result = result + ch;
+                i = i + 1;
+            }
+        }
+        return result;
+    },
+
+    // ── Route Registration ────────────────────────────────────────────────
+    function get(path: string, handler: (req: Request, res: Response) => void): void {
+        this.addRoute("GET", path, handler);
+    },
+    function post(path: string, handler: (req: Request, res: Response) => void): void {
+        this.addRoute("POST", path, handler);
+    },
+    function put(path: string, handler: (req: Request, res: Response) => void): void {
+        this.addRoute("PUT", path, handler);
+    },
+    function delete(path: string, handler: (req: Request, res: Response) => void): void {
+        this.addRoute("DELETE", path, handler);
+    },
+    function patch(path: string, handler: (req: Request, res: Response) => void): void {
+        this.addRoute("PATCH", path, handler);
+    },
+    function head(path: string, handler: (req: Request, res: Response) => void): void {
+        this.addRoute("HEAD", path, handler);
+    },
+    function options(path: string, handler: (req: Request, res: Response) => void): void {
+        this.addRoute("OPTIONS", path, handler);
+    },
+    function any(path: string, handler: (req: Request, res: Response) => void): void {
+        this.addRoute("ANY", path, handler);
+    },
+
+    function addRoute(method: string, path: string, handler: (req: Request, res: Response) => void): void {
+        let rtype = getRouteType(path);
+        // Slots 0-7
+        if (this.routeCount == 0.0)  { this.r0_method  = method; this.r0_path  = path; this.r0_type  = rtype; this.r0_fn  = handler; this.r0_has = 1.0; }
+        if (this.routeCount == 1.0)  { this.r1_method  = method; this.r1_path  = path; this.r1_type  = rtype; this.r1_fn  = handler; this.r1_has = 1.0; }
+        if (this.routeCount == 2.0)  { this.r2_method  = method; this.r2_path  = path; this.r2_type  = rtype; this.r2_fn  = handler; this.r2_has = 1.0; }
+        if (this.routeCount == 3.0)  { this.r3_method  = method; this.r3_path  = path; this.r3_type  = rtype; this.r3_fn  = handler; this.r3_has = 1.0; }
+        if (this.routeCount == 4.0)  { this.r4_method  = method; this.r4_path  = path; this.r4_type  = rtype; this.r4_fn  = handler; this.r4_has = 1.0; }
+        if (this.routeCount == 5.0)  { this.r5_method  = method; this.r5_path  = path; this.r5_type  = rtype; this.r5_fn  = handler; this.r5_has = 1.0; }
+        if (this.routeCount == 6.0)  { this.r6_method  = method; this.r6_path  = path; this.r6_type  = rtype; this.r6_fn  = handler; this.r6_has = 1.0; }
+        if (this.routeCount == 7.0)  { this.r7_method  = method; this.r7_path  = path; this.r7_type  = rtype; this.r7_fn  = handler; this.r7_has = 1.0; }
+        // Slots 8-15
+        if (this.routeCount == 8.0)  { this.r8_method  = method; this.r8_path  = path; this.r8_type  = rtype; this.r8_fn  = handler; this.r8_has = 1.0; }
+        if (this.routeCount == 9.0)  { this.r9_method  = method; this.r9_path  = path; this.r9_type  = rtype; this.r9_fn  = handler; this.r9_has = 1.0; }
+        if (this.routeCount == 10.0) { this.r10_method = method; this.r10_path = path; this.r10_type = rtype; this.r10_fn = handler; this.r10_has = 1.0; }
+        if (this.routeCount == 11.0) { this.r11_method = method; this.r11_path = path; this.r11_type = rtype; this.r11_fn = handler; this.r11_has = 1.0; }
+        if (this.routeCount == 12.0) { this.r12_method = method; this.r12_path = path; this.r12_type = rtype; this.r12_fn = handler; this.r12_has = 1.0; }
+        if (this.routeCount == 13.0) { this.r13_method = method; this.r13_path = path; this.r13_type = rtype; this.r13_fn = handler; this.r13_has = 1.0; }
+        if (this.routeCount == 14.0) { this.r14_method = method; this.r14_path = path; this.r14_type = rtype; this.r14_fn = handler; this.r14_has = 1.0; }
+        if (this.routeCount == 15.0) { this.r15_method = method; this.r15_path = path; this.r15_type = rtype; this.r15_fn = handler; this.r15_has = 1.0; }
+        // Slots 16-23
+        if (this.routeCount == 16.0) { this.r16_method = method; this.r16_path = path; this.r16_type = rtype; this.r16_fn = handler; this.r16_has = 1.0; }
+        if (this.routeCount == 17.0) { this.r17_method = method; this.r17_path = path; this.r17_type = rtype; this.r17_fn = handler; this.r17_has = 1.0; }
+        if (this.routeCount == 18.0) { this.r18_method = method; this.r18_path = path; this.r18_type = rtype; this.r18_fn = handler; this.r18_has = 1.0; }
+        if (this.routeCount == 19.0) { this.r19_method = method; this.r19_path = path; this.r19_type = rtype; this.r19_fn = handler; this.r19_has = 1.0; }
+        if (this.routeCount == 20.0) { this.r20_method = method; this.r20_path = path; this.r20_type = rtype; this.r20_fn = handler; this.r20_has = 1.0; }
+        if (this.routeCount == 21.0) { this.r21_method = method; this.r21_path = path; this.r21_type = rtype; this.r21_fn = handler; this.r21_has = 1.0; }
+        if (this.routeCount == 22.0) { this.r22_method = method; this.r22_path = path; this.r22_type = rtype; this.r22_fn = handler; this.r22_has = 1.0; }
+        if (this.routeCount == 23.0) { this.r23_method = method; this.r23_path = path; this.r23_type = rtype; this.r23_fn = handler; this.r23_has = 1.0; }
+        // Slots 24-31
+        if (this.routeCount == 24.0) { this.r24_method = method; this.r24_path = path; this.r24_type = rtype; this.r24_fn = handler; this.r24_has = 1.0; }
+        if (this.routeCount == 25.0) { this.r25_method = method; this.r25_path = path; this.r25_type = rtype; this.r25_fn = handler; this.r25_has = 1.0; }
+        if (this.routeCount == 26.0) { this.r26_method = method; this.r26_path = path; this.r26_type = rtype; this.r26_fn = handler; this.r26_has = 1.0; }
+        if (this.routeCount == 27.0) { this.r27_method = method; this.r27_path = path; this.r27_type = rtype; this.r27_fn = handler; this.r27_has = 1.0; }
+        if (this.routeCount == 28.0) { this.r28_method = method; this.r28_path = path; this.r28_type = rtype; this.r28_fn = handler; this.r28_has = 1.0; }
+        if (this.routeCount == 29.0) { this.r29_method = method; this.r29_path = path; this.r29_type = rtype; this.r29_fn = handler; this.r29_has = 1.0; }
+        if (this.routeCount == 30.0) { this.r30_method = method; this.r30_path = path; this.r30_type = rtype; this.r30_fn = handler; this.r30_has = 1.0; }
+        if (this.routeCount == 31.0) { this.r31_method = method; this.r31_path = path; this.r31_type = rtype; this.r31_fn = handler; this.r31_has = 1.0; }
+        this.routeCount = this.routeCount + 1.0;
+    },
+
+    // ── Request Dispatch — 3-Pass Route Precedence Engine ────────────────
+    function handleRequest(req: Request, res: Response): void {
+        let slotId = this.acquireArenaSlot();
+
+        // A. onRequest lifecycle hook
+        if (this.hasOnRequestHook) {
+            let hookFn = this.onRequestHook;
+            hookFn(req, res);
+            if (res.isClosed > 0.0) { if (slotId >= 0.0) { this.releaseArenaSlot(slotId); } return; }
+        }
+
+        // B. Global Middleware Pipeline (8 slots)
+        if (this.mw0_has > 0.0) { let mwFn0=this.mw0_fn; if (!mwFn0(req,res)||res.isClosed > 0.0) { if(slotId>=0.0){this.releaseArenaSlot(slotId);} return; } }
+        if (this.mw1_has > 0.0) { let mwFn1=this.mw1_fn; if (!mwFn1(req,res)||res.isClosed > 0.0) { if(slotId>=0.0){this.releaseArenaSlot(slotId);} return; } }
+        if (this.mw2_has > 0.0) { let mwFn2=this.mw2_fn; if (!mwFn2(req,res)||res.isClosed > 0.0) { if(slotId>=0.0){this.releaseArenaSlot(slotId);} return; } }
+        if (this.mw3_has > 0.0) { let mwFn3=this.mw3_fn; if (!mwFn3(req,res)||res.isClosed > 0.0) { if(slotId>=0.0){this.releaseArenaSlot(slotId);} return; } }
+        if (this.mw4_has > 0.0) { let mwFn4=this.mw4_fn; if (!mwFn4(req,res)||res.isClosed > 0.0) { if(slotId>=0.0){this.releaseArenaSlot(slotId);} return; } }
+        if (this.mw5_has > 0.0) { let mwFn5=this.mw5_fn; if (!mwFn5(req,res)||res.isClosed > 0.0) { if(slotId>=0.0){this.releaseArenaSlot(slotId);} return; } }
+        if (this.mw6_has > 0.0) { let mwFn6=this.mw6_fn; if (!mwFn6(req,res)||res.isClosed > 0.0) { if(slotId>=0.0){this.releaseArenaSlot(slotId);} return; } }
+        if (this.mw7_has > 0.0) { let mwFn7=this.mw7_fn; if (!mwFn7(req,res)||res.isClosed > 0.0) { if(slotId>=0.0){this.releaseArenaSlot(slotId);} return; } }
+
+        // C. beforeHandle hook
+        if (this.hasBeforeHandleHook) {
+            let bhFn = this.beforeHandleHook;
+            if (!bhFn(req, res) || res.isClosed > 0.0) { if (slotId >= 0.0) { this.releaseArenaSlot(slotId); } return; }
+        }
+
+        // D. Route Dispatch — 3-Pass Precedence
+        let matched = false;
+        let isStrict = this.isStrictSlash;
+
+        // ── PASS 1: Static Routes (exact path, no : or *) ─────────────────
+        if (!matched && this.r0_has > 0.0)  { if (this.r0_type  == 0.0 && (this.r0_method  == req.method || this.r0_method  == "ANY") && matchRoutePattern(this.r0_path,  req.path, req, isStrict)) { matched = true; let fn_r0_p0 = this.r0_fn; fn_r0_p0(req,res); } }
+        if (!matched && this.r1_has > 0.0)  { if (this.r1_type  == 0.0 && (this.r1_method  == req.method || this.r1_method  == "ANY") && matchRoutePattern(this.r1_path,  req.path, req, isStrict)) { matched = true; let fn_r1_p0 = this.r1_fn; fn_r1_p0(req,res); } }
+        if (!matched && this.r2_has > 0.0)  { if (this.r2_type  == 0.0 && (this.r2_method  == req.method || this.r2_method  == "ANY") && matchRoutePattern(this.r2_path,  req.path, req, isStrict)) { matched = true; let fn_r2_p0 = this.r2_fn; fn_r2_p0(req,res); } }
+        if (!matched && this.r3_has > 0.0)  { if (this.r3_type  == 0.0 && (this.r3_method  == req.method || this.r3_method  == "ANY") && matchRoutePattern(this.r3_path,  req.path, req, isStrict)) { matched = true; let fn_r3_p0 = this.r3_fn; fn_r3_p0(req,res); } }
+        if (!matched && this.r4_has > 0.0)  { if (this.r4_type  == 0.0 && (this.r4_method  == req.method || this.r4_method  == "ANY") && matchRoutePattern(this.r4_path,  req.path, req, isStrict)) { matched = true; let fn_r4_p0 = this.r4_fn; fn_r4_p0(req,res); } }
+        if (!matched && this.r5_has > 0.0)  { if (this.r5_type  == 0.0 && (this.r5_method  == req.method || this.r5_method  == "ANY") && matchRoutePattern(this.r5_path,  req.path, req, isStrict)) { matched = true; let fn_r5_p0 = this.r5_fn; fn_r5_p0(req,res); } }
+        if (!matched && this.r6_has > 0.0)  { if (this.r6_type  == 0.0 && (this.r6_method  == req.method || this.r6_method  == "ANY") && matchRoutePattern(this.r6_path,  req.path, req, isStrict)) { matched = true; let fn_r6_p0 = this.r6_fn; fn_r6_p0(req,res); } }
+        if (!matched && this.r7_has > 0.0)  { if (this.r7_type  == 0.0 && (this.r7_method  == req.method || this.r7_method  == "ANY") && matchRoutePattern(this.r7_path,  req.path, req, isStrict)) { matched = true; let fn_r7_p0 = this.r7_fn; fn_r7_p0(req,res); } }
+        if (!matched && this.r8_has > 0.0)  { if (this.r8_type  == 0.0 && (this.r8_method  == req.method || this.r8_method  == "ANY") && matchRoutePattern(this.r8_path,  req.path, req, isStrict)) { matched = true; let fn_r8_p0 = this.r8_fn; fn_r8_p0(req,res); } }
+        if (!matched && this.r9_has > 0.0)  { if (this.r9_type  == 0.0 && (this.r9_method  == req.method || this.r9_method  == "ANY") && matchRoutePattern(this.r9_path,  req.path, req, isStrict)) { matched = true; let fn_r9_p0 = this.r9_fn; fn_r9_p0(req,res); } }
+        if (!matched && this.r10_has > 0.0) { if (this.r10_type == 0.0 && (this.r10_method == req.method || this.r10_method == "ANY") && matchRoutePattern(this.r10_path, req.path, req, isStrict)) { matched = true; let fn_r10_p0 = this.r10_fn; fn_r10_p0(req,res); } }
+        if (!matched && this.r11_has > 0.0) { if (this.r11_type == 0.0 && (this.r11_method == req.method || this.r11_method == "ANY") && matchRoutePattern(this.r11_path, req.path, req, isStrict)) { matched = true; let fn_r11_p0 = this.r11_fn; fn_r11_p0(req,res); } }
+        if (!matched && this.r12_has > 0.0) { if (this.r12_type == 0.0 && (this.r12_method == req.method || this.r12_method == "ANY") && matchRoutePattern(this.r12_path, req.path, req, isStrict)) { matched = true; let fn_r12_p0 = this.r12_fn; fn_r12_p0(req,res); } }
+        if (!matched && this.r13_has > 0.0) { if (this.r13_type == 0.0 && (this.r13_method == req.method || this.r13_method == "ANY") && matchRoutePattern(this.r13_path, req.path, req, isStrict)) { matched = true; let fn_r13_p0 = this.r13_fn; fn_r13_p0(req,res); } }
+        if (!matched && this.r14_has > 0.0) { if (this.r14_type == 0.0 && (this.r14_method == req.method || this.r14_method == "ANY") && matchRoutePattern(this.r14_path, req.path, req, isStrict)) { matched = true; let fn_r14_p0 = this.r14_fn; fn_r14_p0(req,res); } }
+        if (!matched && this.r15_has > 0.0) { if (this.r15_type == 0.0 && (this.r15_method == req.method || this.r15_method == "ANY") && matchRoutePattern(this.r15_path, req.path, req, isStrict)) { matched = true; let fn_r15_p0 = this.r15_fn; fn_r15_p0(req,res); } }
+        if (!matched && this.r16_has > 0.0) { if (this.r16_type == 0.0 && (this.r16_method == req.method || this.r16_method == "ANY") && matchRoutePattern(this.r16_path, req.path, req, isStrict)) { matched = true; let fn_r16_p0 = this.r16_fn; fn_r16_p0(req,res); } }
+        if (!matched && this.r17_has > 0.0) { if (this.r17_type == 0.0 && (this.r17_method == req.method || this.r17_method == "ANY") && matchRoutePattern(this.r17_path, req.path, req, isStrict)) { matched = true; let fn_r17_p0 = this.r17_fn; fn_r17_p0(req,res); } }
+        if (!matched && this.r18_has > 0.0) { if (this.r18_type == 0.0 && (this.r18_method == req.method || this.r18_method == "ANY") && matchRoutePattern(this.r18_path, req.path, req, isStrict)) { matched = true; let fn_r18_p0 = this.r18_fn; fn_r18_p0(req,res); } }
+        if (!matched && this.r19_has > 0.0) { if (this.r19_type == 0.0 && (this.r19_method == req.method || this.r19_method == "ANY") && matchRoutePattern(this.r19_path, req.path, req, isStrict)) { matched = true; let fn_r19_p0 = this.r19_fn; fn_r19_p0(req,res); } }
+        if (!matched && this.r20_has > 0.0) { if (this.r20_type == 0.0 && (this.r20_method == req.method || this.r20_method == "ANY") && matchRoutePattern(this.r20_path, req.path, req, isStrict)) { matched = true; let fn_r20_p0 = this.r20_fn; fn_r20_p0(req,res); } }
+        if (!matched && this.r21_has > 0.0) { if (this.r21_type == 0.0 && (this.r21_method == req.method || this.r21_method == "ANY") && matchRoutePattern(this.r21_path, req.path, req, isStrict)) { matched = true; let fn_r21_p0 = this.r21_fn; fn_r21_p0(req,res); } }
+        if (!matched && this.r22_has > 0.0) { if (this.r22_type == 0.0 && (this.r22_method == req.method || this.r22_method == "ANY") && matchRoutePattern(this.r22_path, req.path, req, isStrict)) { matched = true; let fn_r22_p0 = this.r22_fn; fn_r22_p0(req,res); } }
+        if (!matched && this.r23_has > 0.0) { if (this.r23_type == 0.0 && (this.r23_method == req.method || this.r23_method == "ANY") && matchRoutePattern(this.r23_path, req.path, req, isStrict)) { matched = true; let fn_r23_p0 = this.r23_fn; fn_r23_p0(req,res); } }
+        if (!matched && this.r24_has > 0.0) { if (this.r24_type == 0.0 && (this.r24_method == req.method || this.r24_method == "ANY") && matchRoutePattern(this.r24_path, req.path, req, isStrict)) { matched = true; let fn_r24_p0 = this.r24_fn; fn_r24_p0(req,res); } }
+        if (!matched && this.r25_has > 0.0) { if (this.r25_type == 0.0 && (this.r25_method == req.method || this.r25_method == "ANY") && matchRoutePattern(this.r25_path, req.path, req, isStrict)) { matched = true; let fn_r25_p0 = this.r25_fn; fn_r25_p0(req,res); } }
+        if (!matched && this.r26_has > 0.0) { if (this.r26_type == 0.0 && (this.r26_method == req.method || this.r26_method == "ANY") && matchRoutePattern(this.r26_path, req.path, req, isStrict)) { matched = true; let fn_r26_p0 = this.r26_fn; fn_r26_p0(req,res); } }
+        if (!matched && this.r27_has > 0.0) { if (this.r27_type == 0.0 && (this.r27_method == req.method || this.r27_method == "ANY") && matchRoutePattern(this.r27_path, req.path, req, isStrict)) { matched = true; let fn_r27_p0 = this.r27_fn; fn_r27_p0(req,res); } }
+        if (!matched && this.r28_has > 0.0) { if (this.r28_type == 0.0 && (this.r28_method == req.method || this.r28_method == "ANY") && matchRoutePattern(this.r28_path, req.path, req, isStrict)) { matched = true; let fn_r28_p0 = this.r28_fn; fn_r28_p0(req,res); } }
+        if (!matched && this.r29_has > 0.0) { if (this.r29_type == 0.0 && (this.r29_method == req.method || this.r29_method == "ANY") && matchRoutePattern(this.r29_path, req.path, req, isStrict)) { matched = true; let fn_r29_p0 = this.r29_fn; fn_r29_p0(req,res); } }
+        if (!matched && this.r30_has > 0.0) { if (this.r30_type == 0.0 && (this.r30_method == req.method || this.r30_method == "ANY") && matchRoutePattern(this.r30_path, req.path, req, isStrict)) { matched = true; let fn_r30_p0 = this.r30_fn; fn_r30_p0(req,res); } }
+        if (!matched && this.r31_has > 0.0) { if (this.r31_type == 0.0 && (this.r31_method == req.method || this.r31_method == "ANY") && matchRoutePattern(this.r31_path, req.path, req, isStrict)) { matched = true; let fn_r31_p0 = this.r31_fn; fn_r31_p0(req,res); } }
+
+        // ── PASS 2: Parametric & Optional Routes (has : segments) ─────────
+        if (!matched && this.r0_has > 0.0)  { if (this.r0_type  == 1.0 && (this.r0_method  == req.method || this.r0_method  == "ANY") && matchRoutePattern(this.r0_path,  req.path, req, isStrict)) { matched = true; let fn_r0_p1 = this.r0_fn; fn_r0_p1(req,res); } }
+        if (!matched && this.r1_has > 0.0)  { if (this.r1_type  == 1.0 && (this.r1_method  == req.method || this.r1_method  == "ANY") && matchRoutePattern(this.r1_path,  req.path, req, isStrict)) { matched = true; let fn_r1_p1 = this.r1_fn; fn_r1_p1(req,res); } }
+        if (!matched && this.r2_has > 0.0)  { if (this.r2_type  == 1.0 && (this.r2_method  == req.method || this.r2_method  == "ANY") && matchRoutePattern(this.r2_path,  req.path, req, isStrict)) { matched = true; let fn_r2_p1 = this.r2_fn; fn_r2_p1(req,res); } }
+        if (!matched && this.r3_has > 0.0)  { if (this.r3_type  == 1.0 && (this.r3_method  == req.method || this.r3_method  == "ANY") && matchRoutePattern(this.r3_path,  req.path, req, isStrict)) { matched = true; let fn_r3_p1 = this.r3_fn; fn_r3_p1(req,res); } }
+        if (!matched && this.r4_has > 0.0)  { if (this.r4_type  == 1.0 && (this.r4_method  == req.method || this.r4_method  == "ANY") && matchRoutePattern(this.r4_path,  req.path, req, isStrict)) { matched = true; let fn_r4_p1 = this.r4_fn; fn_r4_p1(req,res); } }
+        if (!matched && this.r5_has > 0.0)  { if (this.r5_type  == 1.0 && (this.r5_method  == req.method || this.r5_method  == "ANY") && matchRoutePattern(this.r5_path,  req.path, req, isStrict)) { matched = true; let fn_r5_p1 = this.r5_fn; fn_r5_p1(req,res); } }
+        if (!matched && this.r6_has > 0.0)  { if (this.r6_type  == 1.0 && (this.r6_method  == req.method || this.r6_method  == "ANY") && matchRoutePattern(this.r6_path,  req.path, req, isStrict)) { matched = true; let fn_r6_p1 = this.r6_fn; fn_r6_p1(req,res); } }
+        if (!matched && this.r7_has > 0.0)  { if (this.r7_type  == 1.0 && (this.r7_method  == req.method || this.r7_method  == "ANY") && matchRoutePattern(this.r7_path,  req.path, req, isStrict)) { matched = true; let fn_r7_p1 = this.r7_fn; fn_r7_p1(req,res); } }
+        if (!matched && this.r8_has > 0.0)  { if (this.r8_type  == 1.0 && (this.r8_method  == req.method || this.r8_method  == "ANY") && matchRoutePattern(this.r8_path,  req.path, req, isStrict)) { matched = true; let fn_r8_p1 = this.r8_fn; fn_r8_p1(req,res); } }
+        if (!matched && this.r9_has > 0.0)  { if (this.r9_type  == 1.0 && (this.r9_method  == req.method || this.r9_method  == "ANY") && matchRoutePattern(this.r9_path,  req.path, req, isStrict)) { matched = true; let fn_r9_p1 = this.r9_fn; fn_r9_p1(req,res); } }
+        if (!matched && this.r10_has > 0.0) { if (this.r10_type == 1.0 && (this.r10_method == req.method || this.r10_method == "ANY") && matchRoutePattern(this.r10_path, req.path, req, isStrict)) { matched = true; let fn_r10_p1 = this.r10_fn; fn_r10_p1(req,res); } }
+        if (!matched && this.r11_has > 0.0) { if (this.r11_type == 1.0 && (this.r11_method == req.method || this.r11_method == "ANY") && matchRoutePattern(this.r11_path, req.path, req, isStrict)) { matched = true; let fn_r11_p1 = this.r11_fn; fn_r11_p1(req,res); } }
+        if (!matched && this.r12_has > 0.0) { if (this.r12_type == 1.0 && (this.r12_method == req.method || this.r12_method == "ANY") && matchRoutePattern(this.r12_path, req.path, req, isStrict)) { matched = true; let fn_r12_p1 = this.r12_fn; fn_r12_p1(req,res); } }
+        if (!matched && this.r13_has > 0.0) { if (this.r13_type == 1.0 && (this.r13_method == req.method || this.r13_method == "ANY") && matchRoutePattern(this.r13_path, req.path, req, isStrict)) { matched = true; let fn_r13_p1 = this.r13_fn; fn_r13_p1(req,res); } }
+        if (!matched && this.r14_has > 0.0) { if (this.r14_type == 1.0 && (this.r14_method == req.method || this.r14_method == "ANY") && matchRoutePattern(this.r14_path, req.path, req, isStrict)) { matched = true; let fn_r14_p1 = this.r14_fn; fn_r14_p1(req,res); } }
+        if (!matched && this.r15_has > 0.0) { if (this.r15_type == 1.0 && (this.r15_method == req.method || this.r15_method == "ANY") && matchRoutePattern(this.r15_path, req.path, req, isStrict)) { matched = true; let fn_r15_p1 = this.r15_fn; fn_r15_p1(req,res); } }
+        if (!matched && this.r16_has > 0.0) { if (this.r16_type == 1.0 && (this.r16_method == req.method || this.r16_method == "ANY") && matchRoutePattern(this.r16_path, req.path, req, isStrict)) { matched = true; let fn_r16_p1 = this.r16_fn; fn_r16_p1(req,res); } }
+        if (!matched && this.r17_has > 0.0) { if (this.r17_type == 1.0 && (this.r17_method == req.method || this.r17_method == "ANY") && matchRoutePattern(this.r17_path, req.path, req, isStrict)) { matched = true; let fn_r17_p1 = this.r17_fn; fn_r17_p1(req,res); } }
+        if (!matched && this.r18_has > 0.0) { if (this.r18_type == 1.0 && (this.r18_method == req.method || this.r18_method == "ANY") && matchRoutePattern(this.r18_path, req.path, req, isStrict)) { matched = true; let fn_r18_p1 = this.r18_fn; fn_r18_p1(req,res); } }
+        if (!matched && this.r19_has > 0.0) { if (this.r19_type == 1.0 && (this.r19_method == req.method || this.r19_method == "ANY") && matchRoutePattern(this.r19_path, req.path, req, isStrict)) { matched = true; let fn_r19_p1 = this.r19_fn; fn_r19_p1(req,res); } }
+        if (!matched && this.r20_has > 0.0) { if (this.r20_type == 1.0 && (this.r20_method == req.method || this.r20_method == "ANY") && matchRoutePattern(this.r20_path, req.path, req, isStrict)) { matched = true; let fn_r20_p1 = this.r20_fn; fn_r20_p1(req,res); } }
+        if (!matched && this.r21_has > 0.0) { if (this.r21_type == 1.0 && (this.r21_method == req.method || this.r21_method == "ANY") && matchRoutePattern(this.r21_path, req.path, req, isStrict)) { matched = true; let fn_r21_p1 = this.r21_fn; fn_r21_p1(req,res); } }
+        if (!matched && this.r22_has > 0.0) { if (this.r22_type == 1.0 && (this.r22_method == req.method || this.r22_method == "ANY") && matchRoutePattern(this.r22_path, req.path, req, isStrict)) { matched = true; let fn_r22_p1 = this.r22_fn; fn_r22_p1(req,res); } }
+        if (!matched && this.r23_has > 0.0) { if (this.r23_type == 1.0 && (this.r23_method == req.method || this.r23_method == "ANY") && matchRoutePattern(this.r23_path, req.path, req, isStrict)) { matched = true; let fn_r23_p1 = this.r23_fn; fn_r23_p1(req,res); } }
+        if (!matched && this.r24_has > 0.0) { if (this.r24_type == 1.0 && (this.r24_method == req.method || this.r24_method == "ANY") && matchRoutePattern(this.r24_path, req.path, req, isStrict)) { matched = true; let fn_r24_p1 = this.r24_fn; fn_r24_p1(req,res); } }
+        if (!matched && this.r25_has > 0.0) { if (this.r25_type == 1.0 && (this.r25_method == req.method || this.r25_method == "ANY") && matchRoutePattern(this.r25_path, req.path, req, isStrict)) { matched = true; let fn_r25_p1 = this.r25_fn; fn_r25_p1(req,res); } }
+        if (!matched && this.r26_has > 0.0) { if (this.r26_type == 1.0 && (this.r26_method == req.method || this.r26_method == "ANY") && matchRoutePattern(this.r26_path, req.path, req, isStrict)) { matched = true; let fn_r26_p1 = this.r26_fn; fn_r26_p1(req,res); } }
+        if (!matched && this.r27_has > 0.0) { if (this.r27_type == 1.0 && (this.r27_method == req.method || this.r27_method == "ANY") && matchRoutePattern(this.r27_path, req.path, req, isStrict)) { matched = true; let fn_r27_p1 = this.r27_fn; fn_r27_p1(req,res); } }
+        if (!matched && this.r28_has > 0.0) { if (this.r28_type == 1.0 && (this.r28_method == req.method || this.r28_method == "ANY") && matchRoutePattern(this.r28_path, req.path, req, isStrict)) { matched = true; let fn_r28_p1 = this.r28_fn; fn_r28_p1(req,res); } }
+        if (!matched && this.r29_has > 0.0) { if (this.r29_type == 1.0 && (this.r29_method == req.method || this.r29_method == "ANY") && matchRoutePattern(this.r29_path, req.path, req, isStrict)) { matched = true; let fn_r29_p1 = this.r29_fn; fn_r29_p1(req,res); } }
+        if (!matched && this.r30_has > 0.0) { if (this.r30_type == 1.0 && (this.r30_method == req.method || this.r30_method == "ANY") && matchRoutePattern(this.r30_path, req.path, req, isStrict)) { matched = true; let fn_r30_p1 = this.r30_fn; fn_r30_p1(req,res); } }
+        if (!matched && this.r31_has > 0.0) { if (this.r31_type == 1.0 && (this.r31_method == req.method || this.r31_method == "ANY") && matchRoutePattern(this.r31_path, req.path, req, isStrict)) { matched = true; let fn_r31_p1 = this.r31_fn; fn_r31_p1(req,res); } }
+
+        // ── PASS 3: Wildcard Routes (has * segment — lowest precedence) ───
+        if (!matched && this.r0_has > 0.0)  { if (this.r0_type  == 2.0 && (this.r0_method  == req.method || this.r0_method  == "ANY") && matchRoutePattern(this.r0_path,  req.path, req, isStrict)) { matched = true; let fn_r0_p2 = this.r0_fn; fn_r0_p2(req,res); } }
+        if (!matched && this.r1_has > 0.0)  { if (this.r1_type  == 2.0 && (this.r1_method  == req.method || this.r1_method  == "ANY") && matchRoutePattern(this.r1_path,  req.path, req, isStrict)) { matched = true; let fn_r1_p2 = this.r1_fn; fn_r1_p2(req,res); } }
+        if (!matched && this.r2_has > 0.0)  { if (this.r2_type  == 2.0 && (this.r2_method  == req.method || this.r2_method  == "ANY") && matchRoutePattern(this.r2_path,  req.path, req, isStrict)) { matched = true; let fn_r2_p2 = this.r2_fn; fn_r2_p2(req,res); } }
+        if (!matched && this.r3_has > 0.0)  { if (this.r3_type  == 2.0 && (this.r3_method  == req.method || this.r3_method  == "ANY") && matchRoutePattern(this.r3_path,  req.path, req, isStrict)) { matched = true; let fn_r3_p2 = this.r3_fn; fn_r3_p2(req,res); } }
+        if (!matched && this.r4_has > 0.0)  { if (this.r4_type  == 2.0 && (this.r4_method  == req.method || this.r4_method  == "ANY") && matchRoutePattern(this.r4_path,  req.path, req, isStrict)) { matched = true; let fn_r4_p2 = this.r4_fn; fn_r4_p2(req,res); } }
+        if (!matched && this.r5_has > 0.0)  { if (this.r5_type  == 2.0 && (this.r5_method  == req.method || this.r5_method  == "ANY") && matchRoutePattern(this.r5_path,  req.path, req, isStrict)) { matched = true; let fn_r5_p2 = this.r5_fn; fn_r5_p2(req,res); } }
+        if (!matched && this.r6_has > 0.0)  { if (this.r6_type  == 2.0 && (this.r6_method  == req.method || this.r6_method  == "ANY") && matchRoutePattern(this.r6_path,  req.path, req, isStrict)) { matched = true; let fn_r6_p2 = this.r6_fn; fn_r6_p2(req,res); } }
+        if (!matched && this.r7_has > 0.0)  { if (this.r7_type  == 2.0 && (this.r7_method  == req.method || this.r7_method  == "ANY") && matchRoutePattern(this.r7_path,  req.path, req, isStrict)) { matched = true; let fn_r7_p2 = this.r7_fn; fn_r7_p2(req,res); } }
+        if (!matched && this.r8_has > 0.0)  { if (this.r8_type  == 2.0 && (this.r8_method  == req.method || this.r8_method  == "ANY") && matchRoutePattern(this.r8_path,  req.path, req, isStrict)) { matched = true; let fn_r8_p2 = this.r8_fn; fn_r8_p2(req,res); } }
+        if (!matched && this.r9_has > 0.0)  { if (this.r9_type  == 2.0 && (this.r9_method  == req.method || this.r9_method  == "ANY") && matchRoutePattern(this.r9_path,  req.path, req, isStrict)) { matched = true; let fn_r9_p2 = this.r9_fn; fn_r9_p2(req,res); } }
+        if (!matched && this.r10_has > 0.0) { if (this.r10_type == 2.0 && (this.r10_method == req.method || this.r10_method == "ANY") && matchRoutePattern(this.r10_path, req.path, req, isStrict)) { matched = true; let fn_r10_p2 = this.r10_fn; fn_r10_p2(req,res); } }
+        if (!matched && this.r11_has > 0.0) { if (this.r11_type == 2.0 && (this.r11_method == req.method || this.r11_method == "ANY") && matchRoutePattern(this.r11_path, req.path, req, isStrict)) { matched = true; let fn_r11_p2 = this.r11_fn; fn_r11_p2(req,res); } }
+        if (!matched && this.r12_has > 0.0) { if (this.r12_type == 2.0 && (this.r12_method == req.method || this.r12_method == "ANY") && matchRoutePattern(this.r12_path, req.path, req, isStrict)) { matched = true; let fn_r12_p2 = this.r12_fn; fn_r12_p2(req,res); } }
+        if (!matched && this.r13_has > 0.0) { if (this.r13_type == 2.0 && (this.r13_method == req.method || this.r13_method == "ANY") && matchRoutePattern(this.r13_path, req.path, req, isStrict)) { matched = true; let fn_r13_p2 = this.r13_fn; fn_r13_p2(req,res); } }
+        if (!matched && this.r14_has > 0.0) { if (this.r14_type == 2.0 && (this.r14_method == req.method || this.r14_method == "ANY") && matchRoutePattern(this.r14_path, req.path, req, isStrict)) { matched = true; let fn_r14_p2 = this.r14_fn; fn_r14_p2(req,res); } }
+        if (!matched && this.r15_has > 0.0) { if (this.r15_type == 2.0 && (this.r15_method == req.method || this.r15_method == "ANY") && matchRoutePattern(this.r15_path, req.path, req, isStrict)) { matched = true; let fn_r15_p2 = this.r15_fn; fn_r15_p2(req,res); } }
+        if (!matched && this.r16_has > 0.0) { if (this.r16_type == 2.0 && (this.r16_method == req.method || this.r16_method == "ANY") && matchRoutePattern(this.r16_path, req.path, req, isStrict)) { matched = true; let fn_r16_p2 = this.r16_fn; fn_r16_p2(req,res); } }
+        if (!matched && this.r17_has > 0.0) { if (this.r17_type == 2.0 && (this.r17_method == req.method || this.r17_method == "ANY") && matchRoutePattern(this.r17_path, req.path, req, isStrict)) { matched = true; let fn_r17_p2 = this.r17_fn; fn_r17_p2(req,res); } }
+        if (!matched && this.r18_has > 0.0) { if (this.r18_type == 2.0 && (this.r18_method == req.method || this.r18_method == "ANY") && matchRoutePattern(this.r18_path, req.path, req, isStrict)) { matched = true; let fn_r18_p2 = this.r18_fn; fn_r18_p2(req,res); } }
+        if (!matched && this.r19_has > 0.0) { if (this.r19_type == 2.0 && (this.r19_method == req.method || this.r19_method == "ANY") && matchRoutePattern(this.r19_path, req.path, req, isStrict)) { matched = true; let fn_r19_p2 = this.r19_fn; fn_r19_p2(req,res); } }
+        if (!matched && this.r20_has > 0.0) { if (this.r20_type == 2.0 && (this.r20_method == req.method || this.r20_method == "ANY") && matchRoutePattern(this.r20_path, req.path, req, isStrict)) { matched = true; let fn_r20_p2 = this.r20_fn; fn_r20_p2(req,res); } }
+        if (!matched && this.r21_has > 0.0) { if (this.r21_type == 2.0 && (this.r21_method == req.method || this.r21_method == "ANY") && matchRoutePattern(this.r21_path, req.path, req, isStrict)) { matched = true; let fn_r21_p2 = this.r21_fn; fn_r21_p2(req,res); } }
+        if (!matched && this.r22_has > 0.0) { if (this.r22_type == 2.0 && (this.r22_method == req.method || this.r22_method == "ANY") && matchRoutePattern(this.r22_path, req.path, req, isStrict)) { matched = true; let fn_r22_p2 = this.r22_fn; fn_r22_p2(req,res); } }
+        if (!matched && this.r23_has > 0.0) { if (this.r23_type == 2.0 && (this.r23_method == req.method || this.r23_method == "ANY") && matchRoutePattern(this.r23_path, req.path, req, isStrict)) { matched = true; let fn_r23_p2 = this.r23_fn; fn_r23_p2(req,res); } }
+        if (!matched && this.r24_has > 0.0) { if (this.r24_type == 2.0 && (this.r24_method == req.method || this.r24_method == "ANY") && matchRoutePattern(this.r24_path, req.path, req, isStrict)) { matched = true; let fn_r24_p2 = this.r24_fn; fn_r24_p2(req,res); } }
+        if (!matched && this.r25_has > 0.0) { if (this.r25_type == 2.0 && (this.r25_method == req.method || this.r25_method == "ANY") && matchRoutePattern(this.r25_path, req.path, req, isStrict)) { matched = true; let fn_r25_p2 = this.r25_fn; fn_r25_p2(req,res); } }
+        if (!matched && this.r26_has > 0.0) { if (this.r26_type == 2.0 && (this.r26_method == req.method || this.r26_method == "ANY") && matchRoutePattern(this.r26_path, req.path, req, isStrict)) { matched = true; let fn_r26_p2 = this.r26_fn; fn_r26_p2(req,res); } }
+        if (!matched && this.r27_has > 0.0) { if (this.r27_type == 2.0 && (this.r27_method == req.method || this.r27_method == "ANY") && matchRoutePattern(this.r27_path, req.path, req, isStrict)) { matched = true; let fn_r27_p2 = this.r27_fn; fn_r27_p2(req,res); } }
+        if (!matched && this.r28_has > 0.0) { if (this.r28_type == 2.0 && (this.r28_method == req.method || this.r28_method == "ANY") && matchRoutePattern(this.r28_path, req.path, req, isStrict)) { matched = true; let fn_r28_p2 = this.r28_fn; fn_r28_p2(req,res); } }
+        if (!matched && this.r29_has > 0.0) { if (this.r29_type == 2.0 && (this.r29_method == req.method || this.r29_method == "ANY") && matchRoutePattern(this.r29_path, req.path, req, isStrict)) { matched = true; let fn_r29_p2 = this.r29_fn; fn_r29_p2(req,res); } }
+        if (!matched && this.r30_has > 0.0) { if (this.r30_type == 2.0 && (this.r30_method == req.method || this.r30_method == "ANY") && matchRoutePattern(this.r30_path, req.path, req, isStrict)) { matched = true; let fn_r30_p2 = this.r30_fn; fn_r30_p2(req,res); } }
+        if (!matched && this.r31_has > 0.0) { if (this.r31_type == 2.0 && (this.r31_method == req.method || this.r31_method == "ANY") && matchRoutePattern(this.r31_path, req.path, req, isStrict)) { matched = true; let fn_r31_p2 = this.r31_fn; fn_r31_p2(req,res); } }
+
+        // E. afterHandle hook
+        if (matched && this.hasAfterHandleHook) {
+            let ahFn = this.afterHandleHook;
+            ahFn(req, res);
+        }
+
+        // F. Error & Not-Found Handling
+        if (!matched && res.isClosed <= 0.0) {
+            // 405 detection — path matches an existing route but wrong method
+            let pathExists = false;
+            if (!pathExists && this.r0_has > 0.0)  { if (pathMatchesPattern(this.r0_path,  req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r1_has > 0.0)  { if (pathMatchesPattern(this.r1_path,  req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r2_has > 0.0)  { if (pathMatchesPattern(this.r2_path,  req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r3_has > 0.0)  { if (pathMatchesPattern(this.r3_path,  req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r4_has > 0.0)  { if (pathMatchesPattern(this.r4_path,  req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r5_has > 0.0)  { if (pathMatchesPattern(this.r5_path,  req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r6_has > 0.0)  { if (pathMatchesPattern(this.r6_path,  req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r7_has > 0.0)  { if (pathMatchesPattern(this.r7_path,  req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r8_has > 0.0)  { if (pathMatchesPattern(this.r8_path,  req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r9_has > 0.0)  { if (pathMatchesPattern(this.r9_path,  req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r10_has > 0.0) { if (pathMatchesPattern(this.r10_path, req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r11_has > 0.0) { if (pathMatchesPattern(this.r11_path, req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r12_has > 0.0) { if (pathMatchesPattern(this.r12_path, req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r13_has > 0.0) { if (pathMatchesPattern(this.r13_path, req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r14_has > 0.0) { if (pathMatchesPattern(this.r14_path, req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r15_has > 0.0) { if (pathMatchesPattern(this.r15_path, req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r16_has > 0.0) { if (pathMatchesPattern(this.r16_path, req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r17_has > 0.0) { if (pathMatchesPattern(this.r17_path, req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r18_has > 0.0) { if (pathMatchesPattern(this.r18_path, req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r19_has > 0.0) { if (pathMatchesPattern(this.r19_path, req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r20_has > 0.0) { if (pathMatchesPattern(this.r20_path, req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r21_has > 0.0) { if (pathMatchesPattern(this.r21_path, req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r22_has > 0.0) { if (pathMatchesPattern(this.r22_path, req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r23_has > 0.0) { if (pathMatchesPattern(this.r23_path, req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r24_has > 0.0) { if (pathMatchesPattern(this.r24_path, req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r25_has > 0.0) { if (pathMatchesPattern(this.r25_path, req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r26_has > 0.0) { if (pathMatchesPattern(this.r26_path, req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r27_has > 0.0) { if (pathMatchesPattern(this.r27_path, req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r28_has > 0.0) { if (pathMatchesPattern(this.r28_path, req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r29_has > 0.0) { if (pathMatchesPattern(this.r29_path, req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r30_has > 0.0) { if (pathMatchesPattern(this.r30_path, req.path, isStrict)) { pathExists = true; } }
+            if (!pathExists && this.r31_has > 0.0) { if (pathMatchesPattern(this.r31_path, req.path, isStrict)) { pathExists = true; } }
+
+            if (pathExists) {
+                // 405 Method Not Allowed — path exists, method rejected
+                if (this.hasMethodNotAllowedHandler) {
+                    let mnaFn = this.methodNotAllowedHandler;
+                    mnaFn(req, res);
+                } else {
+                    res.setStatus(405.0).json("{\"error\":\"Method Not Allowed\",\"method\":\"" + req.method + "\",\"path\":\"" + req.path + "\"}");
+                }
+            } else {
+                // 404 Not Found
+                if (this.hasOnErrorHook) {
+                    res.setStatus(404.0);
+                    let errFn = this.onErrorHook;
+                    errFn(req, res);
+                } else {
+                    if (this.hasErrorHandler) {
+                        res.setStatus(404.0);
+                        let efn = this.errorHandler;
+                        efn(req, res);
+                    } else {
+                        if (this.hasNotFoundHandler) {
+                            let nfFn = this.notFoundHandler;
+                            nfFn(req, res);
+                        } else {
+                            res.setStatus(404.0).json("{\"error\":\"Route Not Found\",\"path\":\"" + req.path + "\",\"method\":\"" + req.method + "\"}");
+                        }
+                    }
+                }
+            }
+        }
+
+        if (slotId >= 0.0) { this.releaseArenaSlot(slotId); }
+    },
+
+    function inject(method: string, path: string): Response {
+        let rawReq = method + " " + path + " HTTP/1.1\r\nHost: localhost\r\n\r\n";
+        let req = parseHttpRequest(rawReq);
+        let res: Response;
+        res.initMock();
+        this.handleRequest(req, res);
+        return res;
+    },
+
+    function injectBody(method: string, path: string): string {
+        let rawReq = method + " " + path + " HTTP/1.1\r\nHost: localhost\r\n\r\n";
+        let req = parseHttpRequest(rawReq);
+        let res: Response;
+        res.initMock();
+        this.handleRequest(req, res);
+        return res.mockBody;
+    },
+
+    function listen(port: number): void {
+        print("=========================================");
+        print(" ⚡ Vito Web Framework v1.2.0");
+        print(" Running on: http://127.0.0.1:" + port);
+        let strictStr = "false";
+        if (this.isStrictSlash) { strictStr = "true"; }
+        print(" Memory Arena: " + this.arenaCapacity + " slots | Strict Slash: " + strictStr);
+        print(" Routes: " + this.routeCount + "/32 | Middleware: " + this.middlewareCount + "/8");
+        print(" Named Routes: " + this.nrCount + "/16 | HTTP Methods: GET POST PUT PATCH DELETE HEAD OPTIONS ANY");
+        print(" Features: Route Precedence ✓ | Optional Params ✓ | Wildcard Multi-seg ✓ | 405 Handler ✓");
+        print("=========================================");
+
+        let listener = listenTcp("127.0.0.1", port);
+        while (true) {
+            let stream = listener.accept();
+            let keepAlive = true;
+            while (keepAlive) {
+                let bufId = this.acquireBuffer();
+                let rawData = stream.read(4096);
+                if (rawData.length > 0) {
+                    let req = parseHttpRequest(rawData);
+                    let res: Response;
+                    res.status = 200.0;
+                    res.statusText = "OK";
+                    res.headersStr = "";
+                    res.stream = stream;
+                    res.isClosed = 0.0;
+                    res.isMock = 0.0;
+                    res.mockBody = "";
+                    this.handleRequest(req, res);
+                    let connHeader = req.header("Connection");
+                    if (connHeader == "close" || connHeader == "Close") { keepAlive = false; }
+                    if (res.isClosed > 0.0 && vit_net_socket_is_connected(stream.fd) <= 0.0) { keepAlive = false; }
+                } else {
+                    keepAlive = false;
+                }
+                if (bufId >= 0) { this.releaseBuffer(bufId); }
+            }
+            stream.close();
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Factory Functions
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Standard app (Lax trailing slash — /users/ normalized to /users)
+function createApp(): VitoApp {
+    let app: VitoApp;
+    app.init();
+    return app;
+}
+
+// Strict trailing slash mode (/users and /users/ are different routes)
+function createStrictApp(): VitoApp {
+    let app: VitoApp;
+    app.init();
+    app.setStrictSlash(true);
+    return app;
+}
+
+function runVitoApp(port: number): void {
+    let app = createApp();
+    app.any("/health", (req: Request, res: Response) => {
+        res.json("{\"status\":\"UP\",\"framework\":\"Vito v1.2.0\",\"engine\":\"VIT Native Phase 9\",\"routes\":32,\"middlewares\":8,\"namedRoutes\":16}");
+    });
+    app.listen(port);
+}

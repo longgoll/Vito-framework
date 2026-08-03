@@ -1,38 +1,38 @@
 # Định Tuyến & Route Parameters 🎯
 
-Hệ thống định tuyến (**Router Engine**) của **Vito Framework** được thiết kế dựa trên thuật toán **Radix Trie (Phase 9 Engine)**, kết hợp giữa tốc độ phản hồi cực đại và khả năng trích xuất tham số linh hoạt.
+Hệ thống định tuyến (**Router Engine**) của **Vito Framework** được thiết kế dựa trên kiến trúc **3-Pass Flat-Unrolled Engine (Phase 9 Perf)**, kết hợp giữa tốc độ phản hồi cực đại O(1) qua Arena Slot Lookup và khả năng phân loại ưu tiên route tự động.
 
 <RouteVisualizer />
 
 ---
 
-## 🧠 0. Nguyên Lý Hoạt Động: Radix Trie Engine
+## 🧠 0. Nguyên Lý Hoạt Động: 3-Pass Flat-Unrolled Engine
 
-Vito Router không so sánh từng route một theo kiểu tuyến tính — thay vào đó sử dụng cấu trúc **Radix Trie (Prefix Tree)** để đạt hiệu năng tra cứu **O(K)** với `K` là độ dài URL, bất kể bạn có 10 hay 10.000 routes đã đăng ký.
+Vito Router sử dụng cấu trúc **Flat-Unrolled Registry (32 Slots cố định)** kết hợp với **Memory Arena Slot Collector** để đạt hiệu năng xử lý cực đại và **Zero-Allocation**:
 
 <div class="card-grid">
   <div class="feature-mini-card">
     <div class="icon">⚡</div>
-    <h4>O(K) Lookup Time</h4>
-    <p>Thời gian tìm route chỉ phụ thuộc vào độ dài URL, không phụ thuộc vào số lượng routes đã đăng ký.</p>
+    <h4>Zero-Allocation Matching</h4>
+    <p>Quá trình khớp route sử dụng bộ nhớ Arena Slot recycled — không tạo bất kỳ heap allocation mới nào.</p>
   </div>
 
   <div class="feature-mini-card">
     <div class="icon">♻️</div>
-    <h4>Zero-Allocation Match</h4>
-    <p>Quá trình khớp route không tạo ra heap allocation mới — cực kỳ thân thiện với GC và bộ nhớ.</p>
+    <h4>Flat-Unrolled Memory Layout</h4>
+    <p>32 slots route và 8 slots middleware được trải phẳng (unrolled) trực tiếp trong struct VitoApp, tối ưu L1/L2 Cache Locality.</p>
   </div>
 
   <div class="feature-mini-card">
     <div class="icon">🔢</div>
-    <h4>Static Fast-Path</h4>
-    <p>Các route tĩnh (không có param) được ưu tiên ở Pass 1, khớp nhanh nhất có thể.</p>
+    <h4>3-Pass Precedence Engine</h4>
+    <p>Tự động phân loại route thành 3 cấp ưu tiên (Static -> Parametric -> Wildcard) lúc đăng ký mà không cần sort.</p>
   </div>
 
   <div class="feature-mini-card">
     <div class="icon">🌿</div>
-    <h4>Shared Prefix Compression</h4>
-    <p>Các nhánh route có tiền tố chung được chia sẻ node trong cây, giảm bộ nhớ và tăng cache locality.</p>
+    <h4>O(1) Memory Arena Access</h4>
+    <p>Quản lý vòng đời request slot qua bitmask arena, giải phóng ngay khi hoàn tất request handling.</p>
   </div>
 </div>
 
@@ -220,6 +220,22 @@ app.get("/posts/:category?", (req: Request, res: Response) => {
 });
 // GET /posts        → { message: "Tất cả bài viết" }
 // GET /posts/tech   → { message: "Bài viết danh mục: tech" }
+```
+
+```typescript [6. Regex Constraints (:id(\\d+))]
+// :id(\d+) — chỉ khớp nếu :id là các chữ số 0-9
+app.get("/users/:id(\\d+)", (req: Request, res: Response) => {
+    let userId = req.paramInt("id"); // Type-safe number: 101
+    res.json("{\"user_id\": " + userId + "}");
+});
+
+// :slug([a-z0-9-]+) — chỉ khớp chữ cái thường, số và dấu gạch ngang
+app.get("/articles/:slug([a-z0-9-]+)", (req: Request, res: Response) => {
+    let slug = req.param("slug");
+    res.json("{\"slug\": \"" + slug + "\"}");
+});
+// GET /users/101  → 200 OK (id = 101)
+// GET /users/abc  → 404/405 (không khớp regex \\d+)
 ```
 
 :::
@@ -618,7 +634,11 @@ function main(): number {
 | `req.method` | `string` | HTTP method | `req.method` → `"GET"` |
 | `req.path` | `string` | Đường dẫn URL | `req.path` → `"/users/42"` |
 | `req.param(key)` | `string` | Route param động | `req.param("id")` → `"42"` |
+| `req.paramInt(key)` | `number` | Route param ép kiểu số nguyên *(NEW)* | `req.paramInt("id")` → `42` |
+| `req.paramFloat(key)` | `number` | Route param ép kiểu số thực *(NEW)* | `req.paramFloat("price")` → `19.99` |
+| `req.paramBool(key)` | `boolean` | Route param ép kiểu boolean *(NEW)* | `req.paramBool("active")` → `true` |
 | `req.query(key)` | `string` | Query string param | `req.query("page")` → `"2"` |
+| `req.queryInt(key)` | `number` | Query param ép kiểu số nguyên *(NEW)* | `req.queryInt("page")` → `2` |
 | `req.header(key)` | `string` | Request header | `req.header("Authorization")` |
 | `req.body` | `string` | Raw request body | `req.body` |
 | `req.queryString` | `string` | Raw query string | `req.queryString` |

@@ -1,0 +1,204 @@
+// Vito Web Framework Dynamic Path Matching Engine (vito/src/core/matcher.vit)
+import { charAt } from "std/string";
+extern function __vit_str_regex_match(str: string, pattern: string): number;
+import { normalizePath } from "packages/router/router.vit";
+import { getPathSegment, getPathSegmentCount, getSubpathFromSegment, routeHasWildcard, routeHasOptional } from "src/core/utils.vit";
+import { Request } from "src/core/request.vit";
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Dynamic Path Matching Engine (with multi-segment wildcard + optional params)
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Full matching with param capture — used for actual route dispatch
+function matchRoutePattern(routePath: string, reqPath: string, req: Request, isStrict: boolean): boolean {
+    let normRoute = normalizePath(routePath, isStrict);
+    let normReq   = normalizePath(reqPath,   isStrict);
+
+    // Fast path: exact static match
+    if (normRoute == normReq) { return true; }
+
+    let hasWildcard  = routeHasWildcard(normRoute);
+    let hasOptional  = routeHasOptional(normRoute);
+    let routeSegCount = getPathSegmentCount(normRoute);
+    let reqSegCount   = getPathSegmentCount(normReq);
+
+    // Segment count guard — relaxed for wildcard and optional
+    if (hasWildcard) {
+        // Wildcard gobbles all remaining segments; need at least fixed-prefix segs
+        if (reqSegCount < routeSegCount - 1.0) { return false; }
+    } else {
+        if (hasOptional) {
+            // Optional param: reqSegCount may be routeSegCount OR routeSegCount - 1
+            if (reqSegCount != routeSegCount && reqSegCount != routeSegCount - 1.0) { return false; }
+        } else {
+            if (routeSegCount != reqSegCount) { return false; }
+        }
+    }
+
+    let s = 0.0;
+    let matched = true;
+    let tk0 = ""; let tv0 = "";
+    let tk1 = ""; let tv1 = "";
+    let tk2 = ""; let tv2 = "";
+    let tempCount = 0.0;
+    let rSeg = "";
+    let pSeg = "";
+
+    while (s < routeSegCount) {
+        rSeg = getPathSegment(normRoute, s);
+        pSeg = getPathSegment(normReq,   s);
+
+        if (rSeg.length > 0.0 && charAt(rSeg, 0.0) == "*") {
+            // ── Wildcard: capture ALL remaining path from this segment ─────
+            let wKey = "";
+            let kw = 1.0;
+            while (kw < rSeg.length) { wKey = wKey + charAt(rSeg, kw); kw = kw + 1.0; }
+            if (wKey == "") { wKey = "wildcard"; }
+            let remaining = getSubpathFromSegment(normReq, s);
+            if (tempCount == 0.0) { tk0 = wKey; tv0 = remaining; }
+            if (tempCount == 1.0) { tk1 = wKey; tv1 = remaining; }
+            if (tempCount == 2.0) { tk2 = wKey; tv2 = remaining; }
+            tempCount = tempCount + 1.0;
+            break; // wildcard consumed all remaining segments
+
+        } else {
+        if (rSeg.length > 0.0 && charAt(rSeg, 0.0) == ":") {
+            // ── Param segment (required, optional, or regex constrained) ──
+            let lastIdx = rSeg.length - 1.0;
+            let isOptional = (rSeg.length > 1.0 && charAt(rSeg, lastIdx) == "?");
+
+            // Extract param key and optional inline regex pattern, e.g. :id(\d+)
+            let paramKey = "";
+            let regexPattern = "";
+            let hasRegex = false;
+
+            let openParen = -1.0;
+            let closeParen = -1.0;
+            let cIdx = 1.0;
+            let kpEnd = rSeg.length;
+            if (isOptional) { kpEnd = kpEnd - 1.0; }
+
+            while (cIdx < kpEnd) {
+                if (charAt(rSeg, cIdx) == "(") { openParen = cIdx; }
+                if (charAt(rSeg, cIdx) == ")") { closeParen = cIdx; }
+                cIdx = cIdx + 1.0;
+            }
+
+            if (openParen >= 1.0 && closeParen > openParen) {
+                hasRegex = true;
+                let k = 1.0;
+                while (k < openParen) { paramKey = paramKey + charAt(rSeg, k); k = k + 1.0; }
+                let r = openParen + 1.0;
+                while (r < closeParen) { regexPattern = regexPattern + charAt(rSeg, r); r = r + 1.0; }
+            } else {
+                let kp = 1.0;
+                while (kp < kpEnd) { paramKey = paramKey + charAt(rSeg, kp); kp = kp + 1.0; }
+            }
+
+            // If regex constraint is present, validate pSeg against pattern
+            if (hasRegex && pSeg.length > 0.0) {
+                let anchorPattern = regexPattern;
+                if (charAt(regexPattern, 0) != "^") { anchorPattern = "^" + anchorPattern; }
+                let rLen = regexPattern.length;
+                if (charAt(regexPattern, rLen - 1.0) != "$") { anchorPattern = anchorPattern + "$"; }
+                let matchResult = __vit_str_regex_match(pSeg, anchorPattern);
+                if (matchResult <= 0.0) { matched = false; break; }
+            }
+
+            if (isOptional && pSeg == "") {
+                // Optional param not provided — store empty string
+                if (tempCount == 0.0) { tk0 = paramKey; tv0 = ""; }
+                if (tempCount == 1.0) { tk1 = paramKey; tv1 = ""; }
+                if (tempCount == 2.0) { tk2 = paramKey; tv2 = ""; }
+            } else {
+                if (tempCount == 0.0) { tk0 = paramKey; tv0 = pSeg; }
+                if (tempCount == 1.0) { tk1 = paramKey; tv1 = pSeg; }
+                if (tempCount == 2.0) { tk2 = paramKey; tv2 = pSeg; }
+            }
+            tempCount = tempCount + 1.0;
+
+        } else {
+            // ── Static segment: must match exactly ────────────────────────
+            if (rSeg != pSeg) { matched = false; break; }
+        }
+        } // end else (not wildcard)
+        s = s + 1.0;
+    }
+
+    if (matched) {
+        if (tempCount >= 1.0) { req.pk0 = tk0; req.pv0 = tv0; }
+        if (tempCount >= 2.0) { req.pk1 = tk1; req.pv1 = tv1; }
+        if (tempCount >= 3.0) { req.pk2 = tk2; req.pv2 = tv2; }
+        req.paramsCount = tempCount;
+        return true;
+    }
+    return false;
+}
+
+// Path-only match (no param capture) — used for 405 Method Not Allowed detection
+function pathMatchesPattern(routePath: string, reqPath: string, isStrict: boolean): boolean {
+    if (routePath == "" || reqPath == "") { return false; }
+    let normRoute = normalizePath(routePath, isStrict);
+    let normReq   = normalizePath(reqPath,   isStrict);
+
+    if (normRoute == normReq) { return true; }
+
+    let hasWildcard  = routeHasWildcard(normRoute);
+    let hasOptional  = routeHasOptional(normRoute);
+    let routeSegCount = getPathSegmentCount(normRoute);
+    let reqSegCount   = getPathSegmentCount(normReq);
+
+    if (hasWildcard) {
+        if (reqSegCount < routeSegCount - 1.0) { return false; }
+    } else {
+        if (hasOptional) {
+            if (reqSegCount != routeSegCount && reqSegCount != routeSegCount - 1.0) { return false; }
+        } else {
+            if (routeSegCount != reqSegCount) { return false; }
+        }
+    }
+
+    let s = 0.0;
+    let matched = true;
+    let rSeg = "";
+    let pSeg = "";
+    while (s < routeSegCount) {
+        rSeg = getPathSegment(normRoute, s);
+        pSeg = getPathSegment(normReq,   s);
+        if (rSeg.length > 0.0 && charAt(rSeg, 0.0) == "*") { break; } // wildcard matches rest
+        if (rSeg.length > 0.0 && charAt(rSeg, 0.0) == ":") {
+            let lastIdx = rSeg.length - 1.0;
+            let isOptional = (rSeg.length > 1.0 && charAt(rSeg, lastIdx) == "?");
+            if (!isOptional && pSeg == "") { matched = false; break; }
+
+            // Validate inline regex constraint if present, e.g. :id(\d+)
+            let openParen = -1.0;
+            let closeParen = -1.0;
+            let cIdx = 1.0;
+            let kpEnd = rSeg.length;
+            if (isOptional) { kpEnd = kpEnd - 1.0; }
+            while (cIdx < kpEnd) {
+                if (charAt(rSeg, cIdx) == "(") { openParen = cIdx; }
+                if (charAt(rSeg, cIdx) == ")") { closeParen = cIdx; }
+                cIdx = cIdx + 1.0;
+            }
+            if (openParen >= 1.0 && closeParen > openParen) {
+                let regexPattern = "";
+                let r = openParen + 1.0;
+                while (r < closeParen) { regexPattern = regexPattern + charAt(rSeg, r); r = r + 1.0; }
+                if (pSeg.length > 0.0) {
+                    let anchorPattern = regexPattern;
+                    if (charAt(regexPattern, 0.0) != "^") { anchorPattern = "^" + anchorPattern; }
+                    let rLen = regexPattern.length;
+                    if (charAt(regexPattern, rLen - 1.0) != "$") { anchorPattern = anchorPattern + "$"; }
+                    let matchResult = __vit_str_regex_match(pSeg, anchorPattern);
+                    if (matchResult <= 0.0) { matched = false; break; }
+                }
+            }
+        } else {
+            if (rSeg != pSeg) { matched = false; break; }
+        }
+        s = s + 1.0;
+    }
+    return matched;
+}

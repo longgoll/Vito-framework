@@ -98,7 +98,7 @@ Mở socket và bắt đầu lắng nghe kết nối HTTP trên cổng được 
 | `createMemoryArena()` | `packages/pool/pool.vit` | Tạo đối tượng quản lý Request Memory Arena slots tái sử dụng. |
 | `createTcpBufferPool()` | `packages/pool/pool.vit` | Tạo Buffer Recycling Pool cho TCP Read/Write buffers. |
 | `zeroAllocHeaderLookup(raw, target)` | `packages/pool/pool.vit` | Trích xuất giá trị Header trực tiếp từ raw HTTP stream không cấp phát memory. |
-| `createRadixRouter(strict)` | `packages/router/router.vit` | Khởi tạo Radix Trie Router với $O(1)$ Static Route Fast Path. |
+| `createRadixRouter(strict)` | `packages/router/router.vit` | Khởi tạo Static Route Fast Path Router với $O(1)$ memory slot lookup. |
 | `normalizePath(path, strict)` | `packages/router/router.vit` | Chuẩn hóa đường dẫn URL theo chế độ Lax / Strict slash. |
 
 ---

@@ -1,0 +1,145 @@
+// Vito Web Framework Engine Response Context (vito/src/core/response.vit)
+import { TcpStream } from "std/net";
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Response Context & HTTP Status Code Handling
+// ═══════════════════════════════════════════════════════════════════════════
+struct Response {
+    status: number,
+    statusText: string,
+    headersStr: string,
+    stream: TcpStream,
+    isClosed: number,
+    isMock: number,
+    mockBody: string,
+
+    function initMock(): void {
+        this.status = 200.0;
+        this.statusText = "OK";
+        this.headersStr = "";
+        this.isClosed = 0.0;
+        this.isMock = 1.0;
+        this.mockBody = "";
+        let s: TcpStream;
+        s.fd = -1.0;
+        this.stream = s;
+    },
+
+    function setHeader(name: string, value: string): Response {
+        this.headersStr = this.headersStr + name + ": " + value + "\r\n";
+        return this;
+    },
+
+    function setCookie(key: string, value: string, optionsStr: string): void {
+        let cookieHeader = key + "=" + value;
+        if (optionsStr.length > 0) {
+            cookieHeader = cookieHeader + "; " + optionsStr;
+        } else {
+            cookieHeader = cookieHeader + "; Path=/; HttpOnly; SameSite=Lax";
+        }
+        this.setHeader("Set-Cookie", cookieHeader);
+    },
+
+    function setStatus(code: number): Response {
+        this.status = code;
+        this.statusText = "OK";
+        if (code == 200.0) { this.statusText = "OK"; }
+        if (code == 201.0) { this.statusText = "Created"; }
+        if (code == 204.0) { this.statusText = "No Content"; }
+        if (code == 301.0) { this.statusText = "Moved Permanently"; }
+        if (code == 302.0) { this.statusText = "Found"; }
+        if (code == 304.0) { this.statusText = "Not Modified"; }
+        if (code == 400.0) { this.statusText = "Bad Request"; }
+        if (code == 401.0) { this.statusText = "Unauthorized"; }
+        if (code == 403.0) { this.statusText = "Forbidden"; }
+        if (code == 404.0) { this.statusText = "Not Found"; }
+        if (code == 405.0) { this.statusText = "Method Not Allowed"; }
+        if (code == 409.0) { this.statusText = "Conflict"; }
+        if (code == 422.0) { this.statusText = "Unprocessable Entity"; }
+        if (code == 429.0) { this.statusText = "Too Many Requests"; }
+        if (code == 500.0) { this.statusText = "Internal Server Error"; }
+        if (code == 502.0) { this.statusText = "Bad Gateway"; }
+        if (code == 503.0) { this.statusText = "Service Unavailable"; }
+        return this;
+    },
+
+    function send(text: string): void {
+        if (this.isClosed > 0.0) { return; }
+        if (this.status == 0.0) { this.setStatus(200.0); }
+        if (this.isMock > 0.0) { this.mockBody = text; this.isClosed = 1.0; return; }
+        let contentLen = text.length;
+        let headerStr = "HTTP/1.1 " + this.status + " " + this.statusText + "\r\n" +
+                        "Content-Type: text/plain; charset=utf-8\r\n" +
+                        "Content-Length: " + contentLen + "\r\n" +
+                        this.headersStr +
+                        "Connection: keep-alive\r\n\r\n";
+        this.stream.write(headerStr + text);
+        this.stream.close();
+        this.isClosed = 1.0;
+    },
+
+    function html(htmlStr: string): void {
+        if (this.isClosed > 0.0) { return; }
+        if (this.status == 0.0) { this.setStatus(200.0); }
+        if (this.isMock > 0.0) { this.mockBody = htmlStr; this.isClosed = 1.0; return; }
+        let contentLen = htmlStr.length;
+        let headerStr = "HTTP/1.1 " + this.status + " " + this.statusText + "\r\n" +
+                        "Content-Type: text/html; charset=utf-8\r\n" +
+                        "Content-Length: " + contentLen + "\r\n" +
+                        this.headersStr +
+                        "Connection: keep-alive\r\n\r\n";
+        this.stream.write(headerStr + htmlStr);
+        this.stream.close();
+        this.isClosed = 1.0;
+    },
+
+    function json(jsonStr: string): void {
+        if (this.isClosed > 0.0) { return; }
+        if (this.status == 0.0) { this.setStatus(200.0); }
+        if (this.isMock > 0.0) { this.mockBody = jsonStr; this.isClosed = 1.0; return; }
+        let contentLen = jsonStr.length;
+        let headerStr = "HTTP/1.1 " + this.status + " " + this.statusText + "\r\n" +
+                        "Content-Type: application/json; charset=utf-8\r\n" +
+                        "Content-Length: " + contentLen + "\r\n" +
+                        this.headersStr +
+                        "Connection: keep-alive\r\n\r\n";
+        this.stream.write(headerStr + jsonStr);
+        this.stream.close();
+        this.isClosed = 1.0;
+    },
+
+    // HTTP 302 redirect
+    function redirect(location: string): void {
+        if (this.isClosed > 0.0) { return; }
+        if (this.isMock > 0.0) { this.mockBody = "REDIRECT:" + location; this.isClosed = 1.0; return; }
+        let headerStr = "HTTP/1.1 302 Found\r\n" +
+                        "Location: " + location + "\r\n" +
+                        "Content-Length: 0\r\n" +
+                        this.headersStr +
+                        "Connection: keep-alive\r\n\r\n";
+        this.stream.write(headerStr);
+        this.stream.close();
+        this.isClosed = 1.0;
+    },
+
+    // HTTP 301 permanent redirect
+    function redirectPermanent(location: string): void {
+        if (this.isClosed > 0.0) { return; }
+        if (this.isMock > 0.0) { this.mockBody = "REDIRECT_301:" + location; this.isClosed = 1.0; return; }
+        let headerStr = "HTTP/1.1 301 Permanently\r\n" +
+                        "Location: " + location + "\r\n" +
+                        "Content-Length: 0\r\n" +
+                        this.headersStr +
+                        "Connection: keep-alive\r\n\r\n";
+        this.stream.write(headerStr);
+        this.stream.close();
+        this.isClosed = 1.0;
+    },
+
+    function sendChunk(chunk: string): void {
+        if (this.isClosed > 0.0) { return; }
+        if (this.status == 0.0) { this.setStatus(200.0); }
+        if (this.isMock > 0.0) { this.mockBody = this.mockBody + chunk; }
+        else { this.stream.write(chunk); }
+    }
+}

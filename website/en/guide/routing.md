@@ -1,38 +1,38 @@
 # Routing & Route Parameters 🎯
 
-The **Router Engine** of **Vito Framework** is built on the **Radix Trie (Phase 9 Engine)** algorithm, combining maximum response speed with flexible parameter extraction.
+The **Router Engine** of **Vito Framework** is designed around a high-performance **3-Pass Flat-Unrolled Engine (Phase 9 Perf)** architecture, combining zero-allocation arena slot lookups with automatic route precedence sorting.
 
 <RouteVisualizer />
 
 ---
 
-## 🧠 0. How It Works: Radix Trie Engine
+## 🧠 0. How It Works: 3-Pass Flat-Unrolled Engine
 
-Vito Router does not compare routes one by one linearly — instead it uses a **Radix Trie (Prefix Tree)** structure to achieve **O(K)** lookup time where `K` is the URL length, regardless of whether you have 10 or 10,000 registered routes.
+Vito Router utilizes a **Flat-Unrolled Registry (32 Fixed Slots)** combined with a **Memory Arena Slot Collector** for maximum performance and zero-allocation execution:
 
 <div class="card-grid">
   <div class="feature-mini-card">
     <div class="icon">⚡</div>
-    <h4>O(K) Lookup Time</h4>
-    <p>Route lookup time depends only on URL length, not on the number of registered routes.</p>
+    <h4>Zero-Allocation Matching</h4>
+    <p>Route matching reuses recycled Arena Slots — eliminating heap allocations during request handling.</p>
   </div>
 
   <div class="feature-mini-card">
     <div class="icon">♻️</div>
-    <h4>Zero-Allocation Match</h4>
-    <p>Route matching creates no new heap allocations — extremely GC-friendly and memory-efficient.</p>
+    <h4>Flat-Unrolled Memory Layout</h4>
+    <p>32 route slots and 8 middleware slots are unrolled directly inside the VitoApp struct for optimal CPU cache locality.</p>
   </div>
 
   <div class="feature-mini-card">
     <div class="icon">🔢</div>
-    <h4>Static Fast-Path</h4>
-    <p>Static routes (no params) are prioritized in Pass 1 for the fastest possible match.</p>
+    <h4>3-Pass Precedence Engine</h4>
+    <p>Automatically classifies routes into 3 priority passes (Static -> Parametric -> Wildcard) at registration time.</p>
   </div>
 
   <div class="feature-mini-card">
     <div class="icon">🌿</div>
-    <h4>Shared Prefix Compression</h4>
-    <p>Route branches with a common prefix share trie nodes, reducing memory and improving cache locality.</p>
+    <h4>O(1) Memory Arena Access</h4>
+    <p>Manages request slot lifecycles via bitmask arena allocation, released instantly when request finishes.</p>
   </div>
 </div>
 
@@ -220,6 +220,22 @@ app.get("/posts/:category?", (req: Request, res: Response) => {
 });
 // GET /posts        → { message: "All posts" }
 // GET /posts/tech   → { message: "Posts in category: tech" }
+```
+
+```typescript [6. Regex Constraints (:id(\\d+))]
+// :id(\d+) — only matches if :id consists of digits 0-9
+app.get("/users/:id(\\d+)", (req: Request, res: Response) => {
+    let userId = req.paramInt("id"); // Type-safe number: 101
+    res.json("{\"user_id\": " + userId + "}");
+});
+
+// :slug([a-z0-9-]+) — only matches lowercase letters, numbers, and hyphens
+app.get("/articles/:slug([a-z0-9-]+)", (req: Request, res: Response) => {
+    let slug = req.param("slug");
+    res.json("{\"slug\": \"" + slug + "\"}");
+});
+// GET /users/101  → 200 OK (id = 101)
+// GET /users/abc  → 404/405 (does not match regex \\d+)
 ```
 
 :::
@@ -614,7 +630,11 @@ function main(): number {
 | `req.method` | `string` | HTTP method | `req.method` → `"GET"` |
 | `req.path` | `string` | URL path | `req.path` → `"/users/42"` |
 | `req.param(key)` | `string` | Dynamic route param | `req.param("id")` → `"42"` |
+| `req.paramInt(key)` | `number` | Type-safe integer param *(NEW)* | `req.paramInt("id")` → `42` |
+| `req.paramFloat(key)` | `number` | Type-safe float param *(NEW)* | `req.paramFloat("price")` → `19.99` |
+| `req.paramBool(key)` | `boolean` | Type-safe boolean param *(NEW)* | `req.paramBool("active")` → `true` |
 | `req.query(key)` | `string` | Query string param | `req.query("page")` → `"2"` |
+| `req.queryInt(key)` | `number` | Type-safe integer query param *(NEW)* | `req.queryInt("page")` → `2` |
 | `req.header(key)` | `string` | Request header | `req.header("Authorization")` |
 | `req.body` | `string` | Raw request body | `req.body` |
 | `req.queryString` | `string` | Raw query string | `req.queryString` |

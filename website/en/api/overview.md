@@ -98,7 +98,7 @@ Open the socket and begin listening for HTTP connections on the specified port.
 | `createMemoryArena()` | `packages/pool/pool.vit` | Create a reusable Request Memory Arena slot manager. |
 | `createTcpBufferPool()` | `packages/pool/pool.vit` | Create a Buffer Recycling Pool for TCP Read/Write buffers. |
 | `zeroAllocHeaderLookup(raw, target)` | `packages/pool/pool.vit` | Extract Header values directly from raw HTTP stream without memory allocation. |
-| `createRadixRouter(strict)` | `packages/router/router.vit` | Initialize a Radix Trie Router with O(1) Static Route Fast Path. |
+| `createRadixRouter(strict)` | `packages/router/router.vit` | Initialize a Static Route Fast Path Router with O(1) memory slot lookup. |
 | `normalizePath(path, strict)` | `packages/router/router.vit` | Normalize URL paths in Lax / Strict slash mode. |
 
 ---

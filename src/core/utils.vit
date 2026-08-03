@@ -1,0 +1,145 @@
+// Vito Web Framework Engine Core Utilities (vito/src/core/utils.vit)
+import { charAt } from "std/string";
+import { zeroAllocHeaderLookup } from "packages/pool/pool.vit";
+
+// Single-pass O(n) path segment extractor
+function getPathSegment(path: string, segIndex: number): string {
+    let len = path.length;
+    let i = 0.0;
+    let currentSeg = 0.0;
+    let result = "";
+    let ch = "";
+    if (i < len && charAt(path, i) == "/") { i = i + 1.0; }
+    while (i < len) {
+        ch = charAt(path, i);
+        if (ch == "/") {
+            if (currentSeg == segIndex) { return result; }
+            currentSeg = currentSeg + 1.0;
+            result = "";
+        } else {
+            if (currentSeg == segIndex) { result = result + ch; }
+        }
+        i = i + 1.0;
+    }
+    if (currentSeg == segIndex) { return result; }
+    return "";
+}
+
+function getPathSegmentCount(path: string): number {
+    let len = path.length;
+    let i = 0.0;
+    let count = 0.0;
+    let hasChar = false;
+    let ch = "";
+    while (i < len) {
+        ch = charAt(path, i);
+        if (ch == "/") {
+            if (hasChar) { count = count + 1.0; hasChar = false; }
+        } else {
+            hasChar = true;
+        }
+        i = i + 1.0;
+    }
+    if (hasChar) { count = count + 1.0; }
+    return count;
+}
+
+// Collect full subpath from segment N to end (for wildcard multi-segment)
+function getSubpathFromSegment(path: string, fromSeg: number): string {
+    let len = path.length;
+    let i = 0.0;
+    let currentSeg = 0.0;
+    if (i < len && charAt(path, i) == "/") { i = i + 1.0; }
+    while (i < len && currentSeg < fromSeg) {
+        if (charAt(path, i) == "/") {
+            currentSeg = currentSeg + 1.0;
+            i = i + 1.0;
+        } else {
+            i = i + 1.0;
+        }
+    }
+    let result = "";
+    while (i < len) {
+        result = result + charAt(path, i);
+        i = i + 1.0;
+    }
+    return result;
+}
+
+// Check if route pattern contains a wildcard segment (*name)
+function routeHasWildcard(path: string): boolean {
+    let len = path.length;
+    let i = 0.0;
+    let ch = "";
+    while (i < len) {
+        ch = charAt(path, i);
+        if (ch == "*") { return true; }
+        i = i + 1.0;
+    }
+    return false;
+}
+
+// Check if route pattern contains an optional param (:slug?)
+function routeHasOptional(path: string): boolean {
+    let len = path.length;
+    let i = 0.0;
+    let ch = "";
+    while (i < len) {
+        ch = charAt(path, i);
+        if (ch == "?") { return true; }
+        i = i + 1.0;
+    }
+    return false;
+}
+
+// Classify route type for 3-pass precedence: 0=static, 1=param, 2=wildcard
+function getRouteType(path: string): number {
+    if (strlen(path) == 0.0) { return 0.0; }
+    let len = strlen(path);
+    let i = 0.0;
+    let hasParam = false;
+    let ch = "";
+    while (i < len) {
+        ch = charAt(path, i);
+        if (ch == "*") { return 2.0; }
+        if (ch == ":") { hasParam = true; }
+        i = i + 1.0;
+    }
+    if (hasParam) { return 1.0; }
+    return 0.0;
+}
+
+function parseQueryParam(queryString: string, targetKey: string): string {
+    if (queryString.length == 0.0 || targetKey.length == 0.0) { return ""; }
+    let len = queryString.length;
+    let i = 0.0;
+    let currentKey = "";
+    let currentValue = "";
+    let isParsingValue = false;
+    while (i < len) {
+        let ch = charAt(queryString, i);
+        if (ch == "&" || i == len - 1.0) {
+            if (ch != "&") {
+                if (isParsingValue) { currentValue = currentValue + ch; }
+                else { currentKey = currentKey + ch; }
+            }
+            if (currentKey == targetKey) { return currentValue; }
+            currentKey = "";
+            currentValue = "";
+            isParsingValue = false;
+        } else {
+            if (ch == "=") {
+                isParsingValue = true;
+            } else {
+                if (isParsingValue) { currentValue = currentValue + ch; }
+                else { currentKey = currentKey + ch; }
+            }
+        }
+        i = i + 1.0;
+    }
+    return "";
+}
+
+function parseHeaderParam(rawReq: string, targetHeader: string): string {
+    return zeroAllocHeaderLookup(rawReq, targetHeader);
+}
