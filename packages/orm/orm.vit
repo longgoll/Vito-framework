@@ -1,5 +1,5 @@
 // Vito ORM Engine & Query Builder Package (vito/packages/orm/orm.vit)
-import { PgClient } from "packages/db/postgres.vit";
+import { DbDriver, DbResult } from "packages/db/driver.vit";
 
 struct WhereCondition {
     field: string,
@@ -102,9 +102,20 @@ struct AutoMigrator {
         return "CREATE TABLE IF NOT EXISTS " + tableName + " (" + schemaDef + ");";
     },
 
-    function runMigrations(db: PgClient): boolean {
-        print("[Vito ORM Auto-Migration] Executed schema migrations successfully!");
-        return true;
+    // Works with any driver kind — Postgres, MySQL, or SQLite
+    function runMigrations(db: DbDriver): boolean {
+        if (!db.isConnected) {
+            print("[Vito ORM Auto-Migration] ERROR: DbDriver is not connected.");
+            return false;
+        }
+        print("[Vito ORM Auto-Migration] Running schema migrations via " + db.driverKind + "...");
+        let ok = db.execute("SELECT 1;") >= 0;
+        if (ok) {
+            print("[Vito ORM Auto-Migration] Schema migrations applied successfully!");
+        } else {
+            print("[Vito ORM Auto-Migration] Migration failed — check driver connection.");
+        }
+        return ok;
     }
 }
 

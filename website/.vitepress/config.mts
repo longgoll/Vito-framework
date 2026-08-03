@@ -77,6 +77,27 @@ export default defineConfig({
             ]
           },
           {
+            text: '🗄️ Database Driver Ecosystem',
+            items: [
+              { text: 'PostgreSQL Native Driver', link: '/guide/database-orm#1-kết-nối-database' },
+              { text: 'MySQL / MariaDB Driver', link: '/guide/database-orm#1-kết-nối-database' },
+              { text: 'SQLite Native Driver (WAL)', link: '/guide/database-orm#1-kết-nối-database' },
+              { text: 'Unified DbDriver Interface', link: '/guide/database-orm#2-unified-dbdriver-interface' },
+              { text: 'Connection Pool', link: '/guide/database-orm#3-connection-pool' },
+              { text: 'Transactions & Savepoints', link: '/guide/database-orm#4-transaction-savepoints' }
+            ]
+          },
+          {
+            text: '🛠️ Migration CLI',
+            items: [
+              { text: 'Schema Migration CLI', link: '/guide/database-orm#5-schema-migration-cli' },
+              { text: 'Dry-Run & Auto-Rollback', link: '/guide/database-orm#5-schema-migration-cli' },
+              { text: 'Database Seeder', link: '/guide/database-orm#6-database-seeder' },
+              { text: 'Schema Introspector & Diff', link: '/guide/database-orm#7-schema-introspector-diff' },
+              { text: 'Bộ Công Cụ CLI', link: '/guide/cli' }
+            ]
+          },
+          {
             text: 'Tính Năng Nâng Cao',
             items: [
               { text: 'Realtime WebSockets & Jobs', link: '/guide/realtime-jobs' },
@@ -151,6 +172,27 @@ export default defineConfig({
             items: [
               { text: 'Vito ORM & Database', link: '/en/guide/database-orm' },
               { text: 'Auth & Security Suite', link: '/en/guide/auth-security' }
+            ]
+          },
+          {
+            text: '🗄️ Database Driver Ecosystem',
+            items: [
+              { text: 'PostgreSQL Native Driver', link: '/en/guide/database-orm#1-connecting-to-a-database' },
+              { text: 'MySQL / MariaDB Driver', link: '/en/guide/database-orm#1-connecting-to-a-database' },
+              { text: 'SQLite Native Driver (WAL)', link: '/en/guide/database-orm#1-connecting-to-a-database' },
+              { text: 'Unified DbDriver Interface', link: '/en/guide/database-orm#2-unified-dbdriver-interface' },
+              { text: 'Connection Pool', link: '/en/guide/database-orm#3-connection-pool' },
+              { text: 'Transactions & Savepoints', link: '/en/guide/database-orm#4-transactions-savepoints' }
+            ]
+          },
+          {
+            text: '🛠️ Migration CLI',
+            items: [
+              { text: 'Schema Migration CLI', link: '/en/guide/database-orm#5-schema-migration-cli' },
+              { text: 'Dry-Run & Auto-Rollback', link: '/en/guide/database-orm#5-schema-migration-cli' },
+              { text: 'Database Seeder', link: '/en/guide/database-orm#6-database-seeder' },
+              { text: 'Schema Introspector & Diff', link: '/en/guide/database-orm#7-schema-introspector-diff' },
+              { text: 'CLI Tooling', link: '/en/guide/cli' }
             ]
           },
           {

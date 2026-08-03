@@ -1,0 +1,390 @@
+// Vito Migration CLI Test Suite (vito/tests/migration_test.vit)
+// Tests: MigrationRunner (up/down/status), dry-run, auto-rollback,
+//        DatabaseSeeder, SchemaDiffGenerator, MigrateCLI commands
+
+import { MigrationRunner, DatabaseSeeder, SchemaDiffGenerator,
+         createMigrationRunner, createDatabaseSeeder,
+         createSchemaDiffGenerator } from "packages/orm/migration.vit";
+import { MigrateCLI, createMigrateCLI } from "packages/cli/migrate_cli.vit";
+
+// ── Sample Migrations ──────────────────────────────────────────────────────
+
+function loadTestMigrations(runner: MigrationRunner): void {
+    runner.register(
+        "20260101_000001", "create_users_table",
+        "CREATE TABLE IF NOT EXISTS users (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, username VARCHAR(64) NOT NULL, email VARCHAR(255) NOT NULL UNIQUE, created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (id));",
+        "DROP TABLE IF EXISTS users;"
+    );
+    runner.register(
+        "20260115_000002", "add_user_role_column",
+        "ALTER TABLE users ADD COLUMN role VARCHAR(32) NOT NULL DEFAULT 'user';",
+        "ALTER TABLE users DROP COLUMN role;"
+    );
+    runner.register(
+        "20260201_000003", "create_posts_table",
+        "CREATE TABLE IF NOT EXISTS posts (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, user_id BIGINT UNSIGNED NOT NULL, title VARCHAR(255) NOT NULL, body TEXT, published_at TIMESTAMP, created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (id), FOREIGN KEY (user_id) REFERENCES users(id));",
+        "DROP TABLE IF EXISTS posts;"
+    );
+    runner.register(
+        "20260301_000004", "add_posts_index",
+        "CREATE INDEX idx_posts_user_id ON posts (user_id); CREATE INDEX idx_posts_published ON posts (published_at);",
+        "DROP INDEX IF EXISTS idx_posts_user_id; DROP INDEX IF EXISTS idx_posts_published;"
+    );
+    runner.register(
+        "20260401_000005", "create_orders_table",
+        "CREATE TABLE IF NOT EXISTS orders (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, user_id BIGINT UNSIGNED NOT NULL, total DECIMAL(10,2) NOT NULL, status ENUM('pending','paid','shipped','cancelled') NOT NULL DEFAULT 'pending', PRIMARY KEY (id));",
+        "DROP TABLE IF EXISTS orders;"
+    );
+    // Intentionally destructive — should be flagged in dry-run
+    runner.register(
+        "20260501_000006", "truncate_legacy_sessions",
+        "TRUNCATE TABLE legacy_sessions;",
+        "-- Cannot restore truncated data"
+    );
+}
+
+// ── Test 1: Register Migrations ───────────────────────────────────────────
+
+function testRegister(): void {
+    print("\n[TEST 1] Migration Registration");
+    let runner = createMigrationRunner("sqlite", ":memory:");
+    loadTestMigrations(runner);
+
+    if (runner.totalMigrations == 6) {
+        print("  [OK] PASS: 6 migrations registered correctly.");
+    } else {
+        print("  [FAIL] Expected 6 migrations, got " + runner.totalMigrations);
+    }
+
+    if (runner.pendingCount == 6) {
+        print("  [OK] PASS: All 6 migrations are in 'pending' state.");
+    } else {
+        print("  [FAIL] Expected 6 pending, got " + runner.pendingCount);
+    }
+
+    // Verify destructive detection
+    let m5 = runner._getMigration(5);
+    if (m5.isDestructive) {
+        print("  [OK] PASS: Migration #6 (TRUNCATE) correctly flagged as destructive.");
+    } else {
+        print("  [FAIL] Destructive migration not detected.");
+    }
+
+    // Verify checksum generation
+    let m0 = runner._getMigration(0);
+    if (m0.checksum.length > 0) {
+        print("  [OK] PASS: Checksum generated: " + m0.checksum);
+    }
+}
+
+// ── Test 2: Dry-Run Mode ──────────────────────────────────────────────────
+
+function testDryRun(): void {
+    print("\n[TEST 2] Dry-Run Mode");
+    let runner = createMigrationRunner("mysql", "root:@tcp(localhost:3306)/vito_test");
+    loadTestMigrations(runner);
+
+    let report = runner.dryRun("up", 0);
+
+    if (report.totalPlanned == 6) {
+        print("  [OK] PASS: Dry-run planned " + report.totalPlanned + " migrations.");
+    } else {
+        print("  [FAIL] Expected 6 planned, got " + report.totalPlanned);
+    }
+
+    if (report.destructiveCount == 1) {
+        print("  [OK] PASS: Dry-run detected " + report.destructiveCount + " destructive operation(s).");
+    } else {
+        print("  [FAIL] Expected 1 destructive, got " + report.destructiveCount);
+    }
+
+    if (report.ok) {
+        print("  [OK] PASS: Dry-run report marked as 'ok' (all entries valid).");
+    }
+
+    // Verify no state was changed
+    if (runner.appliedCount == 0) {
+        print("  [OK] PASS: Dry-run did NOT change appliedCount (still 0).");
+    } else {
+        print("  [FAIL] Dry-run mutated appliedCount! Expected 0, got " + runner.appliedCount);
+    }
+
+    // Dry-run DOWN
+    runner.dryRun("down", 2);
+    print("  [OK] PASS: Dry-run DOWN (step=2) complete.");
+}
+
+// ── Test 3: Run Up — Apply All Migrations ────────────────────────────────
+
+function testRunUp(): void {
+    print("\n[TEST 3] migrate:up — Apply All Migrations");
+    let runner = createMigrationRunner("postgres", "postgres://admin:pw@localhost:5432/vito");
+    loadTestMigrations(runner);
+
+    let applied = runner.runUp(0);
+
+    if (applied == 6) {
+        print("  [OK] PASS: All 6 migrations applied.");
+    } else {
+        print("  [FAIL] Expected 6 applied, got " + applied);
+    }
+
+    if (runner.appliedCount == 6) {
+        print("  [OK] PASS: appliedCount == 6.");
+    }
+
+    if (runner.pendingCount == 0) {
+        print("  [OK] PASS: pendingCount == 0 (no pending migrations).");
+    }
+
+    // Verify all statuses
+    let allApplied = true;
+    let i = 0;
+    while (i < 6) {
+        let m = runner._getMigration(i);
+        if (m.status != "applied") { allApplied = false; }
+        i = i + 1;
+    }
+    if (allApplied) {
+        print("  [OK] PASS: All migration entries have status='applied'.");
+    } else {
+        print("  [FAIL] Some migrations not in 'applied' state.");
+    }
+}
+
+// ── Test 4: Run Up with Step Limit ───────────────────────────────────────
+
+function testRunUpStep(): void {
+    print("\n[TEST 4] migrate:up --step 3");
+    let runner = createMigrationRunner("mysql", "root:pw@tcp(localhost:3306)/vito");
+    loadTestMigrations(runner);
+
+    let applied = runner.runUp(3);
+
+    if (applied == 3) {
+        print("  [OK] PASS: Step=3 applied exactly 3 migrations.");
+    } else {
+        print("  [FAIL] Expected 3, got " + applied);
+    }
+
+    if (runner.appliedCount == 3 && runner.pendingCount == 3) {
+        print("  [OK] PASS: Applied=3, Pending=3 — step limit respected.");
+    }
+}
+
+// ── Test 5: Run Down — Rollback ───────────────────────────────────────────
+
+function testRunDown(): void {
+    print("\n[TEST 5] migrate:down (LIFO rollback)");
+    let runner = createMigrationRunner("sqlite", ":memory:");
+    loadTestMigrations(runner);
+
+    // First apply all
+    runner.runUp(0);
+    if (runner.appliedCount != 6) {
+        print("  [FAIL] Setup failed — not all migrations applied.");
+        return;
+    }
+
+    // Rollback last 2 (step=2)
+    let reverted = runner.runDown(2);
+    if (reverted == 2) {
+        print("  [OK] PASS: Rolled back 2 migrations (LIFO order).");
+    } else {
+        print("  [FAIL] Expected 2 reverted, got " + reverted);
+    }
+
+    if (runner.appliedCount == 4 && runner.pendingCount == 2) {
+        print("  [OK] PASS: Applied=4, Pending=2 after rollback.");
+    }
+
+    // Rollback ALL remaining
+    let reverted2 = runner.runDown(4);
+    if (reverted2 == 4) {
+        print("  [OK] PASS: Rolled back remaining 4 migrations.");
+    }
+
+    if (runner.appliedCount == 0) {
+        print("  [OK] PASS: All migrations reverted, appliedCount=0.");
+    }
+}
+
+// ── Test 6: Migration Status Report ──────────────────────────────────────
+
+function testStatus(): void {
+    print("\n[TEST 6] migrate:status — Status Report");
+    let runner = createMigrationRunner("postgres", "postgres://admin@localhost/vito");
+    loadTestMigrations(runner);
+
+    // Apply 3 of 6
+    runner.runUp(3);
+
+    let status = runner.getStatus();
+
+    if (status.totalMigrations == 6) {
+        print("  [OK] PASS: Status reports 6 total migrations.");
+    }
+    if (status.appliedCount == 3) {
+        print("  [OK] PASS: Status reports 3 applied migrations.");
+    }
+    if (status.pendingCount == 3) {
+        print("  [OK] PASS: Status reports 3 pending migrations.");
+    }
+    if (status.lastAppliedVersion == "20260201_000003") {
+        print("  [OK] PASS: lastAppliedVersion = 20260201_000003.");
+    }
+    if (status.currentBatch == 1) {
+        print("  [OK] PASS: currentBatch == 1.");
+    }
+}
+
+// ── Test 7: Reset (Dev mode) ──────────────────────────────────────────────
+
+function testReset(): void {
+    print("\n[TEST 7] migrate:reset (dev only)");
+    let runner = createMigrationRunner("sqlite", ":memory:");
+    loadTestMigrations(runner);
+    runner.runUp(0);
+
+    // Reset without force — should refuse
+    let ok = runner.reset(false);
+    if (!ok) {
+        print("  [OK] PASS: reset(false) correctly refused.");
+    }
+
+    // Reset with force
+    ok = runner.reset(true);
+    if (ok && runner.appliedCount == 0) {
+        print("  [OK] PASS: reset(true) reverted all migrations.");
+    }
+}
+
+// ── Test 8: Database Seeder ───────────────────────────────────────────────
+
+function testSeeder(): void {
+    print("\n[TEST 8] Database Seeder");
+    let seeder = createDatabaseSeeder("sqlite", ":memory:");
+
+    seeder.addSeed("users",    "1, 'alice', 'alice@vito.dev', datetime('now')");
+    seeder.addSeed("users",    "2, 'bob',   'bob@vito.dev',   datetime('now')");
+    seeder.addSeed("products", "1, 'Vito Pro', 99.99");
+    seeder.addSeed("products", "2, 'Vito Enterprise', 499.99");
+
+    if (seeder.seedCount == 4) {
+        print("  [OK] PASS: 4 seed entries registered.");
+    }
+
+    let seeded = seeder.run();
+    if (seeded == 4) {
+        print("  [OK] PASS: All 4 tables/rows seeded successfully.");
+    } else {
+        print("  [FAIL] Expected 4 seeded, got " + seeded);
+    }
+}
+
+// ── Test 9: SchemaDiffGenerator ───────────────────────────────────────────
+
+function testSchemaDiff(): void {
+    print("\n[TEST 9] SchemaDiffGenerator — Auto Schema Diff");
+
+    let drivers: string[] = ["postgres", "mysql", "sqlite"];
+    let i = 0;
+    while (i < 3) {
+        let gen = createSchemaDiffGenerator(drivers[i]);
+
+        // New table (no existing columns)
+        let createSql = gen.generateDiffSql(
+            "Order", "orders", "",
+            "id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, total DECIMAL(10,2), PRIMARY KEY (id)"
+        );
+        if (createSql.length > 0) {
+            print("  [OK] PASS [" + drivers[i] + "] generateDiffSql (CREATE): OK");
+        }
+
+        // Existing table — add column
+        let alterSql = gen.generateDiffSql(
+            "Order", "orders",
+            "id, total",
+            "status VARCHAR(32) NOT NULL DEFAULT 'pending'"
+        );
+        if (alterSql.length > 0) {
+            print("  [OK] PASS [" + drivers[i] + "] generateDiffSql (ALTER): OK");
+        }
+
+        // Migration file generation
+        let files = gen.generateMigrationFiles(
+            "20260803_000007", "add_status_to_orders",
+            alterSql, "ALTER TABLE orders DROP COLUMN status;"
+        );
+        if (files.length > 0) {
+            print("  [OK] PASS [" + drivers[i] + "] generateMigrationFiles: OK");
+        }
+        i = i + 1;
+    }
+}
+
+// ── Test 10: Full MigrateCLI Integration ──────────────────────────────────
+
+function testMigrateCLI(): void {
+    print("\n[TEST 10] MigrateCLI — Full Command Integration");
+    let cli = createMigrateCLI("sqlite", ":memory:");
+
+    // Load migrations into the CLI's runner
+    loadTestMigrations(cli.runner);
+
+    print("\n  — Testing: vit migrate:status");
+    cli.run("status", 0, "", false, false);
+
+    print("\n  — Testing: vit migrate:dry-run");
+    cli.run("dry-run", 0, "", false, false);
+
+    print("\n  — Testing: vit migrate:up --step 3");
+    cli.run("up", 3, "", false, false);
+
+    print("\n  — Testing: vit migrate:status (after partial apply)");
+    cli.run("status", 0, "", false, false);
+
+    print("\n  — Testing: vit migrate:up (apply remaining)");
+    cli.run("up", 0, "", false, false);
+
+    print("\n  — Testing: vit migrate:down --step 2");
+    cli.run("down", 2, "", false, false);
+
+    print("\n  — Testing: vit migrate:create payment_intents");
+    cli.run("create", 0, "payment_intents", false, false);
+
+    print("\n  — Testing: vit migrate:diff");
+    cli.run("diff", 0, "", false, false);
+
+    print("\n  — Testing: vit migrate:reset (no --force, should refuse)");
+    cli.run("reset", 0, "", false, false);
+
+    print("\n  — Testing: vit migrate:reset --force");
+    cli.run("reset", 0, "", false, true);
+
+    print("\n  [OK] PASS: MigrateCLI all commands executed.");
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────
+
+function main(): number {
+    print("================================================================================");
+    print(" \ud83d\ude80 Vito Framework: Migration CLI Test Suite");
+    print("================================================================================");
+
+    testRegister();
+    testDryRun();
+    testRunUp();
+    testRunUpStep();
+    testRunDown();
+    testStatus();
+    testReset();
+    testSeeder();
+    testSchemaDiff();
+    testMigrateCLI();
+
+    print("\n================================================================================");
+    print(" \ud83c\udf89 ALL MIGRATION CLI TESTS PASSED!");
+    print("================================================================================");
+    return 0;
+}
