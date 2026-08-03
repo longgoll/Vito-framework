@@ -1,11 +1,14 @@
 // Vito High-Performance Radix Trie Router & Fast Path Package (vito/packages/router/router.vit)
+// v1.2.0: Added NamedRouteTable, resolveUrl(), createRouter() standalone factory
 import { charAt } from "std/string";
 
-// 1. Trailing Slash Normalization Helper (Strict vs Lax Mode)
+// ═══════════════════════════════════════════════════════════════════════════
+// 1. Trailing Slash Normalization (Strict vs Lax Mode)
+// ═══════════════════════════════════════════════════════════════════════════
+
 function normalizePath(rawPath: string, isStrict: boolean): string {
     if (rawPath.length <= 1) { return rawPath; }
-    if (isStrict) { return rawPath; } // Strict mode: preserve original path exactly
-    
+    if (isStrict) { return rawPath; } // Strict mode: preserve exactly
     // Lax mode: strip trailing slash except for root "/"
     let len = rawPath.length;
     if (charAt(rawPath, len - 1) == "/") {
@@ -20,29 +23,42 @@ function normalizePath(rawPath: string, isStrict: boolean): string {
     return rawPath;
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
 // 2. Radix Trie Router Node Structure (Flat Unrolled)
+// ═══════════════════════════════════════════════════════════════════════════
+
 struct RadixNode {
-    pathSegment: string,
-    isParamNode: boolean,
+    pathSegment:    string,
+    isParamNode:    boolean,
     isWildcardNode: boolean,
-    paramName: string,
-    isTerminal: boolean,
-    routeMethod: string,
+    isOptionalNode: boolean,   // NEW: true if param ends with "?"
+    paramName:      string,
+    isTerminal:     boolean,
+    routeMethod:    string,
 
     function init(segment: string): void {
-        this.pathSegment = segment;
-        this.isParamNode = false;
+        this.pathSegment    = segment;
+        this.isParamNode    = false;
         this.isWildcardNode = false;
-        this.paramName = "";
-        this.isTerminal = false;
-        this.routeMethod = "";
+        this.isOptionalNode = false;
+        this.paramName      = "";
+        this.isTerminal     = false;
+        this.routeMethod    = "";
 
         if (segment.length > 0) {
             if (charAt(segment, 0) == ":") {
                 this.isParamNode = true;
+                // Check optional (ends with "?")
+                let lastIdx = segment.length - 1;
+                if (charAt(segment, lastIdx) == "?") {
+                    this.isOptionalNode = true;
+                }
+                // Extract param name (strip ":" and optional "?")
                 let name = "";
                 let kp = 1;
-                while (kp < segment.length) {
+                let kpEnd = segment.length;
+                if (this.isOptionalNode) { kpEnd = kpEnd - 1; }
+                while (kp < kpEnd) {
                     name = name + charAt(segment, kp);
                     kp = kp + 1;
                 }
@@ -64,7 +80,10 @@ struct RadixNode {
     }
 }
 
-// 3. Radix Router with Static Fast Path Engine (Flat struct unrolling for native performance)
+// ═══════════════════════════════════════════════════════════════════════════
+// 3. Static Fast-Path Router (Flat Unrolled — for benchmarking & testing)
+// ═══════════════════════════════════════════════════════════════════════════
+
 struct RadixRouter {
     isStrictSlash: boolean,
     f_count: number,
@@ -75,7 +94,7 @@ struct RadixRouter {
 
     function init(strictMode: boolean): void {
         this.isStrictSlash = strictMode;
-        this.f_count = 0.0;
+        this.f_count  = 0.0;
         this.f0_has = false; this.f1_has = false;
         this.f2_has = false; this.f3_has = false;
         this.f0_method = ""; this.f0_path = "";
@@ -106,4 +125,142 @@ function createRadixRouter(strictMode: boolean): RadixRouter {
     let router: RadixRouter;
     router.init(strictMode);
     return router;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 4. NEW: Named Route Table (16 slots — name → path template mapping)
+//    Used for reverse routing / URL generation
+// ═══════════════════════════════════════════════════════════════════════════
+
+struct NamedRouteTable {
+    nr0_name:  string, nr0_path:  string, nr0_has:  boolean,
+    nr1_name:  string, nr1_path:  string, nr1_has:  boolean,
+    nr2_name:  string, nr2_path:  string, nr2_has:  boolean,
+    nr3_name:  string, nr3_path:  string, nr3_has:  boolean,
+    nr4_name:  string, nr4_path:  string, nr4_has:  boolean,
+    nr5_name:  string, nr5_path:  string, nr5_has:  boolean,
+    nr6_name:  string, nr6_path:  string, nr6_has:  boolean,
+    nr7_name:  string, nr7_path:  string, nr7_has:  boolean,
+    nr8_name:  string, nr8_path:  string, nr8_has:  boolean,
+    nr9_name:  string, nr9_path:  string, nr9_has:  boolean,
+    nr10_name: string, nr10_path: string, nr10_has: boolean,
+    nr11_name: string, nr11_path: string, nr11_has: boolean,
+    nr12_name: string, nr12_path: string, nr12_has: boolean,
+    nr13_name: string, nr13_path: string, nr13_has: boolean,
+    nr14_name: string, nr14_path: string, nr14_has: boolean,
+    nr15_name: string, nr15_path: string, nr15_has: boolean,
+    count: number,
+
+    function init(): void {
+        this.count = 0.0;
+        this.nr0_has  = false; this.nr0_name  = ""; this.nr0_path  = "";
+        this.nr1_has  = false; this.nr1_name  = ""; this.nr1_path  = "";
+        this.nr2_has  = false; this.nr2_name  = ""; this.nr2_path  = "";
+        this.nr3_has  = false; this.nr3_name  = ""; this.nr3_path  = "";
+        this.nr4_has  = false; this.nr4_name  = ""; this.nr4_path  = "";
+        this.nr5_has  = false; this.nr5_name  = ""; this.nr5_path  = "";
+        this.nr6_has  = false; this.nr6_name  = ""; this.nr6_path  = "";
+        this.nr7_has  = false; this.nr7_name  = ""; this.nr7_path  = "";
+        this.nr8_has  = false; this.nr8_name  = ""; this.nr8_path  = "";
+        this.nr9_has  = false; this.nr9_name  = ""; this.nr9_path  = "";
+        this.nr10_has = false; this.nr10_name = ""; this.nr10_path = "";
+        this.nr11_has = false; this.nr11_name = ""; this.nr11_path = "";
+        this.nr12_has = false; this.nr12_name = ""; this.nr12_path = "";
+        this.nr13_has = false; this.nr13_name = ""; this.nr13_path = "";
+        this.nr14_has = false; this.nr14_name = ""; this.nr14_path = "";
+        this.nr15_has = false; this.nr15_name = ""; this.nr15_path = "";
+    },
+
+    function register(name: string, path: string): void {
+        if (this.count == 0.0)  { this.nr0_name  = name; this.nr0_path  = path; this.nr0_has  = true; }
+        if (this.count == 1.0)  { this.nr1_name  = name; this.nr1_path  = path; this.nr1_has  = true; }
+        if (this.count == 2.0)  { this.nr2_name  = name; this.nr2_path  = path; this.nr2_has  = true; }
+        if (this.count == 3.0)  { this.nr3_name  = name; this.nr3_path  = path; this.nr3_has  = true; }
+        if (this.count == 4.0)  { this.nr4_name  = name; this.nr4_path  = path; this.nr4_has  = true; }
+        if (this.count == 5.0)  { this.nr5_name  = name; this.nr5_path  = path; this.nr5_has  = true; }
+        if (this.count == 6.0)  { this.nr6_name  = name; this.nr6_path  = path; this.nr6_has  = true; }
+        if (this.count == 7.0)  { this.nr7_name  = name; this.nr7_path  = path; this.nr7_has  = true; }
+        if (this.count == 8.0)  { this.nr8_name  = name; this.nr8_path  = path; this.nr8_has  = true; }
+        if (this.count == 9.0)  { this.nr9_name  = name; this.nr9_path  = path; this.nr9_has  = true; }
+        if (this.count == 10.0) { this.nr10_name = name; this.nr10_path = path; this.nr10_has = true; }
+        if (this.count == 11.0) { this.nr11_name = name; this.nr11_path = path; this.nr11_has = true; }
+        if (this.count == 12.0) { this.nr12_name = name; this.nr12_path = path; this.nr12_has = true; }
+        if (this.count == 13.0) { this.nr13_name = name; this.nr13_path = path; this.nr13_has = true; }
+        if (this.count == 14.0) { this.nr14_name = name; this.nr14_path = path; this.nr14_has = true; }
+        if (this.count == 15.0) { this.nr15_name = name; this.nr15_path = path; this.nr15_has = true; }
+        this.count = this.count + 1.0;
+    },
+
+    // Resolve URL: find path by name, substitute :paramKey → paramVal
+    function resolveUrl(name: string, paramKey: string, paramVal: string): string {
+        let path = "";
+        if (this.nr0_has  && this.nr0_name  == name) { path = this.nr0_path;  }
+        if (path == "" && this.nr1_has  && this.nr1_name  == name) { path = this.nr1_path;  }
+        if (path == "" && this.nr2_has  && this.nr2_name  == name) { path = this.nr2_path;  }
+        if (path == "" && this.nr3_has  && this.nr3_name  == name) { path = this.nr3_path;  }
+        if (path == "" && this.nr4_has  && this.nr4_name  == name) { path = this.nr4_path;  }
+        if (path == "" && this.nr5_has  && this.nr5_name  == name) { path = this.nr5_path;  }
+        if (path == "" && this.nr6_has  && this.nr6_name  == name) { path = this.nr6_path;  }
+        if (path == "" && this.nr7_has  && this.nr7_name  == name) { path = this.nr7_path;  }
+        if (path == "" && this.nr8_has  && this.nr8_name  == name) { path = this.nr8_path;  }
+        if (path == "" && this.nr9_has  && this.nr9_name  == name) { path = this.nr9_path;  }
+        if (path == "" && this.nr10_has && this.nr10_name == name) { path = this.nr10_path; }
+        if (path == "" && this.nr11_has && this.nr11_name == name) { path = this.nr11_path; }
+        if (path == "" && this.nr12_has && this.nr12_name == name) { path = this.nr12_path; }
+        if (path == "" && this.nr13_has && this.nr13_name == name) { path = this.nr13_path; }
+        if (path == "" && this.nr14_has && this.nr14_name == name) { path = this.nr14_path; }
+        if (path == "" && this.nr15_has && this.nr15_name == name) { path = this.nr15_path; }
+        if (path == "") { return ""; }
+
+        // Substitute :paramKey with paramVal (first occurrence only)
+        let result = "";
+        let len = path.length;
+        let i = 0;
+        let replaced = false;
+        while (i < len) {
+            let ch = charAt(path, i);
+            if (ch == ":" && !replaced) {
+                i = i + 1;
+                let segName = "";
+                while (i < len) {
+                    let c = charAt(path, i);
+                    if (c == "/" || c == "?") { break; }
+                    segName = segName + c;
+                    i = i + 1;
+                }
+                if (i < len && charAt(path, i) == "?") { i = i + 1; }
+                if (segName == paramKey) { result = result + paramVal; replaced = true; }
+                else { result = result + ":" + segName; }
+            } else {
+                result = result + ch;
+                i = i + 1;
+            }
+        }
+        return result;
+    }
+}
+
+function createNamedRouteTable(): NamedRouteTable {
+    let t: NamedRouteTable;
+    t.init();
+    return t;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 5. NEW: createRouter() — Standalone router factory (for sub-app / module pattern)
+//    Returns an independent VitoApp instance that can be used standalone
+//    or have its routes composed into a parent app via app.group() / app.mount()
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Note: This imports VitoApp from the main vito module.
+// In a full Vit module system this would be: import { VitoApp, createApp } from "vito"
+// For now, the router package re-exports the createApp() factory under the router name.
+
+function createRouter(): VitoApp {
+    // Delegates to the main app factory — creates a zero-config isolated router instance
+    // Use this for:
+    //   - Building plugin/package-scoped route modules
+    //   - Independent testing of route handlers
+    //   - Composition via app.group() with shared prefix
+    return createApp();
 }
