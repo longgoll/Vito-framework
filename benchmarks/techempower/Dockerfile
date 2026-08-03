@@ -26,10 +26,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# Expected layout when built via TFB tooling:
-#   /app/vito/  → Vito-framework source
-#   /app/vit/   → VIT compiler + runtime source
-COPY . .
+# Copy only the files needed for compilation (avoids copying 2GB LLVM tools, build artifacts)
+# vito: only the techempower benchmark entry point
+COPY Vito-framework/benchmarks/techempower/main.c /app/vito/benchmarks/techempower/main.c
+# vit: only runtime source + headers needed by main.c
+COPY vit/src/runtime/ /app/vit/src/runtime/
+COPY vit/include/ /app/vit/include/
 
 # Compile benchmark server with all vit runtime files:
 #   -march=x86-64-v3  = AVX2+FMA, safe for Intel Haswell+ / AMD Ryzen (TFB Dell PowerEdge)
@@ -39,6 +41,7 @@ COPY . .
 RUN gcc -O3 -march=x86-64-v3 -flto -ffast-math -DNDEBUG -std=c11 \
     -I/app/vit/src/runtime \
     -I/app/vit/include \
+    -I/usr/include/postgresql \
     /app/vito/benchmarks/techempower/main.c \
     /app/vit/src/runtime/async_iouring_rt.c \
     /app/vit/src/runtime/net_rt.c \

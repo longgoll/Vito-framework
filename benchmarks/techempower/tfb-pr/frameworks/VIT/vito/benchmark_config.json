@@ -1,0 +1,25 @@
+{
+  "framework": "vito",
+  "tests": {
+    "default": {
+      "json_url": "/json",
+      "db_url": "/db",
+      "query_url": "/queries?queries=",
+      "fortune_url": "/fortunes",
+      "update_url": "/updates?queries=",
+      "plaintext_url": "/plaintext",
+      "port": 8080,
+      "approach": "Realistic",
+      "database": "Postgres",
+      "framework": "vito",
+      "language": "vit",
+      "orm": "Raw",
+      "platform": "Vit Engine Native (LLVM)",
+      "webserver": "Vito Native HTTP/1.1 (epoll + SO_REUSEPORT multi-worker)",
+      "os": "Linux",
+      "database_os": "Linux",
+      "display_name": "vito",
+      "notes": "Vito Web Framework. epoll + SO_REUSEPORT multi-worker, C100K per-connection slab allocator, AVX2 SIMD JSON parser, libpq native Postgres protocol, zero-copy HTTP pipelining."
+    }
+  }
+}
