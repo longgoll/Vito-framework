@@ -69,12 +69,13 @@ struct Response {
         if (this.isMock > 0.0) { this.mockBody = text; this.isClosed = 1.0; return; }
         let contentLen = text.length;
         let headerStr = "HTTP/1.1 " + this.status + " " + this.statusText + "\r\n" +
-                        "Content-Type: text/plain; charset=utf-8\r\n" +
+                        "Server: Vito\r\n" +
+                        "Content-Type: text/plain\r\n" +
                         "Content-Length: " + contentLen + "\r\n" +
                         this.headersStr +
                         "Connection: keep-alive\r\n\r\n";
         this.stream.write(headerStr + text);
-        this.stream.close();
+        // RI-03: do NOT close — TFB uses persistent connections (keep-alive)
         this.isClosed = 1.0;
     },
 
@@ -84,12 +85,13 @@ struct Response {
         if (this.isMock > 0.0) { this.mockBody = htmlStr; this.isClosed = 1.0; return; }
         let contentLen = htmlStr.length;
         let headerStr = "HTTP/1.1 " + this.status + " " + this.statusText + "\r\n" +
+                        "Server: Vito\r\n" +
                         "Content-Type: text/html; charset=utf-8\r\n" +
                         "Content-Length: " + contentLen + "\r\n" +
                         this.headersStr +
                         "Connection: keep-alive\r\n\r\n";
         this.stream.write(headerStr + htmlStr);
-        this.stream.close();
+        // RI-03: do NOT close — keep-alive
         this.isClosed = 1.0;
     },
 
@@ -99,12 +101,13 @@ struct Response {
         if (this.isMock > 0.0) { this.mockBody = jsonStr; this.isClosed = 1.0; return; }
         let contentLen = jsonStr.length;
         let headerStr = "HTTP/1.1 " + this.status + " " + this.statusText + "\r\n" +
-                        "Content-Type: application/json; charset=utf-8\r\n" +
+                        "Server: Vito\r\n" +
+                        "Content-Type: application/json\r\n" +
                         "Content-Length: " + contentLen + "\r\n" +
                         this.headersStr +
                         "Connection: keep-alive\r\n\r\n";
         this.stream.write(headerStr + jsonStr);
-        this.stream.close();
+        // RI-03: do NOT close — keep-alive
         this.isClosed = 1.0;
     },
 
@@ -113,12 +116,13 @@ struct Response {
         if (this.isClosed > 0.0) { return; }
         if (this.isMock > 0.0) { this.mockBody = "REDIRECT:" + location; this.isClosed = 1.0; return; }
         let headerStr = "HTTP/1.1 302 Found\r\n" +
+                        "Server: Vito\r\n" +
                         "Location: " + location + "\r\n" +
                         "Content-Length: 0\r\n" +
                         this.headersStr +
                         "Connection: keep-alive\r\n\r\n";
         this.stream.write(headerStr);
-        this.stream.close();
+        // RI-03: do NOT close — keep-alive
         this.isClosed = 1.0;
     },
 
@@ -127,12 +131,13 @@ struct Response {
         if (this.isClosed > 0.0) { return; }
         if (this.isMock > 0.0) { this.mockBody = "REDIRECT_301:" + location; this.isClosed = 1.0; return; }
         let headerStr = "HTTP/1.1 301 Permanently\r\n" +
+                        "Server: Vito\r\n" +
                         "Location: " + location + "\r\n" +
                         "Content-Length: 0\r\n" +
                         this.headersStr +
                         "Connection: keep-alive\r\n\r\n";
         this.stream.write(headerStr);
-        this.stream.close();
+        // RI-03: do NOT close — keep-alive
         this.isClosed = 1.0;
     },
 

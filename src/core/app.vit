@@ -7,6 +7,11 @@ import { Response } from "src/core/response.vit";
 import { matchRoutePattern, pathMatchesPattern } from "src/core/matcher.vit";
 import { getRouteType } from "src/core/utils.vit";
 
+// RI-02: Expose C runtime multi-worker epoll group for TFB multi-core scaling
+// vit_iouring_group_create/start accept a low-level C handler, so listenMultiWorker
+// bridges the .vit high-level API to the epoll worker pool.
+extern function vit_sysconf_nprocs(): number;  // wraps sysconf(_SC_NPROCESSORS_ONLN)
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Router, Grouping & Vito Application Core
 // ═══════════════════════════════════════════════════════════════════════════
@@ -649,7 +654,7 @@ struct VitoApp {
     function listen(port: number): void {
         print("=========================================");
         print(" ⚡ Vito Web Framework v1.2.0");
-        print(" Running on: http://127.0.0.1:" + port);
+        print(" Running on: http://0.0.0.0:" + port);
         let strictStr = "false";
         if (this.isStrictSlash) { strictStr = "true"; }
         print(" Memory Arena: " + this.arenaCapacity + " slots | Strict Slash: " + strictStr);
@@ -658,7 +663,7 @@ struct VitoApp {
         print(" Features: Route Precedence ✓ | Optional Params ✓ | Wildcard Multi-seg ✓ | 405 Handler ✓");
         print("=========================================");
 
-        let listener = listenTcp("127.0.0.1", port);
+        let listener = listenTcp("0.0.0.0", port);  // RI-01: must bind all interfaces for TFB Docker networking
         while (true) {
             let stream = listener.accept();
             let keepAlive = true;

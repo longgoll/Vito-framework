@@ -10,17 +10,16 @@
       "plaintext_url": "/plaintext",
       "port": 8080,
       "approach": "Realistic",
-      "classification": "Fullstack",
       "database": "Postgres",
       "framework": "vito",
       "language": "vit",
       "orm": "Raw",
       "platform": "Vit Engine Native (LLVM)",
-      "webserver": "Vito Native HTTP/1.1 (io_uring)",
+      "webserver": "Vito Native HTTP/1.1 (epoll + SO_REUSEPORT multi-worker)",
       "os": "Linux",
       "database_os": "Linux",
       "display_name": "vito",
-      "notes": "Vito Web Framework with Zero-Alloc C100K Slab Allocator, AVX2 SIMD JSON, and Kernel Bypass Event Loop."
+      "notes": "Vito Web Framework. epoll + SO_REUSEPORT multi-worker, C100K per-connection slab allocator, AVX2 SIMD JSON parser, libpq native Postgres protocol, zero-copy HTTP pipelining."
     }
   }
 }
