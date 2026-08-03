@@ -24,27 +24,27 @@ export default defineConfig({
       themeConfig: {
         logo: '/logo.svg',
         nav: [
-          { text: 'Trang chủ', link: '/' },
-          { text: 'Ngôn Ngữ Vit', link: '/guide/vit-language' },
-          { text: 'Vito Framework', link: '/guide/getting-started' },
-          { text: 'Thư Viện Chuẩn (STD)', link: '/guide/std-packages' },
+          { text: 'Home', link: '/' },
+          { text: 'Language', link: '/guide/vit-language' },
+          { text: 'Platform', link: '/guide/getting-started' },
+          { text: 'Std', link: '/guide/std-packages' },
           {
-            text: 'Tính Năng & Mô-đun',
+            text: 'Features',
             items: [
-              { text: 'Ngôn Ngữ Vit', link: '/guide/vit-language' },
-              { text: 'Thư Viện Chuẩn & Packages', link: '/guide/std-packages' },
-              { text: 'Định Tuyến (Routing)', link: '/guide/routing' },
-              { text: 'Hệ Thống Middleware', link: '/guide/middleware' },
-              { text: 'Vito ORM & CSDL', link: '/guide/database-orm' },
-              { text: 'Xác Thực & Bảo Mật', link: '/guide/auth-security' },
-              { text: 'Realtime & Jobs', link: '/guide/realtime-jobs' },
-              { text: 'Metrics & Observability', link: '/guide/observability-dx' },
-              { text: 'Bộ Công Cụ CLI', link: '/guide/cli' }
+              { text: 'Language', link: '/guide/vit-language' },
+              { text: 'Std & Packages', link: '/guide/std-packages' },
+              { text: 'Routing', link: '/guide/routing' },
+              { text: 'Middleware', link: '/guide/middleware' },
+              { text: 'Database', link: '/guide/database-orm' },
+              { text: 'Auth', link: '/guide/auth-security' },
+              { text: 'Realtime', link: '/guide/realtime-jobs' },
+              { text: 'Observability', link: '/guide/observability-dx' },
+              { text: 'CLI', link: '/guide/cli' }
             ]
           },
           { text: 'Benchmark', link: '/guide/benchmarks' },
           { text: 'Playground', link: '/playground' },
-          { text: 'API Reference', link: '/api/overview' }
+          { text: 'Reference', link: '/api/overview' }
         ],
         sidebar: [
           {
@@ -121,26 +121,26 @@ export default defineConfig({
         logo: '/logo.svg',
         nav: [
           { text: 'Home', link: '/en/' },
-          { text: 'Vit Language', link: '/en/guide/vit-language' },
-          { text: 'Vito Framework', link: '/en/guide/getting-started' },
-          { text: 'Standard Library (STD)', link: '/en/guide/std-packages' },
+          { text: 'Language', link: '/en/guide/vit-language' },
+          { text: 'Platform', link: '/en/guide/getting-started' },
+          { text: 'Std', link: '/en/guide/std-packages' },
           {
-            text: 'Features & Modules',
+            text: 'Features',
             items: [
-              { text: 'Vit Language Guide', link: '/en/guide/vit-language' },
-              { text: 'Standard Library & Packages', link: '/en/guide/std-packages' },
-              { text: 'Routing System', link: '/en/guide/routing' },
-              { text: 'Middleware System', link: '/en/guide/middleware' },
-              { text: 'Database & Vito ORM', link: '/en/guide/database-orm' },
-              { text: 'Auth & Security Suite', link: '/en/guide/auth-security' },
-              { text: 'Realtime & Job Queue', link: '/en/guide/realtime-jobs' },
-              { text: 'Metrics & Observability', link: '/en/guide/observability-dx' },
-              { text: 'CLI Tooling', link: '/en/guide/cli' }
+              { text: 'Language', link: '/en/guide/vit-language' },
+              { text: 'Std & Packages', link: '/en/guide/std-packages' },
+              { text: 'Routing', link: '/en/guide/routing' },
+              { text: 'Middleware', link: '/en/guide/middleware' },
+              { text: 'Database', link: '/en/guide/database-orm' },
+              { text: 'Auth', link: '/en/guide/auth-security' },
+              { text: 'Realtime', link: '/en/guide/realtime-jobs' },
+              { text: 'Observability', link: '/en/guide/observability-dx' },
+              { text: 'CLI', link: '/en/guide/cli' }
             ]
           },
           { text: 'Benchmark', link: '/en/guide/benchmarks' },
           { text: 'Playground', link: '/playground' },
-          { text: 'API Reference', link: '/en/api/overview' }
+          { text: 'Reference', link: '/en/api/overview' }
         ],
         sidebar: [
           {
