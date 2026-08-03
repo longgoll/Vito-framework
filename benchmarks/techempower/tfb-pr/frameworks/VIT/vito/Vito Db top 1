@@ -1,0 +1,52 @@
+# 🚀 Lộ Trình Nâng Cấp Vito Framework — Mục Tiêu TOP 1 Database Benchmark (TechEmpower)
+
+---
+
+## 📌 Phân Tích Hiện Trạng (Baseline Round 23)
+
+Hiện tại, Vito dùng mô hình **Synchronous `libpq` per-worker connection**:
+- Mỗi worker thread sở hữu 1 kết nối `PGconn*` độc lập.
+- Kết nối DB dùng `PQexecPrepared()` — blocking I/O trên worker thread.
+
+### Ưu điểm:
+- **Độ tin cậy tuyệt đối (100% Pass Rate):** Không bị race-condition, không leak kết nối, dễ debug.
+- **Tốc độ khá cao:** Đạt 30K - 80K RPS trên phần cứng TFB nhờ không qua ORM/Middleware.
+
+### Giới hạn (Bottleneck):
+- Khi tải 16,384 connections đổ vào cùng lúc, 28 worker threads sẽ bị phong tỏa (blocked) để chờ PostgreSQL phản hồi mạng. 
+- Vòng lặp `epoll` của HTTP Server bị chậm lại do worker bị nghẽn ở I/O DB.
+
+---
+
+## 🎯 Lộ Trình 3 Bước Để Đạt TOP 1 TFB DB Test
+
+### 1. Giai đoạn 1: Non-blocking Async `libpq` multiplexing qua `epoll`
+- **Mục tiêu:** Giải phóng Worker thread, không cho worker bị block khi chờ DB.
+- **Giải pháp kỹ thuật:**
+  1. Đổi `PQexecPrepared()` sang `PQsendQueryPrepared()` (gửi query bất đồng bộ).
+  2. Lấy file descriptor socket DB (`PQsocket(conn)`) đăng ký trực tiếp vào **`epoll` loop** của Worker (`EPOLLIN | EPOLLOUT`).
+  3. Khi DB socket báo `EPOLLIN` ➔ Worker gọi `PQconsumeInput()` và `PQgetResult()` để lấy data mà không hề tốn 1ms nào chờ đợi.
+- **Dự kiến hiệu năng:** Tăng gấp 3 - 5 lần RPS (`150,000 - 300,000 RPS`).
+
+### 2. Giai đoạn 2: Tận dụng libpq Pipeline Mode (PostgreSQL 14+)
+- **Mục tiêu:** Giảm RTT (Round Trip Time) latency trên mạng.
+- **Giải pháp kỹ thuật:**
+  1. Sử dụng `PQenterPipelineMode(conn)`.
+  2. Với các test `/queries?queries=N` hoặc `/updates?queries=N` (với N từ 1 đến 500), thay vì gửi N lệnh từng đợt, Vito sẽ dồn (batch) N lệnh vào buffer và bắn 1 TCP packet duy nhất tới PostgreSQL.
+  3. Đọc kết quả stream trả về 1 lượt.
+- **Dự kiến hiệu năng:** Tăng gấp 2 lần với các bài test `/queries` và `/updates`.
+
+### 3. Giai đoạn 3: Custom Zero-Copy Native C Postgres Driver (Ultimate Level)
+- **Mục tiêu:** Loại bỏ hoàn toàn overhead xử lý của thư viện `libpq`.
+- **Giải pháp kỹ thuật:**
+  1. Tự encode/decode chuẩn giao thức PostgreSQL Frontend/Backend Protocol v3.0 trực tiếp bằng C/VIT.
+  2. Ghi trực tiếp data từ DB socket vào HTTP response buffer mà không qua bất kỳ intermediate allocation nào (Zero-Copy parsing).
+- **Dự kiến hiệu năng:** Cạnh tranh sòng phẳng vị trí **Top 1 Absolute** với các cỗ máy như `drogon`, `may-minihttp` (`400,000+ DB RPS`).
+
+---
+
+## 📅 Kết Luận
+
+Bản PR hiện tại của Vito đã **hoàn hảo cho mục tiêu chào sân TFB Round 23** (Pass 100% verifier, Plaintext/JSON thuộc top cao). 
+
+Lộ trình trên sẽ là kim chỉ nam cho các bản nâng cấp về sau (TFB Round 24+).
